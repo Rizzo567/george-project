@@ -1,0 +1,322 @@
+/* MISTER BARBER — base.css v1.0 */
+
+:root {
+  --asphalt: #0B0B0B;
+  --asphalt-soft: #1A1A1A;
+  --canvas: #E5E1D8;
+  --canvas-soft: #D6D2C8;
+  --ember: #E85A1F;
+  --silver: #8E8E8E;
+
+  --font-display: 'Anton', Impact, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --s-9: 96px; --s-10: 128px; --s-11: 192px;
+
+  --page-margin: 56px;
+  --max-width: 1440px;
+  --nav-height: 72px;
+
+  --display-xl: 180px;
+  --display-l: 140px;
+  --display-m: 96px;
+  --display-s: 64px;
+  --h1: 48px; --h2: 32px; --h3: 20px;
+  --body-l: 18px; --body: 15px; --body-s: 13px;
+  --eyebrow: 11px; --meta: 10px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --page-margin: 20px;
+    --display-xl: 92px;
+    --display-l: 72px;
+    --display-m: 56px;
+    --display-s: 40px;
+    --h1: 32px;
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--asphalt);
+  color: var(--canvas);
+  font-family: var(--font-body);
+  font-size: var(--body);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  filter: contrast(1.05);
+}
+
+/* ─── NAVBAR ─── */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: var(--nav-height);
+  background-color: var(--asphalt);
+  border-bottom: 1px solid var(--asphalt-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--page-margin);
+  transition: border-color 0.2s;
+}
+
+.nav--scrolled {
+  border-bottom-color: var(--canvas-soft);
+}
+
+.nav__logo {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 0.06em;
+  color: var(--canvas);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  list-style: none;
+}
+
+.nav__links a {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--meta);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--canvas);
+  transition: color 0.15s;
+}
+
+.nav__links a:hover {
+  color: var(--silver);
+}
+
+.nav__cta {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--meta);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--canvas);
+  border: 1px solid var(--canvas);
+  padding: 10px 20px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav__cta:hover {
+  background: var(--canvas);
+  color: var(--asphalt);
+}
+
+.nav__hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+
+.nav__hamburger span {
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--canvas);
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 0 20px;
+  }
+
+  .nav__links,
+  .nav__cta {
+    display: none;
+  }
+
+  .nav__hamburger {
+    display: flex;
+  }
+
+  .nav--open .nav__links {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--asphalt);
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-7);
+  }
+
+  .nav--open .nav__links a {
+    font-size: 14px;
+  }
+
+  .nav--open .nav__cta {
+    display: block;
+  }
+}
+
+/* ─── META STRIP ─── */
+
+.meta-strip {
+  display: flex;
+  gap: 80px;
+  padding: var(--s-5) var(--page-margin);
+  border-top: 1px solid var(--asphalt);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--meta);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--silver);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+/* ─── FOOTER ─── */
+
+.footer {
+  background: var(--asphalt);
+  border-top: 1px solid var(--asphalt-soft);
+  padding: var(--s-10) var(--page-margin) var(--s-7);
+}
+
+.footer__logo {
+  font-family: var(--font-display);
+  font-size: var(--display-m);
+  letter-spacing: 0.005em;
+  line-height: 0.9;
+  color: var(--canvas);
+  text-transform: uppercase;
+  margin-bottom: var(--s-10);
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-8);
+  margin-bottom: var(--s-10);
+  padding-top: var(--s-7);
+  border-top: 1px solid var(--asphalt-soft);
+}
+
+.footer__col-label {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--eyebrow);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--silver);
+  margin-bottom: var(--s-4);
+}
+
+.footer__col-value {
+  font-family: var(--font-body);
+  font-size: var(--body-s);
+  color: var(--canvas);
+  line-height: 1.55;
+}
+
+.footer__social {
+  display: flex;
+  gap: var(--s-6);
+}
+
+.footer__social a {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--body-s);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--canvas);
+  transition: color 0.15s;
+}
+
+.footer__social a:hover {
+  color: var(--ember);
+}
+
+.footer__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--asphalt-soft);
+  font-size: var(--meta);
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--silver);
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: var(--s-9) 20px var(--s-7);
+  }
+
+  .footer__logo {
+    font-size: var(--display-m);
+    margin-bottom: var(--s-8);
+  }
+
+  .footer__grid {
+    grid-template-columns: 1fr;
+    gap: var(--s-6);
+  }
+
+  .footer__bottom {
+    flex-direction: column;
+    gap: var(--s-3);
+    text-align: center;
+  }
+
+  .meta-strip {
+    padding: var(--s-5) 20px;
+  }
+}
+
+/* ─── MAIN OFFSET (per navbar fissa) ─── */
+
+main {
+  padding-top: var(--nav-height);
+}

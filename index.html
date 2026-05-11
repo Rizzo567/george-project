@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mister Barber — Milano · Brera. Due barbieri. Un taglio.">
+  <title>MISTER BARBER</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="nav" id="nav">
+    <a href="/" class="nav__logo">Mister Barber</a>
+    <ul class="nav__links" id="navLinks">
+      <li><a href="#servizi">Servizi</a></li>
+      <li><a href="#barbieri">Barbieri</a></li>
+      <li><a href="#posto">Il Posto</a></li>
+      <li><a href="#drop">Drop</a></li>
+    </ul>
+    <a href="#prenota" class="nav__cta">Prenota</a>
+    <button class="nav__hamburger" id="hamburger" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+
+  <!-- MAIN (sezioni verranno aggiunte qui) -->
+  <main id="main">
+    <!-- placeholder — sezioni in arrivo -->
+  </main>
+
+  <!-- META STRIP -->
+  <div class="meta-strip">
+    <span>I · FADES</span>
+    <span>II · BEARD</span>
+    <span>III · RAZOR</span>
+    <span>IV · DROP</span>
+    <span>MILANO · BRERA · 2026</span>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__logo">Mister<br>Barber</div>
+
+    <div class="footer__grid">
+      <div>
+        <p class="footer__col-label">Dove</p>
+        <p class="footer__col-value">Via [indirizzo]<br>Brera, Milano</p>
+      </div>
+      <div>
+        <p class="footer__col-label">Orari</p>
+        <p class="footer__col-value">
+          Mar – Sab<br>
+          09:00 – 19:00
+        </p>
+      </div>
+      <div>
+        <p class="footer__col-label">Social</p>
+        <div class="footer__social">
+          <a href="#" target="_blank" rel="noopener">Instagram</a>
+          <a href="#" target="_blank" rel="noopener">TikTok</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span>© 2026 Mister Barber</span>
+      <span>P.IVA [numero]</span>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('nav');
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('nav--scrolled', window.scrollY > 80);
+    });
+
+    hamburger.addEventListener('click', () => {
+      nav.classList.toggle('nav--open');
+    });
+
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => nav.classList.remove('nav--open'));
+    });
+  </script>
+</body>
+</html>
