@@ -1077,10 +1077,14 @@ img {
   .barber--berlin { transform: translateX(-40px); }
   /* George: -40px */
   .barber--george { transform: translateX(-40px); overflow: visible; }
-  /* George name → left of hat */
+  /* George name */
   .barber--george .barber-meta {
-    left: -20px;
+    left: 0px;
     top: 10%;
+  }
+  /* Berlin name +100px right */
+  .barber--berlin .barber-meta {
+    left: 98px;
   }
   .s01 .cap-1 { width: 260px; top: 30%; left: 50%; }
   .s01 .cap-2 { width: 240px; bottom: 4%; left: 6%; }
