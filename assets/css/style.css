@@ -957,6 +957,15 @@ img {
   color: var(--silver);
 }
 
+.brand-necklace {
+  width: 260px;
+  display: block;
+  mix-blend-mode: screen;
+  filter: contrast(1.1);
+  pointer-events: none;
+  margin-bottom: -8px;
+}
+
 .btn-prenota-ora {
   display: inline-block;
   background: var(--ember);
