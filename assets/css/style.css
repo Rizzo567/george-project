@@ -642,7 +642,8 @@ img {
     height: auto;
     gap: 12px;
     overflow-x: scroll;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: none;
+    scroll-behavior: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     padding: 0 20px;
@@ -1041,12 +1042,22 @@ img {
 }
 
 @media (max-width: 900px) {
-  .s01 { padding: 32px 20px; }
+  .s01 { padding: 32px 20px; overflow: visible; }
   .s01-grid { grid-template-columns: 1fr; gap: 48px; }
-  .chi { padding-left: 0; padding-top: 32px; transform: none; }
+  .chi { padding-left: 0; padding-top: 32px; transform: none; overflow: visible; }
   .brand-mark { font-size: 96px; }
+  .duo { transform: none; overflow: visible; }
   .barber-img-wrap { height: 480px; }
   .barber-name { font-size: 25px; }
+  /* Berlin: shift right 30px */
+  .barber--berlin { transform: translateX(30px); }
+  /* George: shift right 30px, allow overflow */
+  .barber--george { transform: translateX(30px); overflow: visible; }
+  /* George name → left of hat */
+  .barber--george .barber-meta {
+    left: -20px;
+    top: 10%;
+  }
   .s01 .cap-1 { width: 260px; top: 30%; left: 50%; }
   .s01 .cap-2 { width: 240px; bottom: 4%; left: 6%; }
   .diag-tag { top: 16px; right: 12px; font-size: 11px; }
