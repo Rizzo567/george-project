@@ -191,47 +191,56 @@
       var row = document.querySelector('.cards-row');
       if (!row) return;
 
-      // Clone cards for seamless infinite loop
       var origCards = Array.from(row.children);
-      origCards.forEach(function(card) {
-        var clone = card.cloneNode(true);
-        clone.setAttribute('aria-hidden', 'true');
-        row.appendChild(clone);
-        // Start cloned videos
-        var vids = clone.querySelectorAll('video');
-        vids.forEach(function(v) { v.load(); v.play().catch(function(){}); });
+      var total = origCards.length; // 3
+      var current = 0;
+      var timer = null;
+      var paused = false;
+
+      function getCardWidth() {
+        var card = row.querySelector('.card-wrap');
+        if (!card) return 0;
+        return card.offsetWidth + 12; // width + gap
+      }
+
+      function scrollTo(index) {
+        var w = getCardWidth();
+        row.scrollTo({ left: index * w, behavior: 'smooth' });
+      }
+
+      function next() {
+        if (!paused && window.innerWidth <= 768) {
+          current = (current + 1) % total;
+          scrollTo(current);
+        }
+      }
+
+      function startTimer() {
+        clearInterval(timer);
+        timer = setInterval(next, 3000);
+      }
+
+      row.addEventListener('pointerdown', function() {
+        paused = true;
+        clearInterval(timer);
+      });
+      row.addEventListener('pointerup', function() {
+        paused = false;
+        startTimer();
+      });
+      row.addEventListener('pointerleave', function() {
+        if (paused) { paused = false; startTimer(); }
       });
 
-      var speed = 0.7;
-      var paused = false;
-      var halfWidth = 0;
-
-      function computeHalf() {
-        // Half = width of the original 3 cards + their gaps
-        halfWidth = row.scrollWidth / 2;
-      }
-
-      row.addEventListener('pointerdown', function() { paused = true; });
-      row.addEventListener('pointerup',   function() { paused = false; });
-      row.addEventListener('pointerleave',function() { paused = false; });
-
-      function tick() {
-        if (window.innerWidth <= 768) {
-          if (!paused) {
-            row.scrollLeft += speed;
-          }
-          if (halfWidth > 0 && row.scrollLeft >= halfWidth) {
-            row.scrollLeft -= halfWidth;
-          }
-        }
-        requestAnimationFrame(tick);
-      }
-
-      // Compute after layout settles, then start
+      // Start after layout settles
       setTimeout(function() {
-        computeHalf();
-        requestAnimationFrame(tick);
-      }, 300);
+        if (window.innerWidth <= 768) startTimer();
+      }, 500);
+
+      window.addEventListener('resize', function() {
+        clearInterval(timer);
+        if (window.innerWidth <= 768) startTimer();
+      });
     })();
   </script>
 </body>
