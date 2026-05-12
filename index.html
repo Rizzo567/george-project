@@ -183,5 +183,29 @@
       link.addEventListener('click', () => nav.classList.remove('nav--open'));
     });
   </script>
+
+  <script>
+    (function() {
+      var row = document.querySelector('.cards-row');
+      if (!row) return;
+      var speed = 0.6;
+      var paused = false;
+
+      row.addEventListener('pointerdown', function() { paused = true; });
+      row.addEventListener('pointerup', function() { paused = false; });
+      row.addEventListener('pointerleave', function() { paused = false; });
+
+      function tick() {
+        if (!paused && window.innerWidth <= 768) {
+          row.scrollLeft += speed;
+          if (row.scrollLeft >= row.scrollWidth - row.clientWidth - 1) {
+            row.scrollLeft = 0;
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    })();
+  </script>
 </body>
 </html>

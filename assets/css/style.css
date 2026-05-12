@@ -636,14 +636,28 @@ img {
 }
 
 @media (max-width: 768px) {
-  .s02 { padding: 48px 20px; }
+  .s02 { padding: 48px 0 48px; }
   .cards-row {
-    flex-direction: column;
+    flex-direction: row;
     height: auto;
-    gap: 16px;
+    gap: 12px;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0 20px;
+    max-width: none;
+    width: 100%;
   }
+  .cards-row::-webkit-scrollbar { display: none; }
   .card-wrap,
-  .card-wrap--center { flex: none; width: 100%; aspect-ratio: 9/16; height: auto; }
+  .card-wrap--center {
+    flex: none;
+    width: 50vw;
+    aspect-ratio: 9/16;
+    height: auto;
+    scroll-snap-align: center;
+  }
   .cards-row:has(.card-wrap--left:hover) .card-wrap--center,
   .cards-row:has(.card-wrap--right:hover) .card-wrap--center { flex: none; }
 }
@@ -1011,11 +1025,13 @@ img {
 @media (max-width: 900px) {
   .s01 { padding: 32px 20px; }
   .s01-grid { grid-template-columns: 1fr; gap: 48px; }
-  .chi { padding-left: 0; border-top: 1px solid rgba(229,225,216,0.12); padding-top: 32px; transform: none; }
+  .chi { padding-left: 0; padding-top: 32px; transform: none; }
   .brand-mark { font-size: 96px; }
-  .barber-img-wrap { height: 240px; }
-  .s01 .cap-1 { width: 130px; top: 30%; left: 50%; }
-  .s01 .cap-2 { width: 120px; bottom: 4%; left: 6%; }
+  .barber-img-wrap { height: 480px; }
+  .barber-name { font-size: 25px; }
+  .s01 .cap-1 { width: 260px; top: 30%; left: 50%; }
+  .s01 .cap-2 { width: 240px; bottom: 4%; left: 6%; }
   .diag-tag { top: 16px; right: 12px; font-size: 11px; }
   .btn-prenota { font-size: 20px; padding: 22px 20px; }
+  .btn-prenota-ora { transform: none; margin-top: 24px; align-self: flex-start; }
 }
