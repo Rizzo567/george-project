@@ -39,7 +39,7 @@
     <section class="hero" id="hero">
       <div class="hero__media">
         <video class="hero__video" autoplay muted loop playsinline>
-          <source src="assets/videos/hero-video.mp4" type="video/mp4">
+          <source src="assets/videos/hero-video-h264.mp4" type="video/mp4">
         </video>
         <div class="hero__overlay"></div>
       </div>
@@ -100,21 +100,21 @@
 
         <div class="card-wrap card-wrap--left" data-glow>
           <div class="card-glow-inner" data-glow></div>
-          <video class="card-video" muted loop playsinline preload="none">
+          <video class="card-video" autoplay muted loop playsinline>
             <source src="assets/videos/tiktok-left.mp4" type="video/mp4">
           </video>
         </div>
 
         <div class="card-wrap card-wrap--center" data-glow>
           <div class="card-glow-inner" data-glow></div>
-          <video class="card-video" muted loop playsinline preload="none">
-            <source src="assets/videos/tiktok-center.mp4" type="video/mp4">
+          <video class="card-video" autoplay muted loop playsinline>
+            <source src="assets/videos/tiktok-center-h264.mp4" type="video/mp4">
           </video>
         </div>
 
         <div class="card-wrap card-wrap--right" data-glow>
           <div class="card-glow-inner" data-glow></div>
-          <video class="card-video" muted loop playsinline preload="none">
+          <video class="card-video" autoplay muted loop playsinline>
             <source src="assets/videos/tiktok-right.mp4" type="video/mp4">
           </video>
         </div>
@@ -156,35 +156,14 @@
   </footer>
 
   <script>
-    /* glow cards — local coords per card, rAF throttled */
-    let rafPending = false;
-    let lastE = null;
     document.addEventListener('pointermove', (e) => {
-      lastE = e;
-      if (rafPending) return;
-      rafPending = true;
-      requestAnimationFrame(() => {
-        rafPending = false;
-        if (!lastE) return;
-        document.querySelectorAll('.card-wrap[data-glow]').forEach(el => {
-          const r = el.getBoundingClientRect();
-          el.style.setProperty('--x', (lastE.clientX - r.left).toFixed(1));
-          el.style.setProperty('--y', (lastE.clientY - r.top).toFixed(1));
-          el.style.setProperty('--xp', (lastE.clientX / window.innerWidth).toFixed(2));
-        });
+      document.querySelectorAll('[data-glow]').forEach(el => {
+        el.style.setProperty('--x', e.clientX.toFixed(2));
+        el.style.setProperty('--xp', (e.clientX / window.innerWidth).toFixed(2));
+        el.style.setProperty('--y', e.clientY.toFixed(2));
+        el.style.setProperty('--yp', (e.clientY / window.innerHeight).toFixed(2));
       });
     });
-
-    /* lazy play TikTok videos via IntersectionObserver */
-    const cardVideos = document.querySelectorAll('.card-video');
-    const vidObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const v = entry.target;
-        if (entry.isIntersecting) { v.play().catch(() => {}); }
-        else { v.pause(); }
-      });
-    }, { threshold: 0.2 });
-    cardVideos.forEach(v => vidObserver.observe(v));
   </script>
 
   <script>

@@ -560,6 +560,7 @@ img {
     hsl(var(--hue) 100% 65% / 0.12), transparent
   );
   background-color: var(--backdrop);
+  background-attachment: fixed;
   border: var(--border-size) solid rgba(255,255,255,0.08);
 }
 
@@ -591,6 +592,7 @@ img {
   mask-clip: padding-box, border-box;
   -webkit-mask-composite: destination-in;
   mask-composite: intersect;
+  background-attachment: fixed;
   z-index: 2;
 }
 .card-wrap::before {
@@ -680,7 +682,7 @@ img {
   position: relative;
   background: var(--asphalt);
   overflow: hidden;
-  padding: 56px var(--page-margin) 0;
+  padding: 56px var(--page-margin) 10px;
 }
 
 .s01::before {
