@@ -668,13 +668,13 @@ img {
 }
 
 @media (max-width: 768px) {
-  .s02 { padding: 200px 20px 48px; }
+  .s02 { padding: 180px 20px 48px; }
 
   .cards-row {
     position: relative;
     flex-direction: row;
-    width: 82vw;
-    max-width: 340px;
+    width: 66vw;
+    max-width: 272px;
     margin: 0 auto;
     aspect-ratio: 9/16;
     height: auto;
