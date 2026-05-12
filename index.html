@@ -152,24 +152,66 @@
 
         <div class="s03-right">
           <div class="expand-map" id="expandMap">
+
+            <!-- top bar -->
             <div class="expand-map__top">
               <div class="expand-map__icon-wrap">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E85A1F" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.2">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                  <circle cx="12" cy="9" r="2.5"/>
+                </svg>
               </div>
               <span class="expand-map__live"><span class="expand-map__dot"></span>Live</span>
             </div>
 
-            <div class="expand-map__grid-bg" aria-hidden="true"></div>
-
-            <div class="expand-map__iframe-wrap">
-              <iframe
-                src="https://www.openstreetmap.org/export/embed.html?bbox=9.147%2C45.178%2C9.167%2C45.192&layer=mapnik&marker=45.1848%2C9.1573"
-                title="Mister Barber – Via Torino 38, Pavia"
-                class="expand-map__iframe"
-                loading="lazy">
-              </iframe>
+            <!-- collapsed: grid pattern -->
+            <div class="expand-map__grid-bg" aria-hidden="true">
+              <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(229,225,216,0.07)" stroke-width="1"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)"/>
+              </svg>
             </div>
 
+            <!-- expanded: pseudo-map SVG -->
+            <div class="expand-map__map-wrap" aria-hidden="true">
+              <svg class="expand-map__roads" viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg">
+                <!-- main horizontal roads -->
+                <line class="road road--main" x1="0" y1="140" x2="360" y2="140" stroke="rgba(229,225,216,0.25)" stroke-width="3"/>
+                <line class="road road--main" x1="0" y1="90"  x2="360" y2="90"  stroke="rgba(229,225,216,0.15)" stroke-width="2"/>
+                <line class="road road--main" x1="0" y1="200" x2="360" y2="200" stroke="rgba(229,225,216,0.15)" stroke-width="2"/>
+                <!-- secondary horizontal -->
+                <line class="road road--sec" x1="0" y1="50"  x2="360" y2="50"  stroke="rgba(229,225,216,0.07)" stroke-width="1"/>
+                <line class="road road--sec" x1="0" y1="240" x2="360" y2="240" stroke="rgba(229,225,216,0.07)" stroke-width="1"/>
+                <!-- main vertical roads -->
+                <line class="road road--main" x1="180" y1="0" x2="180" y2="280" stroke="rgba(229,225,216,0.25)" stroke-width="3"/>
+                <line class="road road--main" x1="100" y1="0" x2="100" y2="280" stroke="rgba(229,225,216,0.15)" stroke-width="2"/>
+                <line class="road road--main" x1="270" y1="0" x2="270" y2="280" stroke="rgba(229,225,216,0.15)" stroke-width="2"/>
+                <!-- secondary vertical -->
+                <line class="road road--sec" x1="50"  y1="0" x2="50"  y2="280" stroke="rgba(229,225,216,0.07)" stroke-width="1"/>
+                <line class="road road--sec" x1="320" y1="0" x2="320" y2="280" stroke="rgba(229,225,216,0.07)" stroke-width="1"/>
+                <!-- buildings -->
+                <rect class="building" x="108" y="97"  width="64" height="35" rx="3" fill="rgba(229,225,216,0.07)"/>
+                <rect class="building" x="108" y="148" width="64" height="44" rx="3" fill="rgba(229,225,216,0.09)"/>
+                <rect class="building" x="188" y="97"  width="74" height="35" rx="3" fill="rgba(229,225,216,0.06)"/>
+                <rect class="building" x="188" y="148" width="74" height="44" rx="3" fill="rgba(229,225,216,0.07)"/>
+                <rect class="building" x="18"  y="97"  width="74" height="35" rx="3" fill="rgba(229,225,216,0.05)"/>
+                <rect class="building" x="18"  y="148" width="74" height="44" rx="3" fill="rgba(229,225,216,0.05)"/>
+                <rect class="building" x="108" y="56"  width="64" height="26" rx="3" fill="rgba(229,225,216,0.05)"/>
+                <rect class="building" x="188" y="56"  width="74" height="26" rx="3" fill="rgba(229,225,216,0.04)"/>
+                <!-- pin glow -->
+                <circle class="pin-glow" cx="180" cy="140" r="18" fill="rgba(74,222,128,0.12)"/>
+                <circle class="pin-glow" cx="180" cy="140" r="10" fill="rgba(74,222,128,0.2)"/>
+                <!-- pin -->
+                <circle class="pin" cx="180" cy="140" r="5" fill="#4ade80"/>
+                <circle class="pin-ring" cx="180" cy="140" r="9" fill="none" stroke="#4ade80" stroke-width="1.5" opacity="0.5"/>
+              </svg>
+            </div>
+
+            <!-- bottom -->
             <div class="expand-map__bottom">
               <span class="expand-map__label">Pavia, Via Torino 38</span>
               <div class="expand-map__underline"></div>
