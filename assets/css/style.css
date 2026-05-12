@@ -448,7 +448,7 @@ img {
 
 @media (max-width: 768px) {
   .hero {
-    padding: var(--nav-height) 20px 8px;
+    padding: var(--nav-height) 20px 28px;
   }
 
   .hero__content {
@@ -964,7 +964,7 @@ img {
 
 .brand-necklace {
   position: absolute;
-  width: 300px;
+  width: 240px;
   top: calc(50% + 120px);
   left: calc(50% - 70px);
   transform: translate(-50%, -50%);
