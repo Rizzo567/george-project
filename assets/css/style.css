@@ -298,6 +298,7 @@ img {
 .expand-map.is-expanded {
   width: 380px;
   height: 300px;
+  overflow: visible;
 }
 
 .expand-map__top {
@@ -487,6 +488,27 @@ img {
 .expand-map:hover .expand-map__underline,
 .expand-map.is-expanded .expand-map__underline {
   transform: scaleX(1);
+}
+
+.expand-map__cap {
+  position: absolute;
+  top: -40px;
+  left: -35px;
+  width: 160px;
+  z-index: 10;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.6));
+  transform: rotate(-15deg) scale(0) translateY(20px);
+  opacity: 0;
+}
+
+.expand-map.is-expanded .expand-map__cap {
+  animation: cap-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s forwards;
+}
+
+@keyframes cap-pop {
+  0%   { transform: rotate(-15deg) scale(0) translateY(20px); opacity: 0; }
+  100% { transform: rotate(-15deg) scale(1) translateY(0px);  opacity: 1; }
 }
 
 .expand-map__hint {
