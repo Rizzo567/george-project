@@ -1048,26 +1048,35 @@ img {
 }
 
 .s01 .cap {
-  position: absolute;
   pointer-events: none;
   z-index: 1;
   filter: drop-shadow(0 30px 40px rgba(0,0,0,0.6));
 }
-.s01 .cap-1 {
-  top: calc(18% - 190px);
-  left: 36%;
-  width: 340px;
-  transform: rotate(-12deg);
-  opacity: 0.95;
-  z-index: 5;
-}
 .s01 .cap-2 {
+  position: absolute;
   bottom: calc(12% + 250px);
   left: calc(22% - 320px);
   width: 300px;
   transform: rotate(8deg);
   opacity: 1;
   z-index: 5;
+}
+
+/* cap-1 appeso al ? di CHI SIAMO */
+.chi-title-wrap {
+  position: relative;
+  display: inline-block;
+}
+.cap-1 {
+  position: absolute;
+  top: -55px;
+  right: -30px;
+  width: 110px;
+  transform: rotate(18deg);
+  transform-origin: top center;
+  opacity: 0.95;
+  z-index: 5;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.7));
 }
 
 .s01 .glow {
@@ -1118,7 +1127,6 @@ img {
   .barber--berlin .barber-meta {
     left: 198px;
   }
-  .s01 .cap-1 { width: 78px; top: calc(30% + 30px); left: calc(50% - 30px); transform: scaleX(-1) rotate(-12deg); }
   .s01 .cap-2 { width: 240px; bottom: 4%; left: 6%; }
   .diag-tag { top: 16px; right: 12px; font-size: 11px; }
   .btn-prenota { font-size: 20px; padding: 22px 20px; }
