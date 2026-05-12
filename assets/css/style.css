@@ -479,15 +479,15 @@ img {
   top: 0;
   left: 0;
   right: 0;
-  height: 260px;
+  height: 360px;
   background: linear-gradient(
     to bottom,
     var(--asphalt) 0%,
-    rgba(11,11,11,0.92) 12%,
-    rgba(11,11,11,0.75) 28%,
-    rgba(11,11,11,0.5) 50%,
-    rgba(11,11,11,0.2) 72%,
-    rgba(11,11,11,0.05) 88%,
+    rgba(11,11,11,0.96) 15%,
+    rgba(11,11,11,0.82) 32%,
+    rgba(11,11,11,0.58) 52%,
+    rgba(11,11,11,0.25) 72%,
+    rgba(11,11,11,0.06) 88%,
     transparent 100%
   );
   z-index: 3;
@@ -666,28 +666,46 @@ img {
 
 .section-fade {
   position: relative;
-  height: 80px;
-  margin-top: -80px;
-  margin-bottom: 0;
-  background: linear-gradient(to bottom, transparent 0%, var(--asphalt) 100%);
-  z-index: 4;
   pointer-events: none;
+  z-index: 5;
 }
-.section-fade--mid {
-  height: 180px;
-  margin-top: -120px;
-  margin-bottom: -60px;
+
+/* Hero → s01 */
+.section-fade--hero {
+  height: 220px;
+  margin-top: -220px;
+  margin-bottom: 0;
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(11,11,11,0.08) 15%,
-    rgba(11,11,11,0.2) 30%,
-    rgba(11,11,11,0.45) 50%,
-    rgba(11,11,11,0.7) 68%,
-    rgba(11,11,11,0.88) 82%,
+    rgba(11,11,11,0.15) 25%,
+    rgba(11,11,11,0.55) 55%,
+    rgba(11,11,11,0.88) 80%,
     var(--asphalt) 100%
   );
-  z-index: 2;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 45%, black 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 45%, black 100%);
+}
+
+/* s01 → s02 */
+.section-fade--s1s2 {
+  height: 220px;
+  margin-top: -40px;
+  margin-bottom: -180px;
+  background: linear-gradient(
+    to bottom,
+    var(--asphalt) 0%,
+    rgba(11,11,11,0.85) 30%,
+    rgba(11,11,11,0.5) 60%,
+    rgba(11,11,11,0.15) 80%,
+    transparent 100%
+  );
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
 }
 
 /* ─── CHI SIAMO (s01) ─── */
