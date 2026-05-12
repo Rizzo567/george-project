@@ -470,7 +470,7 @@ img {
 
 .s02 {
   background: var(--asphalt);
-  padding: 480px var(--page-margin) 80px;
+  padding: 160px var(--page-margin) 80px;
   display: flex;
   justify-content: center;
   position: relative;
@@ -668,7 +668,7 @@ img {
 }
 
 @media (max-width: 768px) {
-  .s02 { padding: 48px 20px; }
+  .s02 { padding: 200px 20px 48px; }
 
   .cards-row {
     position: relative;
