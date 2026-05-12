@@ -47,9 +47,13 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body {
+  overflow-x: hidden;
+  max-width: 100vw;
   background-color: var(--asphalt);
   color: var(--canvas);
   font-family: var(--font-body);
@@ -1082,9 +1086,9 @@ img {
     left: 0px;
     top: 10%;
   }
-  /* Berlin name +100px right */
+  /* Berlin name */
   .barber--berlin .barber-meta {
-    left: 98px;
+    left: 198px;
   }
   .s01 .cap-1 { width: 260px; top: 30%; left: 50%; }
   .s01 .cap-2 { width: 240px; bottom: 4%; left: 6%; }
