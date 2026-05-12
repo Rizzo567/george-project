@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Prenota il tuo appuntamento da Mister Barber — Milano · Brera.">
+  <title>PRENOTA — MISTER BARBER</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <style>
+    /* ─── PRENOTA PAGE ─── */
+
+    .prenota-page {
+      background: var(--asphalt);
+      min-height: 100vh;
+    }
+
+    /* ─── HERO PRENOTA ─── */
+
+    .prenota-hero {
+      padding: calc(var(--nav-height) + 80px) var(--page-margin) 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prenota-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 80% 20%, rgba(232,90,31,0.08), transparent 50%),
+        radial-gradient(circle at 10% 80%, rgba(232,90,31,0.05), transparent 40%);
+      pointer-events: none;
+    }
+
+    .prenota-hero__eyebrow {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: var(--eyebrow);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--silver);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .prenota-hero__eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 32px;
+      height: 1px;
+      background: var(--ember);
+    }
+
+    .prenota-hero__title {
+      font-family: var(--font-display);
+      font-size: clamp(96px, 18vw, 280px);
+      line-height: 0.82;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 32px;
+    }
+
+    .prenota-hero__title .word-solid {
+      display: block;
+      color: var(--canvas);
+    }
+
+    .prenota-hero__title .word-outline {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 2px var(--canvas);
+    }
+
+    .prenota-hero__sub {
+      font-family: var(--font-body);
+      font-size: var(--body-l);
+      color: var(--canvas-soft);
+      letter-spacing: 0.04em;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ─── SECTION BARBIERI ─── */
+
+    .prenota-section {
+      padding: 0 var(--page-margin) 80px;
+    }
+
+    .prenota-section-label {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: var(--eyebrow);
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--silver);
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(229,225,216,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .prenota-section-label .step-num {
+      color: var(--ember);
+      font-family: var(--font-display);
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    /* ─── BARBER CARDS ─── */
+
+    .barber-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 64px;
+    }
+
+    .barber-card {
+      background: #111111;
+      border: 2px solid rgba(229,225,216,0.08);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      padding: 32px 28px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .barber-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(232,90,31,0.06) 0%, transparent 65%);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .barber-card:hover {
+      border-color: rgba(232,90,31,0.4);
+    }
+
+    .barber-card:hover::before {
+      opacity: 1;
+    }
+
+    .barber-card.active {
+      border-color: var(--ember);
+      background: #161210;
+    }
+
+    .barber-card.active::before {
+      opacity: 1;
+    }
+
+    .barber-card__check {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 22px;
+      height: 22px;
+      border: 1.5px solid rgba(229,225,216,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .barber-card__check::after {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ember);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .barber-card.active .barber-card__check {
+      border-color: var(--ember);
+    }
+
+    .barber-card.active .barber-card__check::after {
+      opacity: 1;
+    }
+
+    .barber-card__avatar {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--asphalt-soft);
+      border: 2px solid rgba(229,225,216,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .barber-card.active .barber-card__avatar {
+      border-color: var(--ember);
+    }
+
+    .barber-card__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      filter: none;
+    }
+
+    .barber-card__name {
+      font-family: var(--font-display);
+      font-size: clamp(40px, 5vw, 64px);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--canvas);
+      line-height: 1;
+      text-align: center;
+    }
+
+    .barber-card.active .barber-card__name {
+      color: var(--canvas);
+    }
+
+    .barber-card__brief {
+      font-family: var(--font-body);
+      font-size: var(--body-s);
+      color: var(--silver);
+      letter-spacing: 0.05em;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .barber-card__badge {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ember);
+      border: 1px solid var(--ember);
+      padding: 4px 10px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .barber-card.active .barber-card__badge {
+      opacity: 1;
+    }
+
+    /* ─── FORM ─── */
+
+    .prenota-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .form-field--full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: var(--eyebrow);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--silver);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      background: var(--asphalt-soft);
+      border: 1px solid rgba(229,225,216,0.15);
+      color: var(--canvas);
+      font-family: var(--font-body);
+      font-size: var(--body);
+      padding: 14px 18px;
+      outline: none;
+      width: 100%;
+      border-radius: 0;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.2s, background 0.2s;
+      line-height: 1.5;
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: rgba(229,225,216,0.25);
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--ember);
+      background: #1f1a18;
+    }
+
+    .form-select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%238E8E8E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 18px center;
+      padding-right: 44px;
+    }
+
+    .form-select option {
+      background: var(--asphalt-soft);
+      color: var(--canvas);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    /* Date input calendar icon color */
+    .form-input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+      cursor: pointer;
+    }
+
+    /* ─── SUBMIT AREA ─── */
+
+    .prenota-submit-wrap {
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--ember);
+      color: var(--asphalt);
+      border: none;
+      border-radius: 0;
+      padding: 18px 44px;
+      font-family: var(--font-display);
+      font-size: 24px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-submit:hover {
+      background: #FF7A3C;
+    }
+
+    .btn-submit__arrow {
+      font-size: 28px;
+      line-height: 1;
+      margin-top: -2px;
+    }
+
+    .prenota-note {
+      font-family: var(--font-body);
+      font-size: var(--body-s);
+      color: var(--silver);
+      letter-spacing: 0.04em;
+      line-height: 1.55;
+    }
+
+    /* ─── DIVIDER ─── */
+
+    .prenota-divider {
+      border: none;
+      border-top: 1px solid rgba(229,225,216,0.08);
+      margin: 0 var(--page-margin) 64px;
+    }
+
+    /* ─── RESPONSIVE ─── */
+
+    @media (max-width: 768px) {
+      .prenota-hero {
+        padding: calc(var(--nav-height) + 48px) 20px 48px;
+      }
+
+      .prenota-hero__title .word-outline {
+        -webkit-text-stroke: 1.5px var(--canvas);
+      }
+
+      .prenota-section {
+        padding: 0 20px 64px;
+      }
+
+      .prenota-divider {
+        margin: 0 20px 48px;
+      }
+
+      .barber-cards {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 48px;
+      }
+
+      .barber-card {
+        flex-direction: row;
+        align-items: center;
+        gap: 20px;
+        padding: 24px 20px;
+        text-align: left;
+      }
+
+      .barber-card__avatar {
+        width: 88px;
+        height: 88px;
+        flex-shrink: 0;
+      }
+
+      .barber-card__info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .barber-card__name {
+        font-size: 40px;
+        text-align: left;
+      }
+
+      .barber-card__brief {
+        text-align: left;
+      }
+
+      .barber-card__badge {
+        display: inline-block;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .form-field--full {
+        grid-column: 1;
+      }
+
+      .prenota-submit-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .btn-submit {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body class="prenota-page">
+
+  <!-- NAVBAR -->
+  <nav class="nav" id="nav">
+    <a href="/" class="nav__logo">Mister Barber</a>
+    <ul class="nav__links" id="navLinks">
+      <li><a href="/#servizi">Servizi</a></li>
+      <li><a href="/#barbieri">Barbieri</a></li>
+      <li><a href="/#posto">Il Posto</a></li>
+      <li><a href="/#drop">Drop</a></li>
+    </ul>
+    <a href="prenota.html" class="nav__cta" style="border-color: var(--ember); color: var(--ember);">Prenota</a>
+    <button class="nav__hamburger" id="hamburger" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- HERO -->
+    <section class="prenota-hero">
+      <p class="prenota-hero__eyebrow">Mister Barber &mdash; Milano &middot; Brera</p>
+      <h1 class="prenota-hero__title">
+        <span class="word-solid">Pre</span>
+        <span class="word-outline">nota</span>
+      </h1>
+      <p class="prenota-hero__sub">Scegli il tuo barbiere e il tuo orario</p>
+    </section>
+
+    <!-- STEP 1: SELEZIONE BARBIERE -->
+    <section class="prenota-section">
+      <p class="prenota-section-label">
+        <span class="step-num">01</span>
+        Scegli il barbiere
+      </p>
+
+      <div class="barber-cards" id="barberCards">
+
+        <!-- BERLIN -->
+        <div class="barber-card" data-barber="berlin" role="button" tabindex="0" aria-pressed="false">
+          <div class="barber-card__check" aria-hidden="true"></div>
+          <div class="barber-card__avatar">
+            <img src="assets/img/berlin-face.png" alt="Berlin">
+          </div>
+          <div class="barber-card__info">
+            <p class="barber-card__name">Berlin</p>
+            <p class="barber-card__brief">Specializzato in fade, skin e disegni geometrici</p>
+            <span class="barber-card__badge">Selezionato</span>
+          </div>
+        </div>
+
+        <!-- GEORGE -->
+        <div class="barber-card" data-barber="george" role="button" tabindex="0" aria-pressed="false">
+          <div class="barber-card__check" aria-hidden="true"></div>
+          <div class="barber-card__avatar">
+            <img src="assets/img/george-face.png" alt="George">
+          </div>
+          <div class="barber-card__info">
+            <p class="barber-card__name">George</p>
+            <p class="barber-card__brief">Esperto in tagli classici, barba e trattamenti</p>
+            <span class="barber-card__badge">Selezionato</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <hr class="prenota-divider">
+
+    <!-- STEP 2: FORM -->
+    <section class="prenota-section">
+      <p class="prenota-section-label">
+        <span class="step-num">02</span>
+        I tuoi dati e preferenze
+      </p>
+
+      <form class="prenota-form" id="prenotaForm" novalidate>
+
+        <!-- Hidden field barbiere -->
+        <input type="hidden" name="barbiere" id="barbiere-input" value="">
+
+        <div class="form-grid">
+
+          <div class="form-field">
+            <label class="form-label" for="nome">Nome</label>
+            <input
+              class="form-input"
+              type="text"
+              id="nome"
+              name="nome"
+              placeholder="Il tuo nome"
+              autocomplete="given-name"
+              required
+            >
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="telefono">Telefono</label>
+            <input
+              class="form-input"
+              type="tel"
+              id="telefono"
+              name="telefono"
+              placeholder="+39 000 000 0000"
+              autocomplete="tel"
+              required
+            >
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="data">Data</label>
+            <input
+              class="form-input"
+              type="date"
+              id="data"
+              name="data"
+              required
+            >
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="ora">Ora</label>
+            <select class="form-select" id="ora" name="ora" required>
+              <option value="" disabled selected>Seleziona orario</option>
+              <option value="09:00">09:00</option>
+              <option value="10:00">10:00</option>
+              <option value="11:00">11:00</option>
+              <option value="12:00">12:00</option>
+              <option value="14:00">14:00</option>
+              <option value="15:00">15:00</option>
+              <option value="16:00">16:00</option>
+              <option value="17:00">17:00</option>
+              <option value="18:00">18:00</option>
+            </select>
+          </div>
+
+          <div class="form-field form-field--full">
+            <label class="form-label" for="servizio">Servizio</label>
+            <select class="form-select" id="servizio" name="servizio" required>
+              <option value="" disabled selected>Seleziona servizio</option>
+              <option value="taglio">Taglio</option>
+              <option value="taglio-barba">Taglio + Barba</option>
+              <option value="barba">Barba</option>
+              <option value="trattamento-completo">Trattamento completo</option>
+            </select>
+          </div>
+
+          <div class="form-field form-field--full">
+            <label class="form-label" for="note">Note <span style="color: var(--silver); font-size: 9px; letter-spacing: 0.15em;">(opzionale)</span></label>
+            <textarea
+              class="form-textarea"
+              id="note"
+              name="note"
+              placeholder="Hai richieste particolari? Scrivicelo qui..."
+            ></textarea>
+          </div>
+
+        </div>
+
+        <div class="prenota-submit-wrap">
+          <button class="btn-submit" type="submit">
+            Conferma prenotazione
+            <span class="btn-submit__arrow" aria-hidden="true">&rarr;</span>
+          </button>
+          <p class="prenota-note">
+            Ti contatteremo via WhatsApp per confermare l&rsquo;appuntamento.
+          </p>
+        </div>
+
+      </form>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__logo">Mister<br>Barber</div>
+
+    <div class="footer__grid">
+      <div>
+        <p class="footer__col-label">Dove</p>
+        <p class="footer__col-value">Via [indirizzo]<br>Brera, Milano</p>
+      </div>
+      <div>
+        <p class="footer__col-label">Orari</p>
+        <p class="footer__col-value">
+          Mar &ndash; Sab<br>
+          09:00 &ndash; 19:00
+        </p>
+      </div>
+      <div>
+        <p class="footer__col-label">Social</p>
+        <div class="footer__social">
+          <a href="#" target="_blank" rel="noopener">Instagram</a>
+          <a href="#" target="_blank" rel="noopener">TikTok</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span>&copy; 2026 Mister Barber</span>
+      <span>P.IVA [numero]</span>
+    </div>
+  </footer>
+
+  <!-- JS: Navbar -->
+  <script>
+    const nav = document.getElementById('nav');
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+
+    // On prenota page the nav starts scrolled (no hero video behind it)
+    nav.classList.add('nav--scrolled');
+
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('nav--scrolled', window.scrollY > 0);
+    });
+
+    hamburger.addEventListener('click', () => {
+      nav.classList.toggle('nav--open');
+    });
+
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => nav.classList.remove('nav--open'));
+    });
+  </script>
+
+  <!-- JS: Barber card selection -->
+  <script>
+    (function () {
+      var cards = document.querySelectorAll('.barber-card');
+      var input = document.getElementById('barbiere-input');
+
+      function selectCard(card) {
+        cards.forEach(function (c) {
+          c.classList.remove('active');
+          c.setAttribute('aria-pressed', 'false');
+        });
+        card.classList.add('active');
+        card.setAttribute('aria-pressed', 'true');
+        input.value = card.dataset.barber;
+      }
+
+      cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          selectCard(card);
+        });
+        card.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectCard(card);
+          }
+        });
+      });
+    })();
+  </script>
+
+  <!-- JS: Form submit -->
+  <script>
+    document.getElementById('prenotaForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var barbiere = document.getElementById('barbiere-input').value;
+      if (!barbiere) {
+        alert('Seleziona un barbiere prima di continuare.');
+        document.getElementById('barberCards').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      alert('Prenotazione inviata!');
+    });
+  </script>
+
+  <!-- JS: Set date min to today -->
+  <script>
+    (function () {
+      var dateInput = document.getElementById('data');
+      var today = new Date().toISOString().split('T')[0];
+      dateInput.setAttribute('min', today);
+    })();
+  </script>
+
+</body>
+</html>
