@@ -965,17 +965,19 @@ img {
 .brand-necklace {
   position: absolute;
   width: 300px;
-  top: calc(50% + 60px);
+  top: calc(50% + 120px);
   left: calc(50% - 70px);
   transform: translate(-50%, -50%);
   mix-blend-mode: screen;
   filter: contrast(1.1);
   pointer-events: none;
-  z-index: 2;
+  z-index: 0;
 }
 
 .btn-prenota-ora {
   display: inline-block;
+  position: relative;
+  z-index: 1;
   background: var(--ember);
   color: var(--asphalt);
   border: none;
