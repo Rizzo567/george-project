@@ -965,7 +965,7 @@ img {
 .brand-necklace {
   position: absolute;
   width: 240px;
-  top: calc(50% + 120px);
+  top: calc(50% + 105px);
   left: calc(50% - 70px);
   transform: translate(-50%, -50%);
   mix-blend-mode: screen;
