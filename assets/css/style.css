@@ -635,29 +635,58 @@ img {
   z-index: 0;
 }
 
+/* ─── CAROUSEL ANIMATIONS ─── */
+@keyframes cardExitLeft {
+  0%   { transform: translateX(0) scale(1);    opacity: 1; }
+  100% { transform: translateX(-108%) scale(0.88); opacity: 0; }
+}
+@keyframes cardEnterRight {
+  0%   { transform: translateX(108%) scale(0.88); opacity: 0; }
+  100% { transform: translateX(0) scale(1);    opacity: 1; }
+}
+
 @media (max-width: 768px) {
-  .s02 { padding: 48px 0 48px; }
+  .s02 { padding: 48px 20px; }
+
   .cards-row {
+    position: relative;
     flex-direction: row;
-    height: auto;
-    gap: 12px;
-    overflow-x: scroll;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding: 0 20px;
-    max-width: none;
-    width: 100%;
-  }
-  .cards-row::-webkit-scrollbar { display: none; }
-  .card-wrap,
-  .card-wrap--center {
-    flex: none;
-    width: 50vw;
+    width: 82vw;
+    max-width: 340px;
+    margin: 0 auto;
     aspect-ratio: 9/16;
     height: auto;
-    scroll-snap-align: center;
+    overflow: hidden;
+    gap: 0;
+    padding: 0;
   }
+
+  .card-wrap,
+  .card-wrap--center {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: unset;
+    flex: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: none;
+  }
+
+  .card-wrap.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .card-wrap.anim-exit {
+    animation: cardExitLeft 0.32s cubic-bezier(0.55, 0, 0.45, 1) forwards;
+  }
+
+  .card-wrap.anim-enter {
+    animation: cardEnterRight 0.32s cubic-bezier(0.55, 0, 0.45, 1) forwards;
+  }
+
   .cards-row:has(.card-wrap--left:hover) .card-wrap--center,
   .cards-row:has(.card-wrap--right:hover) .card-wrap--center { flex: none; }
 }
@@ -1044,10 +1073,10 @@ img {
   .duo { transform: none; overflow: visible; }
   .barber-img-wrap { height: 480px; }
   .barber-name { font-size: 25px; }
-  /* Berlin: shift left 70px (was +30, now -70 net) */
-  .barber--berlin { transform: translateX(-70px); }
-  /* George: shift left 70px, allow overflow */
-  .barber--george { transform: translateX(-70px); overflow: visible; }
+  /* Berlin: -40px */
+  .barber--berlin { transform: translateX(-40px); }
+  /* George: -40px */
+  .barber--george { transform: translateX(-40px); overflow: visible; }
   /* George name → left of hat */
   .barber--george .barber-meta {
     left: -20px;

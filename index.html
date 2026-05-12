@@ -190,57 +190,49 @@
     (function() {
       var row = document.querySelector('.cards-row');
       if (!row) return;
+      if (window.innerWidth > 768) return;
 
-      var origCards = Array.from(row.children);
-      var total = origCards.length; // 3
+      var cards = Array.from(row.querySelectorAll('.card-wrap'));
+      var total = cards.length;
       var current = 0;
+      var animating = false;
       var timer = null;
-      var paused = false;
 
-      function getCardWidth() {
-        var card = row.querySelector('.card-wrap');
-        if (!card) return 0;
-        return card.offsetWidth + 12; // width + gap
-      }
+      // Show first card
+      cards[current].classList.add('is-active');
 
-      function scrollTo(index) {
-        var w = getCardWidth();
-        row.scrollTo({ left: index * w, behavior: 'smooth' });
-      }
+      // Autoplay all videos
+      cards.forEach(function(card) {
+        var v = card.querySelector('video');
+        if (v) { v.muted = true; v.play().catch(function() {}); }
+      });
 
-      function next() {
-        if (!paused && window.innerWidth <= 768) {
-          current = (current + 1) % total;
-          scrollTo(current);
-        }
+      function advance() {
+        if (animating) return;
+        animating = true;
+
+        var prev = current;
+        current = (current + 1) % total;
+
+        var leaving = cards[prev];
+        var entering = cards[current];
+
+        entering.classList.add('is-active', 'anim-enter');
+        leaving.classList.add('anim-exit');
+
+        setTimeout(function() {
+          leaving.classList.remove('is-active', 'anim-exit');
+          entering.classList.remove('anim-enter');
+          animating = false;
+        }, 360);
       }
 
       function startTimer() {
         clearInterval(timer);
-        timer = setInterval(next, 3000);
+        timer = setInterval(advance, 3000);
       }
 
-      row.addEventListener('pointerdown', function() {
-        paused = true;
-        clearInterval(timer);
-      });
-      row.addEventListener('pointerup', function() {
-        paused = false;
-        startTimer();
-      });
-      row.addEventListener('pointerleave', function() {
-        if (paused) { paused = false; startTimer(); }
-      });
-
-      // Start after layout settles
-      setTimeout(function() {
-        if (window.innerWidth <= 768) startTimer();
-      }, 500);
-
-      window.addEventListener('resize', function() {
-        clearInterval(timer);
-        if (window.innerWidth <= 768) startTimer();
-      });
+      startTimer();
     })();
   </script>
 </body>
