@@ -470,7 +470,7 @@ img {
 
 .s02 {
   background: var(--asphalt);
-  padding: 280px var(--page-margin) 80px;
+  padding: 480px var(--page-margin) 80px;
   display: flex;
   justify-content: center;
   position: relative;
