@@ -957,13 +957,21 @@ img {
   color: var(--silver);
 }
 
+.btn-prenota-wrap {
+  position: relative;
+  display: inline-block;
+}
+
 .brand-necklace {
-  width: 260px;
-  display: block;
+  position: absolute;
+  width: 300px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   mix-blend-mode: screen;
   filter: contrast(1.1);
   pointer-events: none;
-  margin-bottom: -8px;
+  z-index: 2;
 }
 
 .btn-prenota-ora {
