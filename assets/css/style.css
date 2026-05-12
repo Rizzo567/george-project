@@ -648,8 +648,8 @@ img {
 
 .card-cap {
   position: absolute;
-  top: -28px;
-  left: -32px;
+  top: -58px;
+  left: -62px;
   width: 210px;
   z-index: 5;
   pointer-events: none;
