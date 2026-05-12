@@ -1386,8 +1386,8 @@ img {
 }
 .s01 .cap-2 {
   position: absolute;
-  bottom: calc(12% + 250px);
-  left: calc(22% - 320px);
+  bottom: calc(12% + 500px);
+  left: calc(22% - 350px);
   width: 300px;
   transform: rotate(8deg);
   opacity: 1;
