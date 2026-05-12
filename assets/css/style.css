@@ -511,6 +511,13 @@ img {
   100% { transform: rotate(-15deg) scale(1) translateY(0px);  opacity: 1; }
 }
 
+@media (max-width: 768px) {
+  .expand-map__cap {
+    width: 224px;
+    left: -55px;
+  }
+}
+
 .expand-map__hint {
   position: absolute;
   bottom: -28px;
