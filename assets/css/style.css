@@ -474,7 +474,7 @@ img {
   display: flex;
   justify-content: center;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .s02::before {
@@ -678,7 +678,7 @@ img {
     margin: 0 auto;
     aspect-ratio: 9/16;
     height: auto;
-    overflow: hidden;
+    overflow: visible;
     gap: 0;
     padding: 0;
   }
