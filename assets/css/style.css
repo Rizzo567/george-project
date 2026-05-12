@@ -668,13 +668,13 @@ img {
 }
 
 @media (max-width: 768px) {
-  .s02 { padding: 180px 20px 48px; }
+  .s02 { padding: 150px 20px 48px; }
 
   .cards-row {
     position: relative;
     flex-direction: row;
-    width: 66vw;
-    max-width: 272px;
+    width: 73vw;
+    max-width: 300px;
     margin: 0 auto;
     aspect-ratio: 9/16;
     height: auto;
@@ -1088,7 +1088,7 @@ img {
 }
 
 @media (max-width: 900px) {
-  .s01 { padding: 8px 20px 0; margin-bottom: -60px; overflow: visible; }
+  .s01 { padding: 32px 20px 0; margin-bottom: -60px; overflow: visible; }
   .s01 .cap-2 { display: none; }
   .s01-grid { grid-template-columns: 1fr; gap: 48px; }
   .chi { padding-left: 0; padding-top: 32px; transform: none; overflow: visible; }
