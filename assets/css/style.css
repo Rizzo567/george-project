@@ -1088,7 +1088,7 @@ img {
 }
 
 @media (max-width: 900px) {
-  .s01 { padding: 32px 20px 0; margin-bottom: -60px; overflow: visible; }
+  .s01 { padding: 32px 20px 80px; margin-bottom: -60px; overflow: visible; }
   .s01 .cap-2 { display: none; }
   .s01-grid { grid-template-columns: 1fr; gap: 48px; }
   .chi { padding-left: 0; padding-top: 32px; transform: none; overflow: visible; }
