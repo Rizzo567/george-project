@@ -32,19 +32,158 @@
     </button>
   </nav>
 
-  <!-- MAIN (sezioni verranno aggiunte qui) -->
+  <!-- MAIN -->
   <main id="main">
-    <!-- placeholder — sezioni in arrivo -->
-  </main>
 
-  <!-- META STRIP -->
-  <div class="meta-strip">
-    <span>I · FADES</span>
-    <span>II · BEARD</span>
-    <span>III · RAZOR</span>
-    <span>IV · DROP</span>
-    <span>MILANO · BRERA · 2026</span>
-  </div>
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <div class="hero__media">
+        <video class="hero__video" autoplay muted loop playsinline>
+          <source src="assets/videos/hero video.mp4" type="video/mp4">
+        </video>
+        <div class="hero__overlay"></div>
+      </div>
+    </section>
+
+    <div class="section-fade"></div>
+
+    <!-- CHI SIAMO -->
+    <section class="s01" id="barbieri" data-screen-label="01 Chi Siamo">
+
+      <div class="glow"></div>
+
+      <img class="cap cap-1" src="assets/img/cap-amiri.png" alt="" />
+      <img class="cap cap-2" src="assets/img/cap-ne.png" alt="" />
+
+      <div class="s01-grid">
+
+        <!-- LEFT — big brand mark + cta -->
+        <div class="brand">
+          <div class="brand-mark">
+            Mister<span class="second">Barber</span>
+          </div>
+          <button class="btn-prenota-ora" type="button">Prenota ora</button>
+        </div>
+
+        <!-- RIGHT — chi siamo + duo -->
+        <div class="chi">
+          <h2 class="chi-title">Chi <span class="ember">siamo?</span></h2>
+
+          <!-- duo of barbers -->
+          <div class="duo">
+            <figure class="barber barber--berlin">
+              <div class="barber-img-wrap">
+                <img src="assets/img/berlin.png" alt="Berlin" class="berlin" />
+              </div>
+              <figcaption class="barber-meta">
+                <span class="barber-name">BERLIN</span>
+              </figcaption>
+            </figure>
+            <figure class="barber barber--george">
+              <figcaption class="barber-meta">
+                <span class="barber-name">GEORGE</span>
+              </figcaption>
+              <div class="barber-img-wrap">
+                <img src="assets/img/george.png" alt="George" />
+              </div>
+            </figure>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIDEO CARDS -->
+    <section class="s02" id="drop">
+      <div class="aurora-bg" aria-hidden="true"></div>
+      <div class="cards-row">
+
+        <div class="card-wrap card-wrap--left" data-glow>
+          <div class="card-glow-inner" data-glow></div>
+          <video class="card-video" muted loop playsinline preload="none">
+            <source src="assets/videos/ssstik.io_1778574226585.mp4" type="video/mp4">
+          </video>
+        </div>
+
+        <div class="card-wrap card-wrap--center" data-glow>
+          <div class="card-glow-inner" data-glow></div>
+          <video class="card-video" muted loop playsinline preload="none">
+            <source src="assets/videos/ssstik.io_1778574220927.mp4" type="video/mp4">
+          </video>
+        </div>
+
+        <div class="card-wrap card-wrap--right" data-glow>
+          <div class="card-glow-inner" data-glow></div>
+          <video class="card-video" muted loop playsinline preload="none">
+            <source src="assets/videos/ssstik.io_@geoblenz_1778574229896.mp4" type="video/mp4">
+          </video>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- BOOKING -->
+    <section class="s03" id="prenota">
+      <div class="booking">
+
+        <!-- LEFT -->
+        <div class="booking__left">
+          <h2 class="booking__title">Il tuo<br>prossimo<br><span class="ember">taglio.</span></h2>
+          <div class="barber-picks">
+            <button class="barber-pick" data-barber="george">
+              <div class="barber-pick__img-wrap">
+                <img src="assets/img/george-face.png" alt="George">
+              </div>
+              <span class="barber-pick__name">George</span>
+              <span class="barber-pick__tag">Barbiere</span>
+            </button>
+            <button class="barber-pick" data-barber="berlin">
+              <div class="barber-pick__img-wrap">
+                <img src="assets/img/berlin-face.png" alt="Berlin">
+              </div>
+              <span class="barber-pick__name">Berlin</span>
+              <span class="barber-pick__tag">Barbiere</span>
+            </button>
+          </div>
+          <!-- summary after time selected -->
+          <div class="booking__summary" id="booking-summary" style="display:none"></div>
+          <button class="btn-book" id="btn-book" style="display:none">Conferma prenotazione <span>→</span></button>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="booking__right">
+          <div class="booking__right-track" id="right-track">
+
+            <!-- Calendar panel -->
+            <div class="right-panel" id="panel-cal">
+              <div class="cal" id="cal">
+                <div class="cal__nav-row">
+                  <button class="cal__arrow" id="cal-prev">←</button>
+                  <span class="cal__label" id="cal-label"></span>
+                  <button class="cal__arrow" id="cal-next">→</button>
+                </div>
+                <div class="cal__weekdays">
+                  <span>Lun</span><span>Mar</span><span>Mer</span>
+                  <span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span>
+                </div>
+                <div class="cal__grid" id="cal-grid"></div>
+              </div>
+            </div>
+
+            <!-- Slots panel -->
+            <div class="right-panel right-panel--slots" id="panel-slots">
+              <button class="slots__back" id="slots-back">← Cambia data</button>
+              <p class="slots__label">Scegli l'orario</p>
+              <div class="slots__grid" id="slots-grid"></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
 
   <!-- FOOTER -->
   <footer class="footer">
@@ -76,6 +215,167 @@
       <span>P.IVA [numero]</span>
     </div>
   </footer>
+
+  <script>
+    /* ── BOOKING ── */
+    const SLOTS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30',
+                   '14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30'];
+    const MONTHS = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+                    'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+    let selected = { barber: null, date: null, time: null };
+    let calDate = new Date();
+
+    const cal = document.getElementById('cal');
+    const track = document.getElementById('right-track');
+
+    /* build calendar on load */
+    buildCal();
+
+    /* barber pick → pulse calendar */
+    document.querySelectorAll('.barber-pick').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.barber-pick').forEach(b => b.classList.remove('barber-pick--selected'));
+        btn.classList.add('barber-pick--selected');
+        selected.barber = btn.dataset.barber;
+        /* pulse */
+        cal.classList.remove('cal--pulse');
+        void cal.offsetWidth;
+        cal.classList.add('cal--pulse');
+        cal.addEventListener('animationend', () => cal.classList.remove('cal--pulse'), { once: true });
+      });
+    });
+
+    /* calendar */
+    function buildCal() {
+      const y = calDate.getFullYear(), m = calDate.getMonth();
+      document.getElementById('cal-label').textContent = MONTHS[m] + ' ' + y;
+      const grid = document.getElementById('cal-grid');
+      grid.innerHTML = '';
+      const first = new Date(y, m, 1);
+      const lastDay = new Date(y, m+1, 0).getDate();
+      let startDow = first.getDay();
+      startDow = startDow === 0 ? 6 : startDow - 1;
+      for (let i = 0; i < startDow; i++) {
+        const empty = document.createElement('span');
+        empty.className = 'cal__day cal__day--empty';
+        grid.appendChild(empty);
+      }
+      const today = new Date(); today.setHours(0,0,0,0);
+      for (let d = 1; d <= lastDay; d++) {
+        const btn = document.createElement('button');
+        btn.className = 'cal__day';
+        btn.textContent = d;
+        const thisDate = new Date(y, m, d);
+        const dow = thisDate.getDay();
+        if (thisDate < today || dow === 0) {
+          btn.classList.add('cal__day--disabled');
+          btn.disabled = true;
+        } else {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.cal__day--selected').forEach(b => b.classList.remove('cal__day--selected'));
+            btn.classList.add('cal__day--selected');
+            selected.date = thisDate;
+            selected.time = null;
+            hideConfirm();
+            /* animate: cal exits right, slots enter from right */
+            track.classList.add('track--slots');
+            buildSlots();
+          });
+        }
+        if (selected.date && thisDate.toDateString() === selected.date.toDateString())
+          btn.classList.add('cal__day--selected');
+        grid.appendChild(btn);
+      }
+    }
+
+    document.getElementById('cal-prev').addEventListener('click', () => {
+      calDate.setMonth(calDate.getMonth() - 1); buildCal();
+    });
+    document.getElementById('cal-next').addEventListener('click', () => {
+      calDate.setMonth(calDate.getMonth() + 1); buildCal();
+    });
+
+    /* slots */
+    function buildSlots() {
+      const grid = document.getElementById('slots-grid');
+      grid.innerHTML = '';
+      SLOTS.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'slot-btn';
+        btn.textContent = s;
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.slot-btn--selected').forEach(b => b.classList.remove('slot-btn--selected'));
+          btn.classList.add('slot-btn--selected');
+          selected.time = s;
+          showConfirm();
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    /* back to calendar */
+    document.getElementById('slots-back').addEventListener('click', () => {
+      track.classList.remove('track--slots');
+      hideConfirm();
+    });
+
+    /* confirm */
+    function showConfirm() {
+      const d = selected.date;
+      const dateStr = d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+      const label = selected.barber.charAt(0).toUpperCase() + selected.barber.slice(1);
+      const summary = document.getElementById('booking-summary');
+      const btnBook = document.getElementById('btn-book');
+      summary.innerHTML = `
+        <div class="summary__row"><span>Barbiere</span><strong>${label}</strong></div>
+        <div class="summary__row"><span>Data</span><strong>${dateStr}</strong></div>
+        <div class="summary__row"><span>Orario</span><strong>${selected.time}</strong></div>
+      `;
+      summary.style.display = 'flex';
+      btnBook.style.display = 'flex';
+    }
+    function hideConfirm() {
+      document.getElementById('booking-summary').style.display = 'none';
+      document.getElementById('btn-book').style.display = 'none';
+    }
+
+    document.getElementById('btn-book').addEventListener('click', () => {
+      alert('Prenotazione confermata!\n' + selected.barber + ' — ' + selected.date.toLocaleDateString('it-IT') + ' alle ' + selected.time);
+    });
+  </script>
+
+  <script>
+    /* glow cards — local coords per card, rAF throttled */
+    let rafPending = false;
+    let lastE = null;
+    document.addEventListener('pointermove', (e) => {
+      lastE = e;
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => {
+        rafPending = false;
+        if (!lastE) return;
+        document.querySelectorAll('.card-wrap[data-glow]').forEach(el => {
+          const r = el.getBoundingClientRect();
+          el.style.setProperty('--x', (lastE.clientX - r.left).toFixed(1));
+          el.style.setProperty('--y', (lastE.clientY - r.top).toFixed(1));
+          el.style.setProperty('--xp', (lastE.clientX / window.innerWidth).toFixed(2));
+        });
+      });
+    });
+
+    /* lazy play TikTok videos via IntersectionObserver */
+    const cardVideos = document.querySelectorAll('.card-video');
+    const vidObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const v = entry.target;
+        if (entry.isIntersecting) { v.play().catch(() => {}); }
+        else { v.pause(); }
+      });
+    }, { threshold: 0.2 });
+    cardVideos.forEach(v => vidObserver.observe(v));
+  </script>
 
   <script>
     const nav = document.getElementById('nav');
