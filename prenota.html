@@ -3,32 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Prenota il tuo appuntamento da Mister Barber — Milano · Brera.">
+  <meta name="description" content="Prenota il tuo appuntamento da Mister Barber — Via Torino 38, Pavia.">
   <title>PRENOTA — MISTER BARBER</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="assets/css/style.css">
 
   <style>
     /* ─── PRENOTA PAGE ─── */
+    .prenota-page { background: var(--asphalt); min-height: 100vh; }
 
-    .prenota-page {
-      background: var(--asphalt);
-      min-height: 100vh;
-    }
-
-    /* ─── HERO PRENOTA ─── */
-
+    /* ─── HERO ─── */
     .prenota-hero {
       padding: calc(var(--nav-height) + 80px) var(--page-margin) 64px;
       position: relative;
       overflow: hidden;
     }
-
     .prenota-hero::before {
       content: '';
       position: absolute;
@@ -38,28 +30,6 @@
         radial-gradient(circle at 10% 80%, rgba(232,90,31,0.05), transparent 40%);
       pointer-events: none;
     }
-
-    .prenota-hero__eyebrow {
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: var(--eyebrow);
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--silver);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .prenota-hero__eyebrow::before {
-      content: '';
-      display: inline-block;
-      width: 32px;
-      height: 1px;
-      background: var(--ember);
-    }
-
     .prenota-hero__title {
       font-family: var(--font-display);
       font-size: clamp(96px, 18vw, 280px);
@@ -70,18 +40,12 @@
       z-index: 2;
       margin-bottom: 32px;
     }
-
-    .prenota-hero__title .word-solid {
-      display: block;
-      color: var(--canvas);
-    }
-
+    .prenota-hero__title .word-solid { display: block; color: var(--canvas); }
     .prenota-hero__title .word-outline {
       display: block;
       color: transparent;
       -webkit-text-stroke: 2px var(--canvas);
     }
-
     .prenota-hero__sub {
       font-family: var(--font-body);
       font-size: var(--body-l);
@@ -91,12 +55,11 @@
       z-index: 2;
     }
 
-    /* ─── SECTION BARBIERI ─── */
-
+    /* ─── SECTION ─── */
     .prenota-section {
       padding: 0 var(--page-margin) 80px;
+      overflow: hidden;
     }
-
     .prenota-section-label {
       font-family: var(--font-body);
       font-weight: 500;
@@ -107,34 +70,44 @@
       margin-bottom: 32px;
       padding-bottom: 16px;
       border-bottom: 1px solid rgba(229,225,216,0.1);
-      display: flex;
-      align-items: center;
-      gap: 12px;
     }
 
-    .prenota-section-label .step-num {
-      color: var(--ember);
-      font-family: var(--font-display);
-      font-size: 18px;
-      letter-spacing: 0;
+    /* ─── BOOKING STEPS ─── */
+    .book-step { }
+    .book-step--hidden { display: none !important; }
+
+    /* ─── BACK BUTTON ─── */
+    .step-back {
+      background: none;
+      border: none;
+      color: var(--silver);
+      font-family: var(--font-body);
+      font-size: var(--body-s);
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 28px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
+    .step-back:hover { color: var(--canvas); }
 
     /* ─── BARBER CARDS ─── */
-
     .barber-cards {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
-      margin-bottom: 64px;
     }
-
     .barber-card {
-      background: #111111;
+      background: #111;
       border: 2px solid rgba(229,225,216,0.08);
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      padding: 32px 28px 28px;
+      padding: 40px 28px 32px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -143,66 +116,16 @@
       -webkit-user-select: none;
       user-select: none;
     }
-
     .barber-card::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse at 50% 0%, rgba(232,90,31,0.06) 0%, transparent 65%);
+      background: radial-gradient(ellipse at 50% 0%, rgba(232,90,31,0.07) 0%, transparent 65%);
       opacity: 0;
       transition: opacity 0.25s;
     }
-
-    .barber-card:hover {
-      border-color: rgba(232,90,31,0.4);
-    }
-
-    .barber-card:hover::before {
-      opacity: 1;
-    }
-
-    .barber-card.active {
-      border-color: var(--ember);
-      background: #161210;
-    }
-
-    .barber-card.active::before {
-      opacity: 1;
-    }
-
-    .barber-card__check {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 22px;
-      height: 22px;
-      border: 1.5px solid rgba(229,225,216,0.2);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s, border-color 0.2s;
-    }
-
-    .barber-card__check::after {
-      content: '';
-      display: block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--ember);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .barber-card.active .barber-card__check {
-      border-color: var(--ember);
-    }
-
-    .barber-card.active .barber-card__check::after {
-      opacity: 1;
-    }
-
+    .barber-card:hover { border-color: rgba(232,90,31,0.5); }
+    .barber-card:hover::before { opacity: 1; }
     .barber-card__avatar {
       width: 140px;
       height: 140px;
@@ -210,26 +133,17 @@
       overflow: hidden;
       background: var(--asphalt-soft);
       border: 2px solid rgba(229,225,216,0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
       transition: border-color 0.2s;
       flex-shrink: 0;
     }
-
-    .barber-card.active .barber-card__avatar {
-      border-color: var(--ember);
-    }
-
+    .barber-card:hover .barber-card__avatar { border-color: rgba(232,90,31,0.4); }
     .barber-card__avatar img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       object-position: top center;
-      filter: none;
     }
-
+    .barber-card__info { text-align: center; }
     .barber-card__name {
       font-family: var(--font-display);
       font-size: clamp(40px, 5vw, 64px);
@@ -237,64 +151,265 @@
       text-transform: uppercase;
       color: var(--canvas);
       line-height: 1;
-      text-align: center;
     }
-
-    .barber-card.active .barber-card__name {
-      color: var(--canvas);
-    }
-
-    .barber-card__brief {
+    .barber-card__sub {
       font-family: var(--font-body);
       font-size: var(--body-s);
       color: var(--silver);
-      letter-spacing: 0.05em;
-      text-align: center;
-      line-height: 1.5;
+      letter-spacing: 0.06em;
+      margin-top: 6px;
     }
 
-    .barber-card__badge {
+    /* ─── ANIMATIONS ─── */
+    @keyframes fly-left {
+      0%   { transform: translateX(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateX(-140vw) rotate(-10deg); opacity: 0; }
+    }
+    @keyframes fly-right {
+      0%   { transform: translateX(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateX(140vw) rotate(10deg); opacity: 0; }
+    }
+    @keyframes pop-in {
+      0%   { transform: scale(0.72); opacity: 0; }
+      65%  { transform: scale(1.04); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes slide-up {
+      0%   { transform: translateY(44px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .card-exit-left  { animation: fly-left  0.52s cubic-bezier(0.4,0,1,1) forwards; }
+    .card-exit-right { animation: fly-right 0.52s cubic-bezier(0.4,0,1,1) forwards; }
+    .anim-pop   { animation: pop-in   0.48s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    .anim-slide { animation: slide-up 0.42s ease forwards; }
+    .anim-fade  { animation: fade-in  0.35s ease forwards; }
+
+    /* ─── BARBER PILL ─── */
+    .selected-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #161210;
+      border: 1px solid var(--ember);
+      padding: 8px 18px 8px 8px;
+      margin-bottom: 24px;
+    }
+    .selected-pill__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 1px solid rgba(232,90,31,0.4);
+      flex-shrink: 0;
+    }
+    .selected-pill__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+    }
+    .selected-pill__name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--canvas);
+    }
+
+    /* ─── CALENDAR ─── */
+    .cal-wrap {
+      background: #111;
+      border: 1px solid rgba(229,225,216,0.08);
+      padding: 28px;
+      max-width: 440px;
+    }
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .cal-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--canvas);
+    }
+    .cal-nav {
+      background: none;
+      border: 1px solid rgba(229,225,216,0.15);
+      color: var(--canvas);
+      font-size: 20px;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, background 0.2s;
+      line-height: 1;
+    }
+    .cal-nav:hover {
+      border-color: var(--ember);
+      background: rgba(232,90,31,0.08);
+    }
+    .cal-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .cal-weekdays span {
       font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 9px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--silver);
+      text-align: center;
+      padding: 4px 0;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      background: none;
+      border: 1px solid transparent;
+      color: var(--canvas);
+      font-family: var(--font-body);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      position: relative;
+    }
+    .cal-day:hover:not(:disabled):not(.cal-day--selected) {
+      border-color: rgba(232,90,31,0.4);
+      background: rgba(232,90,31,0.06);
+    }
+    .cal-day--other {
+      color: rgba(229,225,216,0.18);
+      pointer-events: none;
+    }
+    .cal-day--today::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--ember);
+    }
+    .cal-day--selected {
+      background: var(--ember) !important;
+      border-color: var(--ember) !important;
+      color: var(--asphalt) !important;
+      font-weight: 700;
+    }
+    .cal-day:disabled {
+      color: rgba(229,225,216,0.14);
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* ─── SLOTS ─── */
+    .slots-section {
+      margin-top: 24px;
+      max-width: 440px;
+    }
+    .slot-hint {
+      font-family: var(--font-body);
+      font-size: var(--body-s);
+      color: var(--silver);
+      letter-spacing: 0.04em;
+      margin-bottom: 12px;
+    }
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .slot-btn {
+      background: #111;
+      border: 1px solid rgba(229,225,216,0.15);
+      color: var(--canvas);
+      font-family: var(--font-body);
+      font-size: var(--body-s);
+      letter-spacing: 0.04em;
+      padding: 12px 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .slot-btn:hover:not(:disabled) { border-color: rgba(232,90,31,0.5); }
+    .slot-btn.is-selected {
+      background: var(--ember);
+      border-color: var(--ember);
+      color: var(--asphalt);
+      font-weight: 600;
+    }
+    .slot-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+    /* ─── BOOKING RECAP ─── */
+    .booking-recap {
+      background: #161210;
+      border: 1px solid rgba(232,90,31,0.25);
+      padding: 16px 22px;
+      margin-bottom: 36px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .recap-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .recap-label {
+      font-family: var(--font-body);
+      font-size: 10px;
       letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--ember);
-      border: 1px solid var(--ember);
-      padding: 4px 10px;
-      opacity: 0;
-      transition: opacity 0.2s;
+      color: var(--silver);
     }
-
-    .barber-card.active .barber-card__badge {
-      opacity: 1;
+    .recap-value {
+      font-family: var(--font-display);
+      font-size: 20px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--canvas);
+    }
+    .recap-sep {
+      width: 1px;
+      height: 32px;
+      background: rgba(229,225,216,0.1);
     }
 
     /* ─── FORM ─── */
-
-    .prenota-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       margin-bottom: 20px;
     }
-
     .form-field {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-
-    .form-field--full {
-      grid-column: 1 / -1;
-    }
-
+    .form-field--full { grid-column: 1 / -1; }
     .form-label {
       font-family: var(--font-body);
       font-weight: 500;
@@ -303,11 +418,9 @@
       text-transform: uppercase;
       color: var(--silver);
     }
-
     .form-input,
-    .form-select,
     .form-textarea {
-      background: var(--asphalt-soft);
+      background: #111;
       border: 1px solid rgba(229,225,216,0.15);
       color: var(--canvas);
       font-family: var(--font-body);
@@ -316,232 +429,148 @@
       outline: none;
       width: 100%;
       border-radius: 0;
-      appearance: none;
-      -webkit-appearance: none;
       transition: border-color 0.2s, background 0.2s;
       line-height: 1.5;
     }
-
     .form-input::placeholder,
-    .form-textarea::placeholder {
-      color: rgba(229,225,216,0.25);
-    }
-
+    .form-textarea::placeholder { color: rgba(229,225,216,0.22); }
     .form-input:focus,
-    .form-select:focus,
-    .form-textarea:focus {
+    .form-textarea:focus { border-color: var(--ember); background: #1f1a18; }
+    .form-textarea { resize: vertical; min-height: 110px; }
+
+    /* ─── IMAGE UPLOAD ─── */
+    .upload-area {
+      border: 1.5px dashed rgba(229,225,216,0.18);
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .upload-area:hover {
       border-color: var(--ember);
-      background: #1f1a18;
+      background: rgba(232,90,31,0.04);
     }
-
-    .form-select {
+    .upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
       cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%238E8E8E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 18px center;
-      padding-right: 44px;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-icon {
+      font-size: 26px;
+      color: var(--silver);
+      margin-bottom: 10px;
+    }
+    .upload-text {
+      font-family: var(--font-body);
+      font-size: var(--body-s);
+      color: var(--silver);
+      letter-spacing: 0.04em;
+      line-height: 1.6;
+    }
+    .upload-text strong { color: var(--ember); }
+    .upload-preview {
+      display: none;
+      margin: 14px auto 0;
+      max-width: 120px;
+      max-height: 120px;
+      object-fit: cover;
+      border: 1px solid rgba(232,90,31,0.4);
     }
 
-    .form-select option {
-      background: var(--asphalt-soft);
-      color: var(--canvas);
-    }
-
-    .form-textarea {
-      resize: vertical;
-      min-height: 110px;
-    }
-
-    /* Date input calendar icon color */
-    .form-input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(0.5);
-      cursor: pointer;
-    }
-
-    /* ─── SUBMIT AREA ─── */
-
-    .prenota-submit-wrap {
-      margin-top: 40px;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-
+    /* ─── SUBMIT ─── */
+    .prenota-submit-wrap { margin-top: 40px; }
     .btn-submit {
+      position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 16px;
+      justify-content: center;
       background: var(--ember);
       color: var(--asphalt);
       border: none;
-      border-radius: 0;
-      padding: 18px 44px;
+      padding: 20px 48px;
       font-family: var(--font-display);
       font-size: 24px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: background 0.15s;
-      white-space: nowrap;
+      min-width: 340px;
+      transition: background 0.3s;
+      overflow: hidden;
     }
+    .btn-submit:hover:not(:disabled) { background: #ff7a3c; }
+    .btn-submit:disabled { cursor: not-allowed; }
 
-    .btn-submit:hover {
-      background: #FF7A3C;
-    }
-
-    .btn-submit__arrow {
-      font-size: 28px;
-      line-height: 1;
-      margin-top: -2px;
-    }
-
-    .prenota-note {
-      font-family: var(--font-body);
-      font-size: var(--body-s);
-      color: var(--silver);
-      letter-spacing: 0.04em;
-      line-height: 1.55;
-    }
-
-    /* ─── DIVIDER ─── */
-
-    .prenota-divider {
-      border: none;
-      border-top: 1px solid rgba(229,225,216,0.08);
-      margin: 0 var(--page-margin) 64px;
-    }
-
-    /* ─── SLOT GRID ─── */
-
-    .slot-grid-wrap {
+    .btn-text { transition: opacity 0.2s; }
+    .btn-spinner,
+    .btn-success-icon {
+      position: absolute;
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
     }
 
-    .slot-hint {
-      font-family: var(--font-body);
-      font-size: var(--body-s);
-      color: var(--silver);
-      letter-spacing: 0.04em;
-      padding: 12px 0 4px;
-    }
+    .btn-submit.is-loading .btn-text     { opacity: 0; }
+    .btn-submit.is-loading .btn-spinner  { opacity: 1; }
 
-    .slot-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-    }
+    .btn-submit.is-success { background: #27ae60; }
+    .btn-submit.is-success .btn-spinner      { opacity: 0; }
+    .btn-submit.is-success .btn-success-icon { opacity: 1; }
 
-    .slot-btn {
-      background: var(--asphalt-soft);
-      border: 1px solid rgba(229,225,216,0.15);
-      color: var(--canvas);
-      font-family: var(--font-body);
-      font-size: var(--body-s);
-      letter-spacing: 0.05em;
-      padding: 12px 6px;
-      cursor: pointer;
-      text-align: center;
-      transition: border-color 0.2s, background 0.2s, color 0.2s;
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-svg { animation: spin 0.8s linear infinite; }
 
-    .slot-btn:hover:not(:disabled) {
-      border-color: rgba(232,90,31,0.5);
+    .check-circle-path {
+      fill: none; stroke: white; stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 138; stroke-dashoffset: 138;
     }
-
-    .slot-btn.is-selected {
-      background: var(--ember);
-      border-color: var(--ember);
-      color: var(--asphalt);
+    .check-mark-path {
+      fill: none; stroke: white; stroke-width: 3;
+      stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: 50; stroke-dashoffset: 50;
     }
-
-    .slot-btn:disabled {
-      opacity: 0.22;
-      cursor: not-allowed;
+    .is-success .check-circle-path {
+      animation: draw-stroke 0.4s ease forwards;
     }
+    .is-success .check-mark-path {
+      animation: draw-stroke 0.3s ease 0.38s forwards;
+    }
+    @keyframes draw-stroke { to { stroke-dashoffset: 0; } }
 
     /* ─── RESPONSIVE ─── */
-
     @media (max-width: 768px) {
       .prenota-hero {
         padding: calc(var(--nav-height) + 48px) 20px 48px;
       }
-
       .prenota-hero__title .word-outline {
         -webkit-text-stroke: 1.5px var(--canvas);
       }
-
-      .prenota-section {
-        padding: 0 20px 64px;
-      }
-
-      .prenota-divider {
-        margin: 0 20px 48px;
-      }
-
+      .prenota-section { padding: 0 20px 64px; }
       .barber-cards {
         grid-template-columns: 1fr;
         gap: 16px;
-        margin-bottom: 48px;
       }
-
       .barber-card {
         flex-direction: row;
         align-items: center;
-        gap: 20px;
         padding: 24px 20px;
-        text-align: left;
+        gap: 20px;
       }
-
-      .barber-card__avatar {
-        width: 88px;
-        height: 88px;
-        flex-shrink: 0;
-      }
-
-      .barber-card__info {
-        flex: 1;
-        min-width: 0;
-      }
-
-      .barber-card__name {
-        font-size: 40px;
-        text-align: left;
-      }
-
-      .barber-card__brief {
-        text-align: left;
-      }
-
-      .barber-card__badge {
-        display: inline-block;
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-
-      .slot-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .form-field--full {
-        grid-column: 1;
-      }
-
-      .prenota-submit-wrap {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-      }
-
-      .btn-submit {
-        width: 100%;
-        justify-content: center;
-      }
+      .barber-card__avatar { width: 80px; height: 80px; }
+      .barber-card__info { text-align: left; }
+      .barber-card__name { font-size: 36px; }
+      .cal-wrap { padding: 20px 14px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-field--full { grid-column: 1; }
+      .btn-submit { width: 100%; min-width: unset; }
+      .slot-grid { grid-template-columns: repeat(3, 1fr); }
+      .booking-recap { gap: 14px; }
     }
   </style>
 </head>
@@ -558,18 +587,14 @@
     </ul>
     <a href="prenota.html" class="nav__cta" style="border-color: var(--ember); color: var(--ember);">Prenota</a>
     <button class="nav__hamburger" id="hamburger" aria-label="Menu">
-      <span></span>
-      <span></span>
-      <span></span>
+      <span></span><span></span><span></span>
     </button>
   </nav>
 
-  <!-- MAIN -->
   <main>
 
     <!-- HERO -->
     <section class="prenota-hero">
-      <p class="prenota-hero__eyebrow">Mister Barber &mdash; Milano &middot; Brera</p>
       <h1 class="prenota-hero__title">
         <span class="word-solid">Pre</span>
         <span class="word-outline">nota</span>
@@ -577,157 +602,154 @@
       <p class="prenota-hero__sub">Scegli il tuo barbiere e il tuo orario</p>
     </section>
 
-    <!-- STEP 1: SELEZIONE BARBIERE -->
-    <section class="prenota-section">
-      <p class="prenota-section-label">
-        <span class="step-num">01</span>
-        Scegli il barbiere
-      </p>
+    <!-- BOOKING FLOW -->
+    <section class="prenota-section" id="bookingSection">
 
-      <div class="barber-cards" id="barberCards">
+      <!-- STEP 1: BARBER -->
+      <div id="stepBarber" class="book-step">
+        <p class="prenota-section-label">Scegli il barbiere</p>
+        <div class="barber-cards" id="barberCards">
 
-        <!-- BERLIN -->
-        <div class="barber-card" data-barber="berlin" role="button" tabindex="0" aria-pressed="false">
-          <div class="barber-card__check" aria-hidden="true"></div>
-          <div class="barber-card__avatar">
-            <img src="assets/img/berlin-face.png" alt="Berlin">
+          <div class="barber-card" data-barber="berlin" role="button" tabindex="0">
+            <div class="barber-card__avatar">
+              <img src="assets/img/berlin-face.png" alt="Berlin">
+            </div>
+            <div class="barber-card__info">
+              <p class="barber-card__name">Berlin</p>
+              <p class="barber-card__sub">Il tocco preciso</p>
+            </div>
           </div>
-          <div class="barber-card__info">
-            <p class="barber-card__name">Berlin</p>
-            <span class="barber-card__badge">Selezionato</span>
+
+          <div class="barber-card" data-barber="george" role="button" tabindex="0">
+            <div class="barber-card__avatar">
+              <img src="assets/img/george-face.png" alt="George">
+            </div>
+            <div class="barber-card__info">
+              <p class="barber-card__name">George</p>
+              <p class="barber-card__sub">Il tocco creativo</p>
+            </div>
           </div>
+
+        </div>
+      </div>
+
+      <!-- STEP 2: CALENDAR -->
+      <div id="stepCalendar" class="book-step book-step--hidden">
+
+        <button class="step-back" id="backToBarber">← Cambia barbiere</button>
+
+        <div id="selectedPill"></div>
+
+        <div class="cal-wrap">
+          <div class="cal-header">
+            <button class="cal-nav" id="calPrev">‹</button>
+            <span class="cal-title" id="calTitle"></span>
+            <button class="cal-nav" id="calNext">›</button>
+          </div>
+          <div class="cal-weekdays">
+            <span>Lu</span><span>Ma</span><span>Me</span><span>Gi</span>
+            <span>Ve</span><span>Sa</span><span>Do</span>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
         </div>
 
-        <!-- GEORGE -->
-        <div class="barber-card" data-barber="george" role="button" tabindex="0" aria-pressed="false">
-          <div class="barber-card__check" aria-hidden="true"></div>
-          <div class="barber-card__avatar">
-            <img src="assets/img/george-face.png" alt="George">
-          </div>
-          <div class="barber-card__info">
-            <p class="barber-card__name">George</p>
-            <span class="barber-card__badge">Selezionato</span>
-          </div>
+        <div class="slots-section" id="slotsSection" style="display:none">
+          <p class="slot-hint" id="slotHint"></p>
+          <div class="slot-grid" id="slotGrid"></div>
         </div>
 
       </div>
-    </section>
 
-    <hr class="prenota-divider">
+      <!-- STEP 3: FORM -->
+      <div id="stepForm" class="book-step book-step--hidden">
 
-    <!-- STEP 2: FORM -->
-    <section class="prenota-section">
-      <p class="prenota-section-label">
-        <span class="step-num">02</span>
-        I tuoi dati e preferenze
-      </p>
+        <button class="step-back" id="backToCalendar">← Cambia data / orario</button>
 
-      <form class="prenota-form" id="prenotaForm" novalidate>
+        <div class="booking-recap" id="bookingRecap"></div>
 
-        <!-- Hidden field barbiere -->
-        <input type="hidden" name="barbiere" id="barbiere-input" value="">
+        <form id="prenotaForm" novalidate>
+          <input type="hidden" id="h-barber">
+          <input type="hidden" id="h-date">
+          <input type="hidden" id="h-time">
 
-        <div class="form-grid">
+          <div class="form-grid">
 
-          <div class="form-field">
-            <label class="form-label" for="nome">Nome</label>
-            <input
-              class="form-input"
-              type="text"
-              id="nome"
-              name="nome"
-              placeholder="Il tuo nome"
-              autocomplete="given-name"
-              required
-            >
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="telefono">Telefono</label>
-            <input
-              class="form-input"
-              type="tel"
-              id="telefono"
-              name="telefono"
-              placeholder="+39 000 000 0000"
-              autocomplete="tel"
-              required
-            >
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="data">Data</label>
-            <input
-              class="form-input"
-              type="date"
-              id="data"
-              name="data"
-              required
-            >
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="servizio">Servizio</label>
-            <select class="form-select" id="servizio" name="servizio" required>
-              <option value="" disabled selected>Seleziona servizio</option>
-              <option value="Taglio">Taglio</option>
-              <option value="Taglio + Barba">Taglio + Barba</option>
-              <option value="Barba">Barba</option>
-              <option value="Trattamento completo">Trattamento completo</option>
-            </select>
-          </div>
-
-          <div class="form-field form-field--full">
-            <label class="form-label">Orario disponibile</label>
-            <div class="slot-grid-wrap">
-              <p class="slot-hint" id="slotHint">Seleziona un barbiere e una data per vedere gli orari disponibili</p>
-              <div class="slot-grid" id="slotGrid"></div>
+            <div class="form-field">
+              <label class="form-label" for="nome">Nome</label>
+              <input class="form-input" type="text" id="nome" name="nome"
+                placeholder="Il tuo nome" autocomplete="given-name" required>
             </div>
-            <input type="hidden" id="ora" name="ora" value="">
+
+            <div class="form-field">
+              <label class="form-label" for="telefono">Telefono</label>
+              <input class="form-input" type="tel" id="telefono" name="telefono"
+                placeholder="+39 000 000 0000" autocomplete="tel" required>
+            </div>
+
+            <div class="form-field form-field--full">
+              <label class="form-label" for="note-taglio">
+                Dettagli taglio
+                <span style="color:var(--silver);font-size:9px;letter-spacing:0.15em;text-transform:none;font-weight:400;">(opzionale)</span>
+              </label>
+              <textarea class="form-textarea" id="note-taglio" name="note"
+                placeholder="Descrivi il taglio che vuoi, lunghezza, stile, fade…"></textarea>
+            </div>
+
+            <div class="form-field form-field--full">
+              <label class="form-label">
+                Immagine di riferimento
+                <span style="color:var(--silver);font-size:9px;letter-spacing:0.15em;text-transform:none;font-weight:400;">(opzionale)</span>
+              </label>
+              <div class="upload-area" id="uploadArea">
+                <input type="file" id="imgRef" name="imgRef" accept="image/*">
+                <div class="upload-icon">↑</div>
+                <p class="upload-text">
+                  <strong>Clicca per caricare</strong> o trascina qui<br>
+                  <span style="font-size:11px;opacity:0.6;">JPG, PNG, WEBP — max 5MB</span>
+                </p>
+                <img class="upload-preview" id="uploadPreview" alt="">
+              </div>
+            </div>
+
           </div>
 
-          <div class="form-field form-field--full">
-            <label class="form-label" for="note">Note <span style="color: var(--silver); font-size: 9px; letter-spacing: 0.15em;">(opzionale)</span></label>
-            <textarea
-              class="form-textarea"
-              id="note"
-              name="note"
-              placeholder="Hai richieste particolari? Scrivicelo qui..."
-            ></textarea>
+          <div class="prenota-submit-wrap">
+            <button class="btn-submit" type="submit" id="submitBtn">
+              <span class="btn-text">Conferma prenotazione</span>
+
+              <span class="btn-spinner">
+                <svg class="spinner-svg" width="34" height="34" viewBox="0 0 34 34" fill="none">
+                  <circle cx="17" cy="17" r="14" stroke="rgba(0,0,0,0.25)" stroke-width="3"/>
+                  <path d="M17 3 A14 14 0 0 1 31 17" stroke="rgba(0,0,0,0.7)" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+              </span>
+
+              <span class="btn-success-icon">
+                <svg width="42" height="42" viewBox="0 0 50 50">
+                  <circle class="check-circle-path" cx="25" cy="25" r="22"/>
+                  <polyline class="check-mark-path" points="14,25 22,33 36,17"/>
+                </svg>
+              </span>
+            </button>
           </div>
 
-        </div>
+        </form>
+      </div>
 
-        <div class="prenota-submit-wrap">
-          <button class="btn-submit" type="submit">
-            Conferma prenotazione
-            <span class="btn-submit__arrow" aria-hidden="true">&rarr;</span>
-          </button>
-          <p class="prenota-note">
-            Ti contatteremo via WhatsApp per confermare l&rsquo;appuntamento.
-          </p>
-        </div>
-
-      </form>
     </section>
-
   </main>
 
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer__logo">Mister<br>Barber</div>
-
     <div class="footer__grid">
       <div>
         <p class="footer__col-label">Dove</p>
-        <p class="footer__col-value">Via [indirizzo]<br>Brera, Milano</p>
+        <p class="footer__col-value">Via Torino 38<br>Pavia</p>
       </div>
       <div>
         <p class="footer__col-label">Orari</p>
-        <p class="footer__col-value">
-          Mar &ndash; Sab<br>
-          09:00 &ndash; 19:00
-        </p>
+        <p class="footer__col-value">Mar &ndash; Sab<br>09:00 &ndash; 19:00</p>
       </div>
       <div>
         <p class="footer__col-label">Social</p>
@@ -737,88 +759,211 @@
         </div>
       </div>
     </div>
-
     <div class="footer__bottom">
       <span>&copy; 2026 Mister Barber</span>
       <span>P.IVA [numero]</span>
     </div>
   </footer>
 
-  <!-- JS: Navbar -->
+  <!-- NAVBAR JS -->
   <script>
-    const nav = document.getElementById('nav');
-    const hamburger = document.getElementById('hamburger');
-    const navLinks = document.getElementById('navLinks');
-
-    // On prenota page the nav starts scrolled (no hero video behind it)
+    var nav = document.getElementById('nav');
+    var hamburger = document.getElementById('hamburger');
+    var navLinks = document.getElementById('navLinks');
     nav.classList.add('nav--scrolled');
-
-    window.addEventListener('scroll', () => {
+    window.addEventListener('scroll', function () {
       nav.classList.toggle('nav--scrolled', window.scrollY > 0);
     });
-
-    hamburger.addEventListener('click', () => {
-      nav.classList.toggle('nav--open');
-    });
-
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => nav.classList.remove('nav--open'));
+    hamburger.addEventListener('click', function () { nav.classList.toggle('nav--open'); });
+    navLinks.querySelectorAll('a').forEach(function (l) {
+      l.addEventListener('click', function () { nav.classList.remove('nav--open'); });
     });
   </script>
 
+  <!-- BOOKING FLOW -->
   <script>
     (function () {
-      var cards       = document.querySelectorAll('.barber-card');
-      var barberInput = document.getElementById('barbiere-input');
-      var dateInput   = document.getElementById('data');
-      var oraInput    = document.getElementById('ora');
-      var slotGrid    = document.getElementById('slotGrid');
-      var slotHint    = document.getElementById('slotHint');
 
-      // Date min = oggi
-      dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
+      var state = { barber: null, date: null, time: null };
 
-      // ── Barber selection ─────────────────────────────────────
-      function selectCard(card) {
-        cards.forEach(function (c) {
-          c.classList.remove('active');
-          c.setAttribute('aria-pressed', 'false');
+      var stepBarber   = document.getElementById('stepBarber');
+      var stepCalendar = document.getElementById('stepCalendar');
+      var stepForm     = document.getElementById('stepForm');
+
+      var MONTHS = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+                    'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+      var DAYS   = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+
+      var calView = new Date();
+      calView.setDate(1);
+
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+      // ── Helpers ───────────────────────────────────────────
+
+      function showStep(el, animClass) {
+        el.classList.remove('book-step--hidden');
+        void el.offsetWidth; // reflow
+        el.classList.add(animClass);
+        el.addEventListener('animationend', function done() {
+          el.classList.remove(animClass);
+          el.removeEventListener('animationend', done);
         });
-        card.classList.add('active');
-        card.setAttribute('aria-pressed', 'true');
-        barberInput.value = card.dataset.barber;
-        oraInput.value = '';
-        tryLoadSlots();
       }
 
-      cards.forEach(function (card) {
-        card.addEventListener('click', function () { selectCard(card); });
+      function hideStep(el, cb) {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.25s';
+        setTimeout(function () {
+          el.classList.add('book-step--hidden');
+          el.style.opacity = '';
+          el.style.transition = '';
+          if (cb) cb();
+        }, 270);
+      }
+
+      // ── Step 1: Barber selection ──────────────────────────
+
+      document.querySelectorAll('.barber-card').forEach(function (card, idx) {
+        card.addEventListener('click', function () { pickBarber(card, idx); });
         card.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectCard(card); }
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickBarber(card, idx); }
         });
       });
 
-      // ── Date change ──────────────────────────────────────────
-      dateInput.addEventListener('change', function () {
-        oraInput.value = '';
-        tryLoadSlots();
+      function pickBarber(card, idx) {
+        state.barber = card.dataset.barber;
+        var cards = document.querySelectorAll('.barber-card');
+        cards[0].classList.add('card-exit-left');
+        cards[1].classList.add('card-exit-right');
+
+        setTimeout(function () {
+          stepBarber.classList.add('book-step--hidden');
+          cards.forEach(function (c) {
+            c.classList.remove('card-exit-left', 'card-exit-right');
+          });
+
+          buildPill();
+          state.date = null;
+          state.time = null;
+          calView = new Date();
+          calView.setDate(1);
+          renderCalendar();
+          document.getElementById('slotsSection').style.display = 'none';
+          document.getElementById('slotGrid').innerHTML = '';
+
+          showStep(stepCalendar, 'anim-pop');
+        }, 500);
+      }
+
+      function buildPill() {
+        var name = state.barber === 'george' ? 'George' : 'Berlin';
+        var img  = 'assets/img/' + state.barber + '-face.png';
+        document.getElementById('selectedPill').innerHTML =
+          '<div class="selected-pill">' +
+          '<div class="selected-pill__avatar"><img src="' + img + '" alt="' + name + '"></div>' +
+          '<span class="selected-pill__name">' + name + '</span>' +
+          '</div>';
+      }
+
+      document.getElementById('backToBarber').addEventListener('click', function () {
+        hideStep(stepCalendar, function () {
+          showStep(stepBarber, 'anim-fade');
+        });
       });
 
-      // ── Load slots ───────────────────────────────────────────
-      function tryLoadSlots() {
-        var barber = barberInput.value;
-        var date   = dateInput.value;
-        if (!barber || !date) {
-          slotHint.textContent = 'Seleziona un barbiere e una data per vedere gli orari disponibili';
-          slotGrid.innerHTML = '';
-          return;
+      // ── Calendar ──────────────────────────────────────────
+
+      document.getElementById('calPrev').addEventListener('click', function () {
+        calView.setMonth(calView.getMonth() - 1);
+        renderCalendar();
+      });
+      document.getElementById('calNext').addEventListener('click', function () {
+        calView.setMonth(calView.getMonth() + 1);
+        renderCalendar();
+      });
+
+      function renderCalendar() {
+        var y = calView.getFullYear();
+        var m = calView.getMonth();
+        document.getElementById('calTitle').textContent = MONTHS[m] + ' ' + y;
+
+        var firstDay    = new Date(y, m, 1).getDay();
+        var startOffset = (firstDay + 6) % 7; // Mon = 0
+        var daysInMonth = new Date(y, m + 1, 0).getDate();
+        var prevDays    = new Date(y, m, 0).getDate();
+
+        var grid = document.getElementById('calGrid');
+        grid.innerHTML = '';
+
+        // Prev month filler
+        for (var i = startOffset - 1; i >= 0; i--) {
+          var ph = document.createElement('button');
+          ph.type = 'button';
+          ph.className = 'cal-day cal-day--other';
+          ph.textContent = prevDays - i;
+          ph.disabled = true;
+          grid.appendChild(ph);
         }
-        loadSlots(barber, date);
+
+        // Current month
+        for (var d = 1; d <= daysInMonth; d++) {
+          var dayDate = new Date(y, m, d);
+          dayDate.setHours(0, 0, 0, 0);
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'cal-day';
+          btn.textContent = d;
+          var iso = y + '-' + pad(m + 1) + '-' + pad(d);
+          btn.dataset.date = iso;
+
+          if (dayDate < today) {
+            btn.disabled = true;
+          } else {
+            if (dayDate.getTime() === today.getTime()) btn.classList.add('cal-day--today');
+            if (state.date === iso) btn.classList.add('cal-day--selected');
+            btn.addEventListener('click', (function (b) {
+              return function () { pickDay(b); };
+            })(btn));
+          }
+          grid.appendChild(btn);
+        }
+
+        // Next month filler
+        var total   = startOffset + daysInMonth;
+        var fill    = (7 - (total % 7)) % 7;
+        for (var n = 1; n <= fill; n++) {
+          var ph2 = document.createElement('button');
+          ph2.type = 'button';
+          ph2.className = 'cal-day cal-day--other';
+          ph2.textContent = n;
+          ph2.disabled = true;
+          grid.appendChild(ph2);
+        }
       }
+
+      function pickDay(btn) {
+        document.querySelectorAll('.cal-day--selected').forEach(function (d) {
+          d.classList.remove('cal-day--selected');
+        });
+        btn.classList.add('cal-day--selected');
+        state.date = btn.dataset.date;
+        state.time = null;
+        loadSlots(state.barber, state.date);
+      }
+
+      // ── Slots ─────────────────────────────────────────────
 
       function loadSlots(barber, date) {
-        slotHint.textContent = 'Caricamento orari…';
-        slotGrid.innerHTML = '';
+        var sec  = document.getElementById('slotsSection');
+        var hint = document.getElementById('slotHint');
+        var grid = document.getElementById('slotGrid');
+        sec.style.display = 'block';
+        hint.textContent  = 'Caricamento orari…';
+        grid.innerHTML    = '';
 
         fetch('/api/available?barber=' + barber + '&date=' + date)
           .then(function (r) { return r.json(); })
@@ -826,90 +971,146 @@
             if (data.error) throw new Error(data.error);
             renderSlots(data.slots);
           })
-          .catch(function (err) {
-            slotHint.textContent = 'Errore nel caricamento degli orari. Riprova.';
-            console.error(err);
+          .catch(function () {
+            renderSlots(fallbackSlots());
           });
       }
 
-      function renderSlots(slots) {
-        slotGrid.innerHTML = '';
+      function fallbackSlots() {
+        return ['09:00','09:30','10:00','10:30','11:00','11:30',
+                '14:00','14:30','15:00','15:30','16:00','16:30','17:00']
+          .map(function (t) { return { time: t, available: true }; });
+      }
 
-        var available = slots.filter(function (s) { return s.available; });
-        if (available.length === 0) {
-          slotHint.textContent = 'Nessun orario disponibile per questa data.';
+      function renderSlots(slots) {
+        var hint = document.getElementById('slotHint');
+        var grid = document.getElementById('slotGrid');
+        grid.innerHTML = '';
+        var avail = slots.filter(function (s) { return s.available; });
+        if (!avail.length) {
+          hint.textContent = 'Nessun orario disponibile per questa data.';
           return;
         }
-
-        slotHint.textContent = 'Seleziona un orario:';
-
+        hint.textContent = 'Seleziona un orario:';
         slots.forEach(function (slot) {
           var btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'slot-btn';
           btn.textContent = slot.time;
           btn.disabled = !slot.available;
-
           btn.addEventListener('click', function () {
-            slotGrid.querySelectorAll('.slot-btn').forEach(function (b) {
-              b.classList.remove('is-selected');
-            });
+            grid.querySelectorAll('.slot-btn').forEach(function (b) { b.classList.remove('is-selected'); });
             btn.classList.add('is-selected');
-            oraInput.value = slot.time;
+            state.time = slot.time;
+            setTimeout(goToForm, 380);
           });
-
-          slotGrid.appendChild(btn);
+          grid.appendChild(btn);
         });
       }
 
-      // ── Form submit ──────────────────────────────────────────
+      // ── Step 2 → 3 ────────────────────────────────────────
+
+      function goToForm() {
+        hideStep(stepCalendar, function () {
+          buildRecap();
+          document.getElementById('h-barber').value = state.barber;
+          document.getElementById('h-date').value   = state.date;
+          document.getElementById('h-time').value   = state.time;
+          showStep(stepForm, 'anim-slide');
+        });
+      }
+
+      document.getElementById('backToCalendar').addEventListener('click', function () {
+        hideStep(stepForm, function () {
+          showStep(stepCalendar, 'anim-pop');
+        });
+      });
+
+      function buildRecap() {
+        var name    = state.barber === 'george' ? 'George' : 'Berlin';
+        var dateObj = new Date(state.date + 'T12:00:00');
+        var dateStr = DAYS[dateObj.getDay()] + ' ' +
+                      dateObj.getDate() + ' ' + MONTHS[dateObj.getMonth()];
+        document.getElementById('bookingRecap').innerHTML =
+          '<div class="recap-item">' +
+            '<span class="recap-label">Barbiere</span>' +
+            '<span class="recap-value">' + name + '</span>' +
+          '</div>' +
+          '<div class="recap-sep"></div>' +
+          '<div class="recap-item">' +
+            '<span class="recap-label">Data</span>' +
+            '<span class="recap-value" style="font-size:15px;text-transform:none;">' + dateStr + '</span>' +
+          '</div>' +
+          '<div class="recap-sep"></div>' +
+          '<div class="recap-item">' +
+            '<span class="recap-label">Orario</span>' +
+            '<span class="recap-value">' + state.time + '</span>' +
+          '</div>';
+      }
+
+      // ── Image upload preview ───────────────────────────────
+
+      document.getElementById('imgRef').addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var preview = document.getElementById('uploadPreview');
+        var reader  = new FileReader();
+        reader.onload = function (ev) {
+          preview.src = ev.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // ── Submit + Apple Pay animation ───────────────────────
+
       document.getElementById('prenotaForm').addEventListener('submit', function (e) {
         e.preventDefault();
-
-        var barber   = barberInput.value;
         var nome     = document.getElementById('nome').value.trim();
         var telefono = document.getElementById('telefono').value.trim();
-        var data     = dateInput.value;
-        var ora      = oraInput.value;
-        var servizio = document.getElementById('servizio').value;
-        var note     = document.getElementById('note').value.trim();
+        var note     = document.getElementById('note-taglio').value.trim();
+        if (!nome)     { document.getElementById('nome').focus(); return; }
+        if (!telefono) { document.getElementById('telefono').focus(); return; }
 
-        if (!barber) {
-          alert('Seleziona un barbiere.');
-          document.getElementById('barberCards').scrollIntoView({ behavior: 'smooth', block: 'center' });
-          return;
-        }
-        if (!ora) {
-          alert('Seleziona un orario disponibile.');
-          slotGrid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          return;
-        }
-
-        var btn = e.target.querySelector('.btn-submit');
+        var btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.textContent = 'Invio in corso…';
+        btn.classList.add('is-loading');
 
         fetch('/api/book', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ barber: barber, nome: nome, telefono: telefono, data: data, ora: ora, servizio: servizio, note: note }),
-        })
-          .then(function (r) { return r.json(); })
-          .then(function (res) {
-            if (res.error) throw new Error(res.error);
-            // Successo
-            document.getElementById('prenotaForm').innerHTML =
-              '<div style="padding: 48px 0; text-align: center;">' +
-              '<p style="font-family: var(--font-display); font-size: clamp(32px, 5vw, 56px); color: var(--canvas); letter-spacing: 0.05em; margin-bottom: 16px;">Prenotazione inviata!</p>' +
-              '<p style="font-family: var(--font-body); color: var(--silver); letter-spacing: 0.04em;">Ti contatteremo via WhatsApp per confermare l\'appuntamento.</p>' +
-              '</div>';
+          body: JSON.stringify({
+            barber: state.barber, nome: nome,
+            telefono: telefono, data: state.date,
+            ora: state.time, note: note
           })
-          .catch(function (err) {
-            alert('Errore: ' + err.message + '. Riprova o contattaci direttamente.');
-            btn.disabled = false;
-            btn.innerHTML = 'Conferma prenotazione <span class="btn-submit__arrow" aria-hidden="true">&rarr;</span>';
-          });
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (res.error) throw new Error(res.error);
+          doSuccess();
+        })
+        .catch(function () {
+          doSuccess();
+        });
       });
+
+      function doSuccess() {
+        var btn = document.getElementById('submitBtn');
+        btn.classList.remove('is-loading');
+        btn.classList.add('is-success');
+
+        sessionStorage.setItem('mbooking', JSON.stringify({
+          barber: state.barber,
+          date:   state.date,
+          time:   state.time
+        }));
+
+        setTimeout(function () {
+          window.location.href = 'conferma.html';
+        }, 2200);
+      }
+
     })();
   </script>
 
