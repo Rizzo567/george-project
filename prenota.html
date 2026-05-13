@@ -1076,23 +1076,40 @@
         btn.disabled = true;
         btn.classList.add('is-loading');
 
-        fetch('/api/book', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            barber: state.barber, nome: nome,
-            telefono: telefono, data: state.date,
-            ora: state.time, note: note
+        var fileInput = document.getElementById('imgRef');
+        var file      = fileInput.files[0];
+
+        function sendBooking(imgBase64, imgMime, imgName) {
+          fetch('/api/book', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              barber: state.barber, nome: nome,
+              telefono: telefono, data: state.date,
+              ora: state.time, note: note,
+              imgBase64: imgBase64 || null,
+              imgMime:   imgMime   || null,
+              imgName:   imgName   || null,
+            })
           })
-        })
-        .then(function (r) { return r.json(); })
-        .then(function (res) {
-          if (res.error) throw new Error(res.error);
-          doSuccess();
-        })
-        .catch(function () {
-          doSuccess();
-        });
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (res.error) throw new Error(res.error);
+            doSuccess();
+          })
+          .catch(function () { doSuccess(); });
+        }
+
+        if (file) {
+          var reader = new FileReader();
+          reader.onload = function (ev) {
+            var b64 = ev.target.result.split(',')[1];
+            sendBooking(b64, file.type, file.name);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          sendBooking(null, null, null);
+        }
       });
 
       function doSuccess() {

@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, pad } from './_google.js';
+import { getAccessToken, uploadToDrive, getCalendarId, getServiceAccount, romeOffset, pad } from './_google.js';
 
 const HEADERS = {
   'Content-Type': 'application/json',
@@ -10,7 +10,7 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); }
   catch { return json({ error: 'Body non valido' }, 400); }
 
-  const { barber, nome, telefono, data, ora, servizio, note } = body;
+  const { barber, nome, telefono, data, ora, servizio, note, imgBase64, imgMime, imgName } = body;
 
   if (!barber || !nome || !telefono || !data || !ora) {
     return json({ error: 'Campi obbligatori mancanti' }, 400);
@@ -24,24 +24,40 @@ export async function onRequestPost({ request, env }) {
   const [startH, startM] = ora.split(':').map(Number);
   const endH = startH + 1;
 
-  const event = {
-    summary:     servizio ? `${servizio} — ${nome}` : `Prenotazione — ${nome}`,
-    description: `Tel: ${telefono}${note ? `\nNote: ${note}` : ''}`,
-    start: { dateTime: `${data}T${pad(startH)}:${pad(startM)}:00${tz}`, timeZone: 'Europe/Rome' },
-    end:   { dateTime: `${data}T${pad(endH)}:${pad(startM)}:00${tz}`,   timeZone: 'Europe/Rome' },
-  };
-
   try {
-    const token = await getAccessToken(serviceAccount);
+    // Upload immagine su Drive se presente
+    let driveLink = null;
+    if (imgBase64 && imgMime) {
+      const fileName = imgName || `riferimento_${nome}_${data}.jpg`;
+      const { webViewLink } = await uploadToDrive(serviceAccount, imgBase64, imgMime, fileName);
+      driveLink = webViewLink;
+    }
 
-    const res = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
-      {
+    const description = [
+      `Tel: ${telefono}`,
+      note ? `Note: ${note}` : null,
+      driveLink ? `Immagine riferimento: ${driveLink}` : null,
+    ].filter(Boolean).join('\n');
+
+    const event = {
+      summary:     servizio ? `${servizio} — ${nome}` : `Prenotazione — ${nome}`,
+      description,
+      start: { dateTime: `${data}T${pad(startH)}:${pad(startM)}:00${tz}`, timeZone: 'Europe/Rome' },
+      end:   { dateTime: `${data}T${pad(endH)}:${pad(startM)}:00${tz}`,   timeZone: 'Europe/Rome' },
+      ...(driveLink && {
+        attachments: [{ fileUrl: driveLink, title: 'Immagine di riferimento' }],
+      }),
+    };
+
+    const token = await getAccessToken(serviceAccount);
+    const calUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`
+      + (driveLink ? '?supportsAttachments=true' : '');
+
+    const res = await fetch(calUrl, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(event),
-      }
-    );
+      });
 
     if (!res.ok) {
       const err = await res.json();
