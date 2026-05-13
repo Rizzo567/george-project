@@ -1500,7 +1500,7 @@ img {
   .s01-grid { grid-template-columns: 1fr; gap: 48px; }
   .chi { padding-left: 0; padding-top: 32px; transform: none; overflow: visible; }
   .brand-mark { font-size: 96px; }
-  .duo { transform: none; overflow: visible; }
+  .duo { transform: none; overflow: visible; margin-top: -40px; }
   .barber-img-wrap { height: 480px; }
   .barber-name { font-size: 25px; }
   /* Berlin: -40px */
