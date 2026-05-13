@@ -12,7 +12,7 @@ export async function onRequestPost({ request, env }) {
 
   const { barber, nome, telefono, data, ora, servizio, note } = body;
 
-  if (!barber || !nome || !telefono || !data || !ora || !servizio) {
+  if (!barber || !nome || !telefono || !data || !ora) {
     return json({ error: 'Campi obbligatori mancanti' }, 400);
   }
 
@@ -25,7 +25,7 @@ export async function onRequestPost({ request, env }) {
   const endH = startH + 1;
 
   const event = {
-    summary:     `${servizio} — ${nome}`,
+    summary:     servizio ? `${servizio} — ${nome}` : `Prenotazione — ${nome}`,
     description: `Tel: ${telefono}${note ? `\nNote: ${note}` : ''}`,
     start: { dateTime: `${data}T${pad(startH)}:${pad(startM)}:00${tz}`, timeZone: 'Europe/Rome' },
     end:   { dateTime: `${data}T${pad(endH)}:${pad(startM)}:00${tz}`,   timeZone: 'Europe/Rome' },
