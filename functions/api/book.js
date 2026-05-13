@@ -1,4 +1,4 @@
-import { getScriptUrl, romeOffset, pad } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, pad } from './_google.js';
 
 const HEADERS = {
   'Content-Type': 'application/json',
@@ -16,29 +16,37 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'Campi obbligatori mancanti' }, 400);
   }
 
-  const scriptUrl = getScriptUrl(barber, env);
-  if (!scriptUrl) return json({ error: 'Barbiere non configurato' }, 400);
+  const calendarId     = getCalendarId(barber, env);
+  const serviceAccount = getServiceAccount(barber, env);
+  if (!calendarId || !serviceAccount.email) return json({ error: 'Barbiere non configurato' }, 400);
 
   const tz = romeOffset(data);
   const [startH, startM] = ora.split(':').map(Number);
   const endH = startH + 1;
 
-  try {
-    const res = await fetch(scriptUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        secret: env.BOOKING_SECRET,
-        action: 'book',
-        summary: `${servizio} — ${nome}`,
-        description: `Tel: ${telefono}${note ? `\nNote: ${note}` : ''}`,
-        start: `${data}T${pad(startH)}:${pad(startM)}:00${tz}`,
-        end:   `${data}T${pad(endH)}:${pad(startM)}:00${tz}`,
-      }),
-    });
+  const event = {
+    summary:     `${servizio} — ${nome}`,
+    description: `Tel: ${telefono}${note ? `\nNote: ${note}` : ''}`,
+    start: { dateTime: `${data}T${pad(startH)}:${pad(startM)}:00${tz}`, timeZone: 'Europe/Rome' },
+    end:   { dateTime: `${data}T${pad(endH)}:${pad(startM)}:00${tz}`,   timeZone: 'Europe/Rome' },
+  };
 
-    const result = await res.json();
-    if (result.error) throw new Error(result.error);
+  try {
+    const token = await getAccessToken(serviceAccount);
+
+    const res = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(event),
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message ?? 'Errore Google Calendar');
+    }
 
     return json({ ok: true });
   } catch (err) {

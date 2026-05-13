@@ -1,4 +1,4 @@
-import { getScriptUrl, romeOffset, WORK_START, WORK_END, SLOT_MINUTES, pad } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, WORK_START, WORK_END, SLOT_MINUTES, pad } from './_google.js';
 
 const HEADERS = {
   'Content-Type': 'application/json',
@@ -8,28 +8,40 @@ const HEADERS = {
 export async function onRequestGet({ request, env }) {
   const { searchParams } = new URL(request.url);
   const barber = searchParams.get('barber');
-  const date = searchParams.get('date');
+  const date   = searchParams.get('date');
 
   if (!barber || !date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return json({ error: 'Parametri non validi' }, 400);
   }
 
-  const scriptUrl = getScriptUrl(barber, env);
-  if (!scriptUrl) return json({ error: 'Barbiere non configurato' }, 400);
+  const calendarId     = getCalendarId(barber, env);
+  const serviceAccount = getServiceAccount(barber, env);
+  if (!calendarId || !serviceAccount.email) return json({ error: 'Barbiere non configurato' }, 400);
+
+  const tz = romeOffset(date);
 
   try {
-    const res = await fetch(`${scriptUrl}?action=availability&date=${date}&secret=${env.BOOKING_SECRET}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    const token = await getAccessToken(serviceAccount);
 
-    const tz = romeOffset(date);
-    const now = new Date();
-    const busy = data.busy ?? [];
+    const fbRes = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        timeMin: `${date}T${pad(WORK_START)}:00:00${tz}`,
+        timeMax: `${date}T${pad(WORK_END)}:00:00${tz}`,
+        timeZone: 'Europe/Rome',
+        items: [{ id: calendarId }],
+      }),
+    });
+
+    const fbData = await fbRes.json();
+    const busy   = fbData.calendars?.[calendarId]?.busy ?? [];
+    const now    = new Date();
 
     const slots = [];
     for (let h = WORK_START; h < WORK_END; h++) {
       const slotStart = new Date(`${date}T${pad(h)}:00:00${tz}`);
-      const slotEnd = new Date(slotStart.getTime() + SLOT_MINUTES * 60000);
+      const slotEnd   = new Date(slotStart.getTime() + SLOT_MINUTES * 60000);
 
       if (slotEnd <= now) continue;
 
