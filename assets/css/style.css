@@ -99,6 +99,7 @@ img {
   -webkit-backdrop-filter: blur(16px) saturate(160%);
   backdrop-filter: blur(16px) saturate(160%);
   border-color: rgba(229, 225, 216, 0.1);
+  border-radius: 16px;
 }
 
 .nav--open {
