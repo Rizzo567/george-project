@@ -10,7 +10,7 @@ export function getCalendarId(barber, env) {
 
 export function getServiceAccount(barber, env) {
   return barber === 'george'
-    ? { email: env.GOOGLE_SERVICE_ACCOUNT_EMAIL, key: env.GOOGLE_PRIVATE_KEY }
+    ? { email: env.GEORGE_SERVICE_ACCOUNT_EMAIL, key: env.GEORGE_PRIVATE_KEY }
     : { email: env.BERLIN_SERVICE_ACCOUNT_EMAIL, key: env.BERLIN_PRIVATE_KEY };
 }
 
