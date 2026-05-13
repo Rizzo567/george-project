@@ -412,6 +412,56 @@
       margin: 0 var(--page-margin) 64px;
     }
 
+    /* ─── SLOT GRID ─── */
+
+    .slot-grid-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .slot-hint {
+      font-family: var(--font-body);
+      font-size: var(--body-s);
+      color: var(--silver);
+      letter-spacing: 0.04em;
+      padding: 12px 0 4px;
+    }
+
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .slot-btn {
+      background: var(--asphalt-soft);
+      border: 1px solid rgba(229,225,216,0.15);
+      color: var(--canvas);
+      font-family: var(--font-body);
+      font-size: var(--body-s);
+      letter-spacing: 0.05em;
+      padding: 12px 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+
+    .slot-btn:hover:not(:disabled) {
+      border-color: rgba(232,90,31,0.5);
+    }
+
+    .slot-btn.is-selected {
+      background: var(--ember);
+      border-color: var(--ember);
+      color: var(--asphalt);
+    }
+
+    .slot-btn:disabled {
+      opacity: 0.22;
+      cursor: not-allowed;
+    }
+
     /* ─── RESPONSIVE ─── */
 
     @media (max-width: 768px) {
@@ -472,6 +522,10 @@
       .form-grid {
         grid-template-columns: 1fr;
         gap: 16px;
+      }
+
+      .slot-grid {
+        grid-template-columns: repeat(3, 1fr);
       }
 
       .form-field--full {
@@ -613,30 +667,23 @@
           </div>
 
           <div class="form-field">
-            <label class="form-label" for="ora">Ora</label>
-            <select class="form-select" id="ora" name="ora" required>
-              <option value="" disabled selected>Seleziona orario</option>
-              <option value="09:00">09:00</option>
-              <option value="10:00">10:00</option>
-              <option value="11:00">11:00</option>
-              <option value="12:00">12:00</option>
-              <option value="14:00">14:00</option>
-              <option value="15:00">15:00</option>
-              <option value="16:00">16:00</option>
-              <option value="17:00">17:00</option>
-              <option value="18:00">18:00</option>
+            <label class="form-label" for="servizio">Servizio</label>
+            <select class="form-select" id="servizio" name="servizio" required>
+              <option value="" disabled selected>Seleziona servizio</option>
+              <option value="Taglio">Taglio</option>
+              <option value="Taglio + Barba">Taglio + Barba</option>
+              <option value="Barba">Barba</option>
+              <option value="Trattamento completo">Trattamento completo</option>
             </select>
           </div>
 
           <div class="form-field form-field--full">
-            <label class="form-label" for="servizio">Servizio</label>
-            <select class="form-select" id="servizio" name="servizio" required>
-              <option value="" disabled selected>Seleziona servizio</option>
-              <option value="taglio">Taglio</option>
-              <option value="taglio-barba">Taglio + Barba</option>
-              <option value="barba">Barba</option>
-              <option value="trattamento-completo">Trattamento completo</option>
-            </select>
+            <label class="form-label">Orario disponibile</label>
+            <div class="slot-grid-wrap">
+              <p class="slot-hint" id="slotHint">Seleziona un barbiere e una data per vedere gli orari disponibili</p>
+              <div class="slot-grid" id="slotGrid"></div>
+            </div>
+            <input type="hidden" id="ora" name="ora" value="">
           </div>
 
           <div class="form-field form-field--full">
@@ -719,12 +766,19 @@
     });
   </script>
 
-  <!-- JS: Barber card selection -->
   <script>
     (function () {
-      var cards = document.querySelectorAll('.barber-card');
-      var input = document.getElementById('barbiere-input');
+      var cards       = document.querySelectorAll('.barber-card');
+      var barberInput = document.getElementById('barbiere-input');
+      var dateInput   = document.getElementById('data');
+      var oraInput    = document.getElementById('ora');
+      var slotGrid    = document.getElementById('slotGrid');
+      var slotHint    = document.getElementById('slotHint');
 
+      // Date min = oggi
+      dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
+
+      // ── Barber selection ─────────────────────────────────────
       function selectCard(card) {
         cards.forEach(function (c) {
           c.classList.remove('active');
@@ -732,45 +786,130 @@
         });
         card.classList.add('active');
         card.setAttribute('aria-pressed', 'true');
-        input.value = card.dataset.barber;
+        barberInput.value = card.dataset.barber;
+        oraInput.value = '';
+        tryLoadSlots();
       }
 
       cards.forEach(function (card) {
-        card.addEventListener('click', function () {
-          selectCard(card);
-        });
+        card.addEventListener('click', function () { selectCard(card); });
         card.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            selectCard(card);
-          }
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectCard(card); }
         });
       });
-    })();
-  </script>
 
-  <!-- JS: Form submit -->
-  <script>
-    document.getElementById('prenotaForm').addEventListener('submit', function (e) {
-      e.preventDefault();
+      // ── Date change ──────────────────────────────────────────
+      dateInput.addEventListener('change', function () {
+        oraInput.value = '';
+        tryLoadSlots();
+      });
 
-      var barbiere = document.getElementById('barbiere-input').value;
-      if (!barbiere) {
-        alert('Seleziona un barbiere prima di continuare.');
-        document.getElementById('barberCards').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
+      // ── Load slots ───────────────────────────────────────────
+      function tryLoadSlots() {
+        var barber = barberInput.value;
+        var date   = dateInput.value;
+        if (!barber || !date) {
+          slotHint.textContent = 'Seleziona un barbiere e una data per vedere gli orari disponibili';
+          slotGrid.innerHTML = '';
+          return;
+        }
+        loadSlots(barber, date);
       }
 
-      alert('Prenotazione inviata!');
-    });
-  </script>
+      function loadSlots(barber, date) {
+        slotHint.textContent = 'Caricamento orari…';
+        slotGrid.innerHTML = '';
 
-  <!-- JS: Set date min to today -->
-  <script>
-    (function () {
-      var dateInput = document.getElementById('data');
-      var today = new Date().toISOString().split('T')[0];
-      dateInput.setAttribute('min', today);
+        fetch('/api/available?barber=' + barber + '&date=' + date)
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.error) throw new Error(data.error);
+            renderSlots(data.slots);
+          })
+          .catch(function (err) {
+            slotHint.textContent = 'Errore nel caricamento degli orari. Riprova.';
+            console.error(err);
+          });
+      }
+
+      function renderSlots(slots) {
+        slotGrid.innerHTML = '';
+
+        var available = slots.filter(function (s) { return s.available; });
+        if (available.length === 0) {
+          slotHint.textContent = 'Nessun orario disponibile per questa data.';
+          return;
+        }
+
+        slotHint.textContent = 'Seleziona un orario:';
+
+        slots.forEach(function (slot) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'slot-btn';
+          btn.textContent = slot.time;
+          btn.disabled = !slot.available;
+
+          btn.addEventListener('click', function () {
+            slotGrid.querySelectorAll('.slot-btn').forEach(function (b) {
+              b.classList.remove('is-selected');
+            });
+            btn.classList.add('is-selected');
+            oraInput.value = slot.time;
+          });
+
+          slotGrid.appendChild(btn);
+        });
+      }
+
+      // ── Form submit ──────────────────────────────────────────
+      document.getElementById('prenotaForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var barber   = barberInput.value;
+        var nome     = document.getElementById('nome').value.trim();
+        var telefono = document.getElementById('telefono').value.trim();
+        var data     = dateInput.value;
+        var ora      = oraInput.value;
+        var servizio = document.getElementById('servizio').value;
+        var note     = document.getElementById('note').value.trim();
+
+        if (!barber) {
+          alert('Seleziona un barbiere.');
+          document.getElementById('barberCards').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+        if (!ora) {
+          alert('Seleziona un orario disponibile.');
+          slotGrid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+
+        var btn = e.target.querySelector('.btn-submit');
+        btn.disabled = true;
+        btn.textContent = 'Invio in corso…';
+
+        fetch('/api/book', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ barber: barber, nome: nome, telefono: telefono, data: data, ora: ora, servizio: servizio, note: note }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (res.error) throw new Error(res.error);
+            // Successo
+            document.getElementById('prenotaForm').innerHTML =
+              '<div style="padding: 48px 0; text-align: center;">' +
+              '<p style="font-family: var(--font-display); font-size: clamp(32px, 5vw, 56px); color: var(--canvas); letter-spacing: 0.05em; margin-bottom: 16px;">Prenotazione inviata!</p>' +
+              '<p style="font-family: var(--font-body); color: var(--silver); letter-spacing: 0.04em;">Ti contatteremo via WhatsApp per confermare l\'appuntamento.</p>' +
+              '</div>';
+          })
+          .catch(function (err) {
+            alert('Errore: ' + err.message + '. Riprova o contattaci direttamente.');
+            btn.disabled = false;
+            btn.innerHTML = 'Conferma prenotazione <span class="btn-submit__arrow" aria-hidden="true">&rarr;</span>';
+          });
+      });
     })();
   </script>
 
