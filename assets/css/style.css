@@ -1509,12 +1509,13 @@ img {
   .barber--george { transform: translateX(-40px); overflow: visible; }
   /* George name */
   .barber--george .barber-meta {
-    left: 0px;
+    left: 15px;
     top: 10%;
   }
   /* Berlin name */
   .barber--berlin .barber-meta {
-    left: 198px;
+    left: 188px;
+    white-space: nowrap;
   }
   .s01 .cap-2 { width: 240px; bottom: 4%; left: 6%; }
   .diag-tag { top: 16px; right: 12px; font-size: 11px; }
