@@ -1521,4 +1521,5 @@ img {
   .diag-tag { top: 16px; right: 12px; font-size: 11px; }
   .btn-prenota { font-size: 20px; padding: 22px 20px; }
   .btn-prenota-ora { transform: none; margin-top: 24px; align-self: flex-start; }
+  .cap-1 { top: -85px; right: 20px; }
 }
