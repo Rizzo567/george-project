@@ -362,5 +362,110 @@
       startTimer();
     })();
   </script>
+
+  <script>
+    (function() {
+      var STAGGER = 0.05;
+
+      // Split text nodes into individual .brand-char spans, preserving child elements
+      function splitText(el, baseDelay) {
+        var idx = 0;
+        function processNode(node) {
+          if (node.nodeType === 3) {
+            var text = node.textContent;
+            var frag = document.createDocumentFragment();
+            for (var i = 0; i < text.length; i++) {
+              var ch = text[i];
+              if (ch === ' ' || ch === '\n' || ch === '\r') {
+                frag.appendChild(document.createTextNode(ch));
+              } else {
+                var span = document.createElement('span');
+                span.className = 'brand-char';
+                span.style.animationDelay = (baseDelay + idx * STAGGER).toFixed(2) + 's';
+                span.textContent = ch;
+                idx++;
+                frag.appendChild(span);
+              }
+            }
+            return frag;
+          }
+          if (node.nodeType === 1) {
+            if (node.tagName === 'BR') return node.cloneNode(true);
+            var clone = node.cloneNode(false);
+            Array.from(node.childNodes).forEach(function(c) {
+              clone.appendChild(processNode(c));
+            });
+            return clone;
+          }
+          return node.cloneNode(true);
+        }
+        var children = Array.from(el.childNodes);
+        while (el.firstChild) el.removeChild(el.firstChild);
+        children.forEach(function(c) { el.appendChild(processNode(c)); });
+      }
+
+      function animateChars(el) {
+        el.querySelectorAll('.brand-char').forEach(function(c) { c.classList.add('animate'); });
+      }
+
+      // Brand mark: Mister 0.5s, Barber 1.5s (special timing)
+      var mark = document.querySelector('.brand-mark');
+      if (mark) {
+        function wrapChars(text, baseDelay) {
+          return text.split('').map(function(ch, i) {
+            return '<span class="brand-char" style="animation-delay:' + (baseDelay + i * STAGGER).toFixed(2) + 's">' + ch + '</span>';
+          }).join('');
+        }
+        mark.innerHTML = wrapChars('Mister', 0.5) + '<span class="second">' + wrapChars('Barber', 1.5) + '</span>';
+      }
+
+      // Text elements: split into chars, trigger on scroll
+      var textEls = document.querySelectorAll('.chi-title, .barber-name, .s03-heading, .s03-address-line, .s03-coords, .footer__logo');
+      textEls.forEach(function(el) {
+        splitText(el, 0);
+        el.setAttribute('data-text-reveal', '');
+      });
+
+      // Reveal elements: fade-up on scroll
+      var revealGroups = [
+        { sel: '.barber-img-wrap', stagger: 0.12 },
+        { sel: '.btn-prenota-wrap' },
+        { sel: '.cards-row' },
+        { sel: '.expand-map' },
+        { sel: '.footer__grid' },
+        { sel: '.footer__bottom', baseDelay: 0.15 },
+      ];
+      revealGroups.forEach(function(group) {
+        document.querySelectorAll(group.sel).forEach(function(el, i) {
+          el.classList.add('reveal-el');
+          var delay = (group.baseDelay || 0) + i * (group.stagger || 0);
+          if (delay > 0) el.style.transitionDelay = delay.toFixed(2) + 's';
+        });
+      });
+
+      var capEl = document.querySelector('.s01 .cap-2');
+
+      // Single IntersectionObserver for everything
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          var el = entry.target;
+          if (el === mark) {
+            animateChars(mark);
+            if (capEl) capEl.classList.add('cap-animate');
+          } else if (el.hasAttribute('data-text-reveal')) {
+            animateChars(el);
+          } else if (el.classList.contains('reveal-el')) {
+            el.classList.add('revealed');
+          }
+          io.unobserve(el);
+        });
+      }, { threshold: 0.15 });
+
+      if (mark) io.observe(mark);
+      textEls.forEach(function(el) { io.observe(el); });
+      document.querySelectorAll('.reveal-el').forEach(function(el) { io.observe(el); });
+    })();
+  </script>
 </body>
 </html>
