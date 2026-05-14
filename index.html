@@ -66,6 +66,7 @@
           <div class="btn-prenota-wrap">
             <button class="btn-prenota-ora" type="button" onclick="location.href='prenota.html'">Prenota ora</button>
             <img class="brand-necklace brand-necklace--mobile" src="assets/img/ch%20necklace%202.png" alt="" aria-hidden="true">
+            <img class="s01-bracelet" src="assets/img/necklace%203.png" alt="" aria-hidden="true">
           </div>
         </div>
 
@@ -155,6 +156,14 @@
           <img class="card-cap" src="assets/img/cap-ne.png" alt="" aria-hidden="true">
         </div>
 
+        <div class="card-wrap card-wrap--car" data-glow>
+          <div class="card-inner">
+            <div class="card-glow-inner" data-glow></div>
+            <img class="card-img" src="assets/img/berlin-car.jpeg" alt="Berlin in car">
+          </div>
+          <img class="card-cap" src="assets/img/cap-ne.png" alt="" aria-hidden="true">
+        </div>
+
       </div>
     </section>
 
@@ -174,18 +183,17 @@
         </div>
 
         <div class="s03-right">
+          <div class="s03-scene">
           <div class="expand-map" id="expandMap">
 
             <!-- top bar -->
             <div class="expand-map__top">
-              <div class="expand-map__icon-wrap">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.2">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                  <circle cx="12" cy="9" r="2.5"/>
-                </svg>
-              </div>
-              <span class="expand-map__live"><span class="expand-map__dot"></span>Live</span>
+<span class="expand-map__live"><span class="expand-map__dot"></span>Live</span>
             </div>
+
+            <!-- collapsed: basketball backboard -->
+            <div class="expand-map__backboard" aria-hidden="true"></div>
+            <img class="expand-map__hoop-img" src="assets/img/basket-net.png" alt="" aria-hidden="true">
 
             <!-- collapsed: grid pattern -->
             <div class="expand-map__grid-bg" aria-hidden="true">
@@ -242,8 +250,15 @@
 
             <div class="expand-map__hint">Clicca per espandere</div>
 
-            <img class="expand-map__cap" src="assets/img/cap-1.png" alt="" aria-hidden="true">
+            <img class="expand-map__cap" src="assets/img/caps/2.png" alt="" aria-hidden="true">
           </div>
+
+          <!-- basketball scene characters -->
+          <img class="s03-berlin" src="assets/img/character/berlin-difende.png" alt="" aria-hidden="true">
+          <img class="s03-george" src="assets/img/character/george-tira.png"    alt="" aria-hidden="true">
+          <img class="s03-ball"   src="assets/img/balls/molten-ball.png"        alt="" aria-hidden="true">
+
+          </div><!-- /s03-scene -->
         </div>
 
       </div>
@@ -312,13 +327,68 @@
   </script>
 
   <script>
+    (function() {
+      var section = document.querySelector('.s03');
+      var card    = document.getElementById('expandMap');
+      var berlin  = document.querySelector('.s03-berlin');
+      var george  = document.querySelector('.s03-george');
+      var ball    = document.querySelector('.s03-ball');
+      var triggered = false;
+      if (!section || !card) return;
+
+      var obs = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting && !triggered) {
+          triggered = true;
+          obs.disconnect();
+          setTimeout(function() {
+            if (ball)   ball.classList.add('is-exiting');
+            if (berlin) berlin.classList.add('is-exiting');
+            if (george) george.classList.add('is-exiting');
+            setTimeout(function() {
+              card.classList.add('is-expanded');
+            }, 220);
+          }, 3000);
+        }
+      }, { threshold: 0.3 });
+      obs.observe(section);
+    })();
+  </script>
+
+  <script>
     // Expand map: click to expand, 3D tilt on hover
     (function() {
       var card = document.getElementById('expandMap');
       if (!card) return;
 
       card.addEventListener('click', function() {
+        var expanding = !card.classList.contains('is-expanded');
         card.classList.toggle('is-expanded');
+
+        var berlin = document.querySelector('.s03-berlin');
+        var george = document.querySelector('.s03-george');
+        var ball   = document.querySelector('.s03-ball');
+
+        if (!expanding) {
+          // collapsing → riporta i personaggi
+          [berlin, george, ball].forEach(function(el) {
+            if (!el) return;
+            el.classList.remove('is-exiting', 'is-entering');
+            void el.offsetWidth;
+            el.classList.add('is-entering');
+            el.addEventListener('animationend', function handler() {
+              el.classList.remove('is-entering');
+              el.removeEventListener('animationend', handler);
+            });
+          });
+        } else {
+          // expanding di nuovo → manda via i personaggi
+          [berlin, george, ball].forEach(function(el) {
+            if (!el) return;
+            el.classList.remove('is-exiting', 'is-entering');
+            void el.offsetWidth;
+            el.classList.add('is-exiting');
+          });
+        }
       });
 
       card.addEventListener('mousemove', function(e) {
@@ -374,7 +444,11 @@
       // Show first card
       cards[current].classList.add('is-active');
 
-      // Autoplay all videos (already handled by IntersectionObserver above)
+      // Play first card's video explicitly
+      var firstVid = cards[current].querySelector('video');
+      if (firstVid) { firstVid.muted = true; firstVid.play().catch(function() {}); }
+
+      // Ensure all videos muted
       cards.forEach(function(card) {
         var v = card.querySelector('video');
         if (v) { v.muted = true; }
@@ -392,6 +466,10 @@
 
         entering.classList.add('is-active', 'anim-enter');
         leaving.classList.add('anim-exit');
+
+        // Play entering card's video
+        var enterVid = entering.querySelector('video');
+        if (enterVid) { enterVid.play().catch(function() {}); }
 
         setTimeout(function() {
           leaving.classList.remove('is-active', 'anim-exit');
