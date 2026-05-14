@@ -362,15 +362,15 @@ img {
 
 @media (max-width: 768px) {
   .s03-berlin {
-    width: 90px;
+    width: 108px;
     bottom: -110px;
     left: 30px;
   }
   .s03-george {
-    width: 85px;
+    width: 102px;
     bottom: -120px;
     right: auto;
-    left: 165px;
+    left: 195px;
   }
   .s03-ball {
     width: 30px;
@@ -743,12 +743,12 @@ img {
 
 @media (max-width: 768px) {
   .s03 { padding: 80px 20px; }
-  .s03-inner { grid-template-columns: 1fr; gap: 48px; }
+  .s03-inner { grid-template-columns: 1fr; gap: 10px; }
   .s03-heading { font-size: 72px; }
-  .s03-right { justify-content: flex-start; }
-  .expand-map.is-expanded { width: 298px; height: 178px; }
-  .s03-right { justify-content: center; }
-  .s03-scene { margin: 0 auto; }
+  .s03-right { justify-content: flex-start; align-items: flex-start; }
+  .s03-scene { width: 278px; height: 158px; }
+  .expand-map { width: 278px; height: 158px; }
+  .expand-map.is-expanded { width: 288px; height: 168px; }
   .s03-address { display: none; }
 }
 
