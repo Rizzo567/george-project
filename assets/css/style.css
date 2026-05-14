@@ -362,15 +362,15 @@ img {
 
 @media (max-width: 768px) {
   .s03-berlin {
-    width: 108px;
+    width: 130px;
     bottom: -110px;
-    left: 30px;
+    left: 80px;
   }
   .s03-george {
-    width: 102px;
+    width: 122px;
     bottom: -120px;
     right: auto;
-    left: 195px;
+    left: 255px;
   }
   .s03-ball {
     width: 30px;
@@ -746,9 +746,9 @@ img {
   .s03-inner { grid-template-columns: 1fr; gap: 10px; }
   .s03-heading { font-size: 72px; }
   .s03-right { justify-content: flex-start; align-items: flex-start; }
-  .s03-scene { width: 278px; height: 158px; }
-  .expand-map { width: 278px; height: 158px; }
-  .expand-map.is-expanded { width: 288px; height: 168px; }
+  .s03-scene { width: 268px; height: 148px; }
+  .expand-map { width: 268px; height: 148px; top: -10px; }
+  .expand-map.is-expanded { width: 278px; height: 158px; top: -10px; }
   .s03-address { display: none; }
 }
 
