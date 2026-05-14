@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, WORK_START, WORK_END, SLOT_MINUTES, pad } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, WORK_RANGES, SLOT_MINUTES, pad } from './_google.js';
 
 const HEADERS = {
   'Content-Type': 'application/json',
@@ -14,6 +14,10 @@ export async function onRequestGet({ request, env }) {
     return json({ error: 'Parametri non validi' }, 400);
   }
 
+  // Blocca domenica (0 = domenica)
+  const dayOfWeek = new Date(date + 'T12:00:00Z').getUTCDay();
+  if (dayOfWeek === 0) return json({ slots: [] });
+
   const calendarId     = getCalendarId(barber, env);
   const serviceAccount = getServiceAccount(barber, env);
   if (!calendarId || !serviceAccount.email) return json({ error: 'Barbiere non configurato' }, 400);
@@ -27,8 +31,8 @@ export async function onRequestGet({ request, env }) {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        timeMin: `${date}T${pad(WORK_START)}:00:00${tz}`,
-        timeMax: `${date}T${pad(WORK_END)}:00:00${tz}`,
+        timeMin: `${date}T09:00:00${tz}`,
+        timeMax: `${date}T20:00:00${tz}`,
         timeZone: 'Europe/Rome',
         items: [{ id: calendarId }],
       }),
@@ -39,19 +43,21 @@ export async function onRequestGet({ request, env }) {
     const now    = new Date();
 
     const slots = [];
-    for (let m = WORK_START * 60; m < WORK_END * 60; m += SLOT_MINUTES) {
-      const h = Math.floor(m / 60);
-      const min = m % 60;
-      const slotStart = new Date(`${date}T${pad(h)}:${pad(min)}:00${tz}`);
-      const slotEnd   = new Date(slotStart.getTime() + SLOT_MINUTES * 60000);
+    for (const range of WORK_RANGES) {
+      for (let m = range.start; m < range.end; m += SLOT_MINUTES) {
+        const h   = Math.floor(m / 60);
+        const min = m % 60;
+        const slotStart = new Date(`${date}T${pad(h)}:${pad(min)}:00${tz}`);
+        const slotEnd   = new Date(slotStart.getTime() + SLOT_MINUTES * 60000);
 
-      if (slotEnd <= now) continue;
+        if (slotEnd <= now) continue;
 
-      const isBusy = busy.some(({ start, end }) =>
-        slotStart < new Date(end) && slotEnd > new Date(start)
-      );
+        const isBusy = busy.some(({ start, end }) =>
+          slotStart < new Date(end) && slotEnd > new Date(start)
+        );
 
-      slots.push({ time: `${pad(h)}:${pad(min)}`, available: !isBusy });
+        slots.push({ time: `${pad(h)}:${pad(min)}`, available: !isBusy });
+      }
     }
 
     return json({ slots });

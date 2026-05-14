@@ -920,7 +920,7 @@
           var iso = y + '-' + pad(m + 1) + '-' + pad(d);
           btn.dataset.date = iso;
 
-          if (dayDate < today) {
+          if (dayDate < today || dayDate.getDay() === 0) {
             btn.disabled = true;
           } else {
             if (dayDate.getTime() === today.getTime()) btn.classList.add('cal-day--today');
