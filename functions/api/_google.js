@@ -2,7 +2,7 @@
 
 export const WORK_START = 9;
 export const WORK_END = 19;
-export const SLOT_MINUTES = 60;
+export const SLOT_MINUTES = 30;
 
 export function getCalendarId(barber, env) {
   return barber === 'george' ? env.GEORGE_CALENDAR_ID : env.BERLIN_CALENDAR_ID;

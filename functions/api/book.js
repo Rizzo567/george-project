@@ -22,7 +22,9 @@ export async function onRequestPost({ request, env }) {
 
   const tz = romeOffset(data);
   const [startH, startM] = ora.split(':').map(Number);
-  const endH = startH + 1;
+  const endTotal = startH * 60 + startM + 30;
+  const endH = Math.floor(endTotal / 60);
+  const endM = endTotal % 60;
 
   try {
     // Upload immagine su Drive se presente
@@ -43,7 +45,7 @@ export async function onRequestPost({ request, env }) {
       summary:     servizio ? `${servizio} — ${nome}` : `Prenotazione — ${nome}`,
       description,
       start: { dateTime: `${data}T${pad(startH)}:${pad(startM)}:00${tz}`, timeZone: 'Europe/Rome' },
-      end:   { dateTime: `${data}T${pad(endH)}:${pad(startM)}:00${tz}`,   timeZone: 'Europe/Rome' },
+      end:   { dateTime: `${data}T${pad(endH)}:${pad(endM)}:00${tz}`,   timeZone: 'Europe/Rome' },
       ...(driveLink && {
         attachments: [{ fileUrl: driveLink, title: 'Immagine di riferimento' }],
       }),

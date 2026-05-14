@@ -39,8 +39,10 @@ export async function onRequestGet({ request, env }) {
     const now    = new Date();
 
     const slots = [];
-    for (let h = WORK_START; h < WORK_END; h++) {
-      const slotStart = new Date(`${date}T${pad(h)}:00:00${tz}`);
+    for (let m = WORK_START * 60; m < WORK_END * 60; m += SLOT_MINUTES) {
+      const h = Math.floor(m / 60);
+      const min = m % 60;
+      const slotStart = new Date(`${date}T${pad(h)}:${pad(min)}:00${tz}`);
       const slotEnd   = new Date(slotStart.getTime() + SLOT_MINUTES * 60000);
 
       if (slotEnd <= now) continue;
@@ -49,7 +51,7 @@ export async function onRequestGet({ request, env }) {
         slotStart < new Date(end) && slotEnd > new Date(start)
       );
 
-      slots.push({ time: `${pad(h)}:00`, available: !isBusy });
+      slots.push({ time: `${pad(h)}:${pad(min)}`, available: !isBusy });
     }
 
     return json({ slots });
