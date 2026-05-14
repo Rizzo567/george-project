@@ -361,7 +361,22 @@ img {
 .s03-ball.is-entering   { animation: ballEnter   0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 
 @media (max-width: 768px) {
-  .s03-berlin, .s03-george, .s03-ball { display: none; }
+  .s03-berlin {
+    width: 90px;
+    bottom: -110px;
+    left: 30px;
+  }
+  .s03-george {
+    width: 85px;
+    bottom: -120px;
+    right: auto;
+    left: 165px;
+  }
+  .s03-ball {
+    width: 30px;
+    top: 20px;
+    right: 25px;
+  }
 }
 
 /* ─── EXPAND MAP ─── */
@@ -465,6 +480,32 @@ img {
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+.expand-map__mobile-address {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .expand-map__mobile-address {
+    display: block;
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #111;
+    z-index: 4;
+    pointer-events: none;
+  }
+  .expand-map.is-expanded .expand-map__mobile-address {
+    display: none;
+  }
 }
 
 /* ── Basketball backboard (collapsed only) ── */
@@ -672,7 +713,7 @@ img {
 
 @media (max-width: 768px) {
   .expand-map__cap {
-    width: 224px;
+    width: 110px;
     left: -55px;
   }
 }
@@ -705,7 +746,10 @@ img {
   .s03-inner { grid-template-columns: 1fr; gap: 48px; }
   .s03-heading { font-size: 72px; }
   .s03-right { justify-content: flex-start; }
-  .expand-map.is-expanded { width: 100%; max-width: 340px; height: 280px; }
+  .expand-map.is-expanded { width: 298px; height: 178px; }
+  .s03-right { justify-content: center; }
+  .s03-scene { margin: 0 auto; }
+  .s03-address { display: none; }
 }
 
 /* ─── FOOTER ─── */
@@ -1464,6 +1508,18 @@ img {
     width: 202px;
     pointer-events: none;
     filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+  }
+}
+
+@media (max-width: 768px) {
+  .s01-bracelet {
+    display: block;
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 0px;
+    width: 40px;
+    pointer-events: none;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
   }
 }
 
