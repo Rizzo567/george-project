@@ -101,13 +101,12 @@
 
     <!-- VIDEO CARDS -->
     <section class="s02" id="drop">
-      <div class="aurora-bg" aria-hidden="true"></div>
       <div class="cards-row">
 
         <div class="card-wrap card-wrap--left" data-glow>
           <div class="card-inner">
             <div class="card-glow-inner" data-glow></div>
-            <video class="card-video" autoplay muted loop playsinline>
+            <video class="card-video" muted loop playsinline preload="none">
               <source src="assets/videos/tiktok-left.mp4" type="video/mp4">
             </video>
           </div>
@@ -117,7 +116,7 @@
         <div class="card-wrap card-wrap--center" data-glow>
           <div class="card-inner">
             <div class="card-glow-inner" data-glow></div>
-            <video class="card-video" autoplay muted loop playsinline>
+            <video class="card-video" muted loop playsinline preload="none">
               <source src="assets/videos/tiktok-center-h264.mp4" type="video/mp4">
             </video>
           </div>
@@ -127,7 +126,7 @@
         <div class="card-wrap card-wrap--right" data-glow>
           <div class="card-inner">
             <div class="card-glow-inner" data-glow></div>
-            <video class="card-video" autoplay muted loop playsinline>
+            <video class="card-video" muted loop playsinline preload="none">
               <source src="assets/videos/tiktok-right.mp4" type="video/mp4">
             </video>
           </div>
@@ -317,6 +316,29 @@
 
   <script>
     (function() {
+      // Play/pause card videos based on section visibility
+      var section = document.querySelector('.s02');
+      var cardVideos = section ? Array.from(section.querySelectorAll('.card-video')) : [];
+
+      if (cardVideos.length && 'IntersectionObserver' in window) {
+        var sectionObserver = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            cardVideos.forEach(function(v) {
+              if (entry.isIntersecting) {
+                v.play().catch(function() {});
+              } else {
+                v.pause();
+              }
+            });
+          });
+        }, { threshold: 0.15 });
+        sectionObserver.observe(section);
+      }
+    })();
+  </script>
+
+  <script>
+    (function() {
       var row = document.querySelector('.cards-row');
       if (!row) return;
       if (window.innerWidth > 768) return;
@@ -330,10 +352,10 @@
       // Show first card
       cards[current].classList.add('is-active');
 
-      // Autoplay all videos
+      // Autoplay all videos (already handled by IntersectionObserver above)
       cards.forEach(function(card) {
         var v = card.querySelector('video');
-        if (v) { v.muted = true; v.play().catch(function() {}); }
+        if (v) { v.muted = true; }
       });
 
       function advance() {
