@@ -363,12 +363,12 @@ img {
 @media (max-width: 768px) {
   .s03-berlin {
     width: 130px;
-    bottom: -110px;
+    bottom: -210px;
     left: 80px;
   }
   .s03-george {
     width: 122px;
-    bottom: -120px;
+    bottom: -220px;
     right: auto;
     left: 255px;
   }
@@ -742,9 +742,9 @@ img {
 }
 
 @media (max-width: 768px) {
-  .s03 { padding: 80px 20px; }
-  .s03-inner { grid-template-columns: 1fr; gap: 10px; }
-  .s03-heading { font-size: 72px; }
+  .s03 { padding: 80px 20px 280px; }
+  .s03-inner { grid-template-columns: 1fr; gap: 5px; }
+  .s03-heading { font-size: 72px; margin-bottom: 0; }
   .s03-right { justify-content: flex-start; align-items: flex-start; }
   .s03-scene { width: 268px; height: 148px; }
   .expand-map { width: 268px; height: 148px; top: -10px; }
