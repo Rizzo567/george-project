@@ -1146,8 +1146,12 @@ img {
 .brand {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding-bottom: 24px;
+}
+.btn-prenota-wrap {
+  margin-top: 250px;
+  margin-left: 10px;
 }
 .brand-mark {
   font-family: var(--font-display);
@@ -1353,14 +1357,18 @@ img {
 
 .brand-necklace {
   position: absolute;
-  width: 240px;
-  top: calc(50% - 65px);
-  left: calc(50% - 150px);
+  width: 276px;
+  top: calc(52% + 135px);
+  left: calc(18% - 100px);
   transform: translate(-50%, -50%);
   mix-blend-mode: screen;
   filter: contrast(1.1);
   pointer-events: none;
   z-index: 0;
+}
+
+.brand-necklace--mobile {
+  display: none;
 }
 
 .btn-prenota-ora {
@@ -1371,9 +1379,9 @@ img {
   color: var(--asphalt);
   border: none;
   border-radius: 0;
-  padding: 10px 40px;
+  padding: 11.5px 46px;
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 25px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
@@ -1518,7 +1526,18 @@ img {
   .s01-grid { grid-template-columns: 1fr; gap: 48px; }
   .chi { padding-left: 0; padding-top: 32px; transform: none; overflow: visible; }
   .brand-mark { font-size: 96px; }
-  .brand-necklace { top: calc(50% + 65px); left: calc(50% - 70px); }
+  .brand-necklace:not(.brand-necklace--mobile) { display: none; }
+  .btn-prenota-wrap { margin-top: 20px; margin-left: -5px; }
+  .brand-necklace--mobile {
+    display: block;
+    position: static;
+    width: 238px;
+    transform: none;
+    margin-top: -15px;
+    margin-left: 15px;
+    filter: contrast(1.1);
+    mix-blend-mode: screen;
+  }
   .duo { transform: none; overflow: visible; margin-top: -40px; }
   .barber-img-wrap { height: 480px; }
   .barber-name { font-size: 25px; }
@@ -1533,7 +1552,7 @@ img {
   }
   /* Berlin name */
   .barber--berlin .barber-meta {
-    left: 188px;
+    left: 168px;
     white-space: nowrap;
   }
   .s01 .cap-2 { width: 240px; bottom: 4%; left: 6%; }

@@ -104,14 +104,15 @@
     .barber-card {
       background: #111;
       border: 2px solid rgba(229,225,216,0.08);
+      border-radius: 20px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      padding: 40px 28px 32px;
+      padding: 0 0 28px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 0;
       transition: border-color 0.2s, background 0.2s;
       -webkit-user-select: none;
       user-select: none;
@@ -123,30 +124,29 @@
       background: radial-gradient(ellipse at 50% 0%, rgba(232,90,31,0.07) 0%, transparent 65%);
       opacity: 0;
       transition: opacity 0.25s;
+      border-radius: 20px;
     }
     .barber-card:hover { border-color: rgba(232,90,31,0.5); }
     .barber-card:hover::before { opacity: 1; }
-    .barber-card__avatar {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      overflow: hidden;
-      background: var(--asphalt-soft);
-      border: 2px solid rgba(229,225,216,0.08);
-      transition: border-color 0.2s;
-      flex-shrink: 0;
-    }
-    .barber-card:hover .barber-card__avatar { border-color: rgba(232,90,31,0.4); }
-    .barber-card__avatar img {
+    .barber-card__img-wrap {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: top center;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      height: 280px;
+      overflow: hidden;
     }
-    .barber-card__info { text-align: center; }
+    .barber-card__img-wrap img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+      object-position: bottom center;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+    }
+    .barber-card__info { text-align: center; margin-top: 16px; }
     .barber-card__name {
       font-family: var(--font-display);
-      font-size: clamp(40px, 5vw, 64px);
+      font-size: clamp(36px, 4vw, 56px);
       letter-spacing: 0.04em;
       text-transform: uppercase;
       color: var(--canvas);
@@ -543,28 +543,50 @@
     }
     @keyframes draw-stroke { to { stroke-dashoffset: 0; } }
 
+    /* ─── HERO CHARACTERS ─── */
+    .prenota-hero__chars {
+      position: absolute;
+      right: var(--page-margin);
+      bottom: 0;
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+      pointer-events: none;
+    }
+    .prenota-char {
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+    }
+    .prenota-char--george {
+      height: 630px;
+      transform: translateX(-600px);
+      transform-origin: bottom center;
+    }
+    .prenota-char--berlin {
+      height: 594px;
+      transform: translateX(-200px);
+      transform-origin: bottom center;
+    }
+
     /* ─── RESPONSIVE ─── */
     @media (max-width: 768px) {
       .prenota-hero {
         padding: calc(var(--nav-height) + 48px) 20px 48px;
       }
+      .prenota-hero__chars { right: 0; bottom: 60px; }
+      .prenota-char--george { height: 264px; transform: translateX(0); }
+      .prenota-char--berlin { height: 240px; transform: translateX(0); }
       .prenota-hero__title .word-outline {
         -webkit-text-stroke: 1.5px var(--canvas);
       }
       .prenota-section { padding: 0 20px 64px; }
       .barber-cards {
-        grid-template-columns: 1fr;
-        gap: 16px;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
       }
-      .barber-card {
-        flex-direction: row;
-        align-items: center;
-        padding: 24px 20px;
-        gap: 20px;
-      }
-      .barber-card__avatar { width: 80px; height: 80px; }
-      .barber-card__info { text-align: left; }
-      .barber-card__name { font-size: 36px; }
+      .barber-card__img-wrap { height: 180px; }
+      .barber-card__name { font-size: 28px; }
       .cal-wrap { padding: 20px 14px; }
       .form-grid { grid-template-columns: 1fr; }
       .form-field--full { grid-column: 1; }
@@ -600,6 +622,10 @@
         <span class="word-outline">nota</span>
       </h1>
       <p class="prenota-hero__sub">Scegli il tuo barbiere e il tuo orario</p>
+      <div class="prenota-hero__chars" aria-hidden="true">
+        <img class="prenota-char prenota-char--george" src="assets/img/character/george-blocco-note.png" alt="">
+        <img class="prenota-char prenota-char--berlin" src="assets/img/character/berlin-incazzato.png" alt="">
+      </div>
     </section>
 
     <!-- BOOKING FLOW -->
@@ -611,8 +637,8 @@
         <div class="barber-cards" id="barberCards">
 
           <div class="barber-card" data-barber="berlin" role="button" tabindex="0">
-            <div class="barber-card__avatar">
-              <img src="assets/img/berlin-face.png" alt="Berlin">
+            <div class="barber-card__img-wrap">
+              <img src="assets/img/character/berlin-canotta-removebg-preview.png" alt="Berlin">
             </div>
             <div class="barber-card__info">
               <p class="barber-card__name">Berlin</p>
@@ -621,8 +647,8 @@
           </div>
 
           <div class="barber-card" data-barber="george" role="button" tabindex="0">
-            <div class="barber-card__avatar">
-              <img src="assets/img/george-face.png" alt="George">
+            <div class="barber-card__img-wrap">
+              <img src="assets/img/character/george-fit1-removebg-preview.png" alt="George">
             </div>
             <div class="barber-card__info">
               <p class="barber-card__name">George</p>
