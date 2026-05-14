@@ -373,7 +373,7 @@ img {
     left: 255px;
   }
   .s03-ball {
-    width: 54px;
+    width: 59px;
     top: 20px;
     right: 25px;
   }
@@ -746,9 +746,9 @@ img {
   .s03-inner { grid-template-columns: 1fr; gap: 5px; }
   .s03-heading { font-size: 72px; margin-bottom: 0; }
   .s03-right { justify-content: flex-start; align-items: flex-start; }
-  .s03-scene { width: 268px; height: 148px; }
-  .expand-map { width: 268px; height: 148px; top: 0; }
-  .expand-map.is-expanded { width: 278px; height: 158px; top: 0; }
+  .s03-scene { width: 258px; height: 138px; }
+  .expand-map { width: 258px; height: 138px; top: 0; }
+  .expand-map.is-expanded { width: 268px; height: 148px; top: 0; }
   .s03-address { display: none; }
 }
 
