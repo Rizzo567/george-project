@@ -249,7 +249,10 @@
         document.getElementById('confName').textContent   = name;
         document.getElementById('confDetail').innerHTML   =
           '<strong>' + dateStr + '</strong><br>alle <strong>' + b.time + '</strong>';
-        document.getElementById('confThumb').src = 'assets/img/' + b.barber + '-thumb.png';
+        var thumbMap = {
+          george: 'assets/img/character/george-fit1_3_-removebg-preview.png'
+        };
+        document.getElementById('confThumb').src = thumbMap[b.barber] || ('assets/img/' + b.barber + '-thumb.png');
         document.getElementById('confThumb').alt = name;
 
         sessionStorage.removeItem('mbooking');

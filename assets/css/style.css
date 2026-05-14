@@ -1255,9 +1255,20 @@ img {
   gap: 0;
   margin-top: 16px;
   transform: translateY(-70px);
+  position: relative;
+}
+
+.duo-stars {
+  position: absolute;
+  inset: -20% -10%;
+  width: 120%;
+  height: 140%;
+  pointer-events: none;
+  z-index: 10;
 }
 .barber {
   position: relative;
+  z-index: 1;
   padding: 24px 0 20px;
   display: flex;
   flex-direction: column;
@@ -1279,7 +1290,7 @@ img {
   filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
 }
 .barber-img-wrap img.berlin {
-  transform: scale(0.82);
+  transform: scale(0.984);
   transform-origin: bottom center;
 }
 .barber-meta {
@@ -1338,8 +1349,8 @@ img {
 .brand-necklace {
   position: absolute;
   width: 240px;
-  top: calc(50% + 5px);
-  left: calc(50% - 70px);
+  top: calc(50% - 35px);
+  left: calc(50% - 110px);
   transform: translate(-50%, -50%);
   mix-blend-mode: screen;
   filter: contrast(1.1);
