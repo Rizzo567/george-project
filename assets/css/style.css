@@ -1101,7 +1101,7 @@ img {
 
 .s01 {
   position: relative;
-  background: var(--asphalt);
+  background: #000;
   overflow: hidden;
   padding: 56px var(--page-margin) 10px;
 }
@@ -1258,13 +1258,18 @@ img {
   position: relative;
 }
 
-.duo-stars {
+.s01-shader {
   position: absolute;
-  inset: -20% -10%;
-  width: 120%;
-  height: 140%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 0;
+}
+.s01-shader canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
 }
 .barber {
   position: relative;
@@ -1513,6 +1518,7 @@ img {
   .s01-grid { grid-template-columns: 1fr; gap: 48px; }
   .chi { padding-left: 0; padding-top: 32px; transform: none; overflow: visible; }
   .brand-mark { font-size: 96px; }
+  .brand-necklace { top: calc(50% + 65px); left: calc(50% - 70px); }
   .duo { transform: none; overflow: visible; margin-top: -40px; }
   .barber-img-wrap { height: 480px; }
   .barber-name { font-size: 25px; }

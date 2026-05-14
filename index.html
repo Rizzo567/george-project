@@ -50,6 +50,7 @@
     <!-- CHI SIAMO -->
     <section class="s01" id="barbieri" data-screen-label="01 Chi Siamo">
 
+      <div class="s01-shader" aria-hidden="true"></div>
       <div class="glow"></div>
 
       <img class="cap cap-2" src="assets/img/cap-angel.png" alt="" />
@@ -75,7 +76,6 @@
 
           <!-- duo of barbers -->
           <div class="duo">
-            <canvas class="duo-stars" aria-hidden="true"></canvas>
             <figure class="barber barber--berlin">
               <div class="barber-img-wrap">
                 <img src="assets/img/character/berlin-canotta-pose1.png" alt="Berlin" class="berlin" />
@@ -503,96 +503,111 @@
     })();
   </script>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
     (function() {
-      var canvas = document.querySelector('.duo-stars');
-      if (!canvas) return;
-      var ctx = canvas.getContext('2d');
+      var container = document.querySelector('.s01-shader');
+      if (!container || typeof THREE === 'undefined') return;
 
-      function resize() {
-        canvas.width  = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+      var W = container.offsetWidth;
+      var H = container.offsetHeight;
+
+      var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(W, H);
+      container.appendChild(renderer.domElement);
+
+      var scene  = new THREE.Scene();
+      var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+      var uniforms = {
+        iTime:       { value: 0.0 },
+        iResolution: { value: new THREE.Vector2(W, H) }
+      };
+
+      var material = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: 'void main() { gl_Position = vec4(position, 1.0); }',
+        fragmentShader: [
+          'uniform float iTime;',
+          'uniform vec2 iResolution;',
+          '#define NUM_OCTAVES 3',
+
+          'float rand(vec2 n) {',
+          '  return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);',
+          '}',
+
+          'float noise(vec2 p) {',
+          '  vec2 ip = floor(p);',
+          '  vec2 u = fract(p);',
+          '  u = u*u*(3.0-2.0*u);',
+          '  float res = mix(',
+          '    mix(rand(ip), rand(ip + vec2(1.0, 0.0)), u.x),',
+          '    mix(rand(ip + vec2(0.0, 1.0)), rand(ip + vec2(1.0, 1.0)), u.x), u.y);',
+          '  return res * res;',
+          '}',
+
+          'float fbm(vec2 x) {',
+          '  float v = 0.0;',
+          '  float a = 0.3;',
+          '  vec2 shift = vec2(100.0);',
+          '  mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));',
+          '  for (int i = 0; i < NUM_OCTAVES; ++i) {',
+          '    v += a * noise(x);',
+          '    x = rot * x * 2.0 + shift;',
+          '    a *= 0.4;',
+          '  }',
+          '  return v;',
+          '}',
+
+          'void main() {',
+          '  vec2 shake = vec2(sin(iTime * 1.2) * 0.005, cos(iTime * 2.1) * 0.005);',
+          '  vec2 p = ((gl_FragCoord.xy + shake * iResolution.xy) - iResolution.xy * 0.5) / iResolution.y * mat2(6.0, -4.0, 4.0, 6.0);',
+          '  vec2 v;',
+          '  vec4 o = vec4(0.0);',
+          '  float f = 2.0 + fbm(p + vec2(iTime * 5.0, 0.0)) * 0.5;',
+          '  for (float i = 0.0; i < 35.0; i++) {',
+          '    v = p + cos(i * i + (iTime + p.x * 0.08) * 0.025 + i * vec2(13.0, 11.0)) * 3.5 + vec2(sin(iTime * 3.0 + i) * 0.003, cos(iTime * 3.5 - i) * 0.003);',
+          '    float tailNoise = fbm(v + vec2(iTime * 0.5, i)) * 0.3 * (1.0 - (i / 35.0));',
+          '    vec4 auroraColors = vec4(',
+          '      0.1 + 0.3 * sin(i * 0.2 + iTime * 0.4),',
+          '      0.3 + 0.5 * cos(i * 0.3 + iTime * 0.5),',
+          '      0.7 + 0.3 * sin(i * 0.4 + iTime * 0.3),',
+          '      1.0',
+          '    );',
+          '    vec4 currentContribution = auroraColors * exp(sin(i * i + iTime * 0.8)) / length(max(v, vec2(v.x * f * 0.015, v.y * 1.5)));',
+          '    float thinnessFactor = smoothstep(0.0, 1.0, i / 35.0) * 0.6;',
+          '    o += currentContribution * (1.0 + tailNoise * 0.8) * thinnessFactor;',
+          '  }',
+          '  o = tanh(pow(o / 100.0, vec4(1.6)));',
+          '  gl_FragColor = o * 1.5;',
+          '}'
+        ].join('\n')
+      });
+
+      var mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+      scene.add(mesh);
+
+      window.addEventListener('resize', function() {
+        W = container.offsetWidth;
+        H = container.offsetHeight;
+        renderer.setSize(W, H);
+        uniforms.iResolution.value.set(W, H);
+      });
+
+      var active = true;
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function(entries) {
+          active = entries[0].isIntersecting;
+        }, { threshold: 0.05 }).observe(container);
       }
-      resize();
-      window.addEventListener('resize', resize);
 
-      var stars = [];
-      var W, H;
-
-      function spawn() {
-        W = canvas.width;
-        H = canvas.height;
-        var angle = Math.PI / 4 + (Math.random() - 0.5) * 0.4;
-        var x = Math.random() * W * 1.4 - W * 0.2;
-        var speed = 0.6 + Math.random() * 0.9;
-        return {
-          x: x,
-          y: -10,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          len: 60 + Math.random() * 100,
-          alpha: 0,
-          life: 0,
-          maxLife: 50 + Math.random() * 40
-        };
-      }
-
-      for (var i = 0; i < 14; i++) {
-        var s = spawn();
-        s.life = Math.random() * s.maxLife;
-        stars.push(s);
-      }
-
-      var tick = 0;
-
-      function draw() {
-        W = canvas.width;
-        H = canvas.height;
-        ctx.clearRect(0, 0, W, H);
-
-        tick++;
-        if (tick % 12 === 0) stars.push(spawn());
-        if (stars.length > 40) stars.splice(0, stars.length - 40);
-
-        for (var i = stars.length - 1; i >= 0; i--) {
-          var s = stars[i];
-          s.x += s.vx;
-          s.y += s.vy;
-          s.life++;
-
-          var progress = s.life / s.maxLife;
-          if (progress < 0.2) s.alpha = progress / 0.2;
-          else if (progress > 0.7) s.alpha = 1 - (progress - 0.7) / 0.3;
-          else s.alpha = 1;
-
-          var tx = s.x - Math.cos(Math.PI / 4) * s.len;
-          var ty = s.y - Math.sin(Math.PI / 4) * s.len;
-
-          var grad = ctx.createLinearGradient(tx, ty, s.x, s.y);
-          grad.addColorStop(0, 'rgba(255,255,255,0)');
-          grad.addColorStop(1, 'rgba(255,255,255,' + (s.alpha * 0.9).toFixed(2) + ')');
-
-          ctx.beginPath();
-          ctx.moveTo(tx, ty);
-          ctx.lineTo(s.x, s.y);
-          ctx.strokeStyle = grad;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, 1.5, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,255,' + (s.alpha * 0.95).toFixed(2) + ')';
-          ctx.fill();
-
-          if (s.life >= s.maxLife || s.x > W + 50 || s.y > H + 50) {
-            stars.splice(i, 1);
-          }
-        }
-
-        requestAnimationFrame(draw);
-      }
-
-      draw();
+      (function animate() {
+        requestAnimationFrame(animate);
+        if (!active) return;
+        uniforms.iTime.value += 0.016;
+        renderer.render(scene, camera);
+      })();
     })();
   </script>
 </body>
