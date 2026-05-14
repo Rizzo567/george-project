@@ -875,25 +875,8 @@ img {
   position: relative;
   cursor: pointer;
   transition: flex 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* glow vars */
-  --base: 30;
-  --spread: 200;
-  --border: 2;
-  --size: 220;
-  --border-size: calc(var(--border) * 1px);
-  --spotlight-size: calc(var(--size) * 1px);
-  --hue: calc(var(--base) + (var(--xp, 0) * var(--spread)));
-  --backdrop: hsl(0 0% 60% / 0.10);
-
-  background-image: radial-gradient(
-    var(--spotlight-size) var(--spotlight-size) at
-    calc(var(--x, -999) * 1px) calc(var(--y, -999) * 1px),
-    hsl(var(--hue) 100% 65% / 0.12), transparent
-  );
-  background-color: var(--backdrop);
-  background-attachment: fixed;
-  border: var(--border-size) solid rgba(255,255,255,0.08);
+  background-color: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
 .card-wrap--center {
@@ -907,56 +890,12 @@ img {
 .cards-row:has(.card-wrap--right:hover) .card-wrap--center { flex: 1; }
 .cards-row:has(.card-wrap--berlin:hover) .card-wrap--berlin { flex: 1.7; }
 .cards-row:has(.card-wrap--berlin:hover) .card-wrap--center { flex: 1; }
+.cards-row:has(.card-wrap--cut:hover) .card-wrap--cut { flex: 1.7; }
+.cards-row:has(.card-wrap--cut:hover) .card-wrap--center { flex: 1; }
 
-/* glow border ::before */
-.card-wrap::before,
-.card-wrap::after {
-  pointer-events: none;
-  content: '';
-  position: absolute;
-  inset: calc(var(--border-size) * -1);
-  border: var(--border-size) solid transparent;
-  border-radius: 14px;
-  background-size: calc(100% + (2 * var(--border-size))) calc(100% + (2 * var(--border-size)));
-  background-repeat: no-repeat;
-  background-position: 50% 50%;
-  -webkit-mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
-  mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
-  -webkit-mask-clip: padding-box, border-box;
-  mask-clip: padding-box, border-box;
-  -webkit-mask-composite: destination-in;
-  mask-composite: intersect;
-  background-attachment: fixed;
-  z-index: 2;
-}
-.card-wrap::before {
-  background-image: radial-gradient(
-    calc(var(--spotlight-size) * 0.75) calc(var(--spotlight-size) * 0.75) at
-    calc(var(--x, -999) * 1px) calc(var(--y, -999) * 1px),
-    hsl(var(--hue) 100% 50% / 1), transparent 100%
-  );
-  filter: brightness(2);
-}
-.card-wrap::after {
-  background-image: radial-gradient(
-    calc(var(--spotlight-size) * 0.5) calc(var(--spotlight-size) * 0.5) at
-    calc(var(--x, -999) * 1px) calc(var(--y, -999) * 1px),
-    hsl(0 100% 100% / 0.8), transparent 100%
-  );
-}
-
-/* inner glow outer blur */
+/* inner glow outer blur — disabled */
 .card-glow-inner {
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  opacity: 0.6;
-  will-change: filter;
-  pointer-events: none;
-  border: 20px solid transparent;
-  filter: blur(20px);
-  background: none;
-  z-index: 1;
+  display: none;
 }
 
 .card-inner {
