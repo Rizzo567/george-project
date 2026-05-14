@@ -901,10 +901,12 @@ img {
 }
 
 /* expand hovered side card, shrink center */
-.cards-row:has(.card-wrap--left:hover) .card-wrap--left  { flex: 1.7; }
-.cards-row:has(.card-wrap--left:hover) .card-wrap--center { flex: 1; }
-.cards-row:has(.card-wrap--right:hover) .card-wrap--right { flex: 1.7; }
+.cards-row:has(.card-wrap--left:hover) .card-wrap--left    { flex: 1.7; }
+.cards-row:has(.card-wrap--left:hover) .card-wrap--center  { flex: 1; }
+.cards-row:has(.card-wrap--right:hover) .card-wrap--right  { flex: 1.7; }
 .cards-row:has(.card-wrap--right:hover) .card-wrap--center { flex: 1; }
+.cards-row:has(.card-wrap--berlin:hover) .card-wrap--berlin { flex: 1.7; }
+.cards-row:has(.card-wrap--berlin:hover) .card-wrap--center { flex: 1; }
 
 /* glow border ::before */
 .card-wrap::before,
@@ -1336,7 +1338,7 @@ img {
 .brand-necklace {
   position: absolute;
   width: 240px;
-  top: calc(50% + 105px);
+  top: calc(50% + 5px);
   left: calc(50% - 70px);
   transform: translate(-50%, -50%);
   mix-blend-mode: screen;
