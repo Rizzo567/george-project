@@ -363,17 +363,17 @@ img {
 @media (max-width: 768px) {
   .s03-berlin {
     width: 156px;
-    bottom: -260px;
+    bottom: -410px;
     left: 80px;
   }
   .s03-george {
     width: 146px;
-    bottom: -270px;
+    bottom: -420px;
     right: auto;
     left: 255px;
   }
   .s03-ball {
-    width: 45px;
+    width: 54px;
     top: 20px;
     right: 25px;
   }
@@ -742,7 +742,7 @@ img {
 }
 
 @media (max-width: 768px) {
-  .s03 { padding: 80px 20px 380px; }
+  .s03 { padding: 80px 20px 560px; }
   .s03-inner { grid-template-columns: 1fr; gap: 5px; }
   .s03-heading { font-size: 72px; margin-bottom: 0; }
   .s03-right { justify-content: flex-start; align-items: flex-start; }
