@@ -1264,7 +1264,7 @@ img {
   width: 120%;
   height: 140%;
   pointer-events: none;
-  z-index: 10;
+  z-index: 0;
 }
 .barber {
   position: relative;
@@ -1290,7 +1290,7 @@ img {
   filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
 }
 .barber-img-wrap img.berlin {
-  transform: scale(0.984);
+  transform: scale(0.886);
   transform-origin: bottom center;
 }
 .barber-meta {
@@ -1349,8 +1349,8 @@ img {
 .brand-necklace {
   position: absolute;
   width: 240px;
-  top: calc(50% - 35px);
-  left: calc(50% - 110px);
+  top: calc(50% - 65px);
+  left: calc(50% - 150px);
   transform: translate(-50%, -50%);
   mix-blend-mode: screen;
   filter: contrast(1.1);
