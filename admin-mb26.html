@@ -37,7 +37,7 @@
     </form>
 
     <!-- Forgot password form -->
-    <form class="auth-form" id="forgotForm" style="display:none;">
+    <form class="auth-form is-hidden" id="forgotForm">
       <div>
         <label for="forgotEmail">La tua email</label>
         <input type="email" id="forgotEmail" placeholder="la tua email" required>
@@ -48,8 +48,8 @@
     </form>
 
     <!-- Reset password form (mostrato dopo click sul link dell'email) -->
-    <form class="auth-form" id="resetForm" style="display:none;">
-      <h1 class="admin-title" style="margin-bottom:8px;">Nuova password</h1>
+    <form class="auth-form is-hidden" id="resetForm">
+      <h2 class="admin-title" style="margin-bottom:8px;">Nuova password</h2>
       <p class="admin-sub">Scegli una password sicura</p>
       <div>
         <label for="newPassword">Nuova password</label>
@@ -100,7 +100,7 @@
         </thead>
         <tbody id="aptTableBody"></tbody>
       </table>
-      <p class="dash-empty" id="dashEmpty" style="display:none;">Nessuna prenotazione trovata.</p>
+      <p class="dash-empty is-hidden" id="dashEmpty">Nessuna prenotazione trovata.</p>
     </div>
   </section>
 

@@ -57,7 +57,7 @@ body {
 }
 .auth-form input {
   width: 100%;
-  background: #111;
+  background: var(--asphalt-soft);
   border: 1px solid rgba(229,225,216,0.15);
   color: var(--canvas);
   font-family: var(--font-body);
@@ -81,6 +81,7 @@ body {
   cursor: pointer;
   transition: background 0.2s;
   width: 100%;
+  border-radius: 0;
 }
 .btn-auth:hover { background: #ff7a3c; }
 .btn-auth:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -138,6 +139,7 @@ body {
   padding: 10px 20px;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
+  border-radius: 0;
 }
 .btn-logout:hover { border-color: var(--canvas); color: var(--canvas); }
 
@@ -159,6 +161,7 @@ body {
   padding: 8px 16px;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
+  border-radius: 0;
 }
 .filter-btn:hover { border-color: rgba(229,225,216,0.4); color: var(--canvas); }
 .filter-btn.is-active {
@@ -187,7 +190,7 @@ body {
 .apt-table td {
   font-size: var(--body-s);
   color: var(--canvas);
-  padding: 16px 16px;
+  padding: 16px;
   border-bottom: 1px solid rgba(229,225,216,0.06);
   vertical-align: middle;
 }
@@ -221,6 +224,7 @@ body {
   padding: 6px 12px;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
+  border-radius: 0;
 }
 .apt-btn:hover { border-color: var(--ember); color: var(--ember); }
 .apt-btn--cancel:hover { border-color: #ff6b6b; color: #ff6b6b; }
@@ -241,3 +245,6 @@ body {
   .apt-table th, .apt-table td { padding: 12px 10px; }
   .apt-actions { flex-direction: column; }
 }
+
+/* ─── UTILITY ─── */
+.is-hidden { display: none !important; }
