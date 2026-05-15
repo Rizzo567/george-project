@@ -34,7 +34,7 @@
   function showAuthMode(mode) {
     // Show authSection, hide dash
     show(authSection);
-    dashSection.style.display = 'none';
+    hide(dashSection);
 
     // Show only the right form
     if (mode === 'login') {
@@ -48,7 +48,7 @@
 
   function showDash() {
     hide(authSection);
-    dashSection.style.display = 'block';
+    show(dashSection);
     loadAppointments();
   }
 
@@ -243,7 +243,7 @@
   }
 
   function statusBadge(status) {
-    return '<span class="status-badge status-badge--' + status + '">' + status + '</span>';
+    return '<span class="status-badge status-badge--' + esc(status) + '">' + esc(status) + '</span>';
   }
 
   function actionButtons(apt) {
