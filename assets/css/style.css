@@ -379,6 +379,43 @@ img {
   }
 }
 
+/* ─── POSTAZIONE CHARACTERS ─── */
+
+.s03-berlin-post,
+.s03-george-post {
+  position: absolute;
+  bottom: 0;
+  width: 420px;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  z-index: 7;
+  transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.s03-berlin-post {
+  left: 0;
+  transform: translateX(-200px);
+}
+
+.s03-george-post {
+  right: 0;
+  transform: translateX(200px);
+}
+
+.s03-berlin-post.is-visible,
+.s03-george-post.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (max-width: 768px) {
+  .s03-berlin-post,
+  .s03-george-post {
+    width: 200px;
+  }
+}
+
 /* ─── EXPAND MAP ─── */
 
 .expand-map {
