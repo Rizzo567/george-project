@@ -1134,7 +1134,6 @@
         var file      = fileInput.files[0];
 
         function sendBooking(imgBase64, imgMime, imgName) {
-          var servizio = document.getElementById('servizio').value;
 
           function doInsert(imgUrl) {
             sb.from('appointments').insert({
