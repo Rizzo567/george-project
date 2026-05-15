@@ -1,0 +1,5 @@
+window.MB_CONFIG = {
+  SUPABASE_URL:  'INSERISCI_PROJECT_URL',
+  SUPABASE_KEY:  'INSERISCI_ANON_KEY',
+  EDGE_FN_URL:   'INSERISCI_PROJECT_URL/functions/v1/send-notification'
+};

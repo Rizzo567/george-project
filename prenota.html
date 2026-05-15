@@ -10,6 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="assets/js/config.js"></script>
 
   <style>
     /* ─── PRENOTA PAGE ─── */
@@ -713,6 +715,18 @@
             </div>
 
             <div class="form-field form-field--full">
+              <label class="form-label" for="servizio">Servizio</label>
+              <select class="form-input" id="servizio" name="servizio" required style="cursor:pointer;appearance:none;-webkit-appearance:none;">
+                <option value="" disabled selected>Scegli il servizio</option>
+                <option value="Cut">Cut</option>
+                <option value="Fade">Fade</option>
+                <option value="Beard">Beard</option>
+                <option value="Razor">Razor</option>
+                <option value="Full">Full</option>
+              </select>
+            </div>
+
+            <div class="form-field form-field--full">
               <label class="form-label" for="note-taglio">
                 Dettagli taglio
                 <span style="color:var(--silver);font-size:9px;letter-spacing:0.15em;text-transform:none;font-weight:400;">(opzionale)</span>
@@ -809,6 +823,9 @@
   <!-- BOOKING FLOW -->
   <script>
     (function () {
+
+      // Supabase client
+      var sb = supabase.createClient(window.MB_CONFIG.SUPABASE_URL, window.MB_CONFIG.SUPABASE_KEY);
 
       var state = { barber: null, date: null, time: null };
 
@@ -991,11 +1008,20 @@
         hint.textContent  = 'Caricamento orari…';
         grid.innerHTML    = '';
 
-        fetch('/api/available?barber=' + barber + '&date=' + date)
-          .then(function (r) { return r.json(); })
-          .then(function (data) {
-            if (data.error) throw new Error(data.error);
-            renderSlots(data.slots);
+        sb.from('appointments')
+          .select('time')
+          .eq('barber', barber)
+          .eq('date', date)
+          .in('status', ['pending', 'confirmed'])
+          .then(function (res) {
+            var bookedTimes = (res.data || []).map(function (r) {
+              return r.time.slice(0, 5);
+            });
+            var all = fallbackSlots();
+            var slots = all.map(function (s) {
+              return { time: s.time, available: bookedTimes.indexOf(s.time) === -1 };
+            });
+            renderSlots(slots);
           })
           .catch(function () {
             renderSlots(fallbackSlots());
@@ -1095,8 +1121,10 @@
         var nome     = document.getElementById('nome').value.trim();
         var telefono = document.getElementById('telefono').value.trim();
         var note     = document.getElementById('note-taglio').value.trim();
+        var servizio = document.getElementById('servizio').value;
         if (!nome)     { document.getElementById('nome').focus(); return; }
         if (!telefono) { document.getElementById('telefono').focus(); return; }
+        if (!servizio) { document.getElementById('servizio').focus(); return; }
 
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
@@ -1106,24 +1134,68 @@
         var file      = fileInput.files[0];
 
         function sendBooking(imgBase64, imgMime, imgName) {
-          fetch('/api/book', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              barber: state.barber, nome: nome,
-              telefono: telefono, data: state.date,
-              ora: state.time, note: note,
-              imgBase64: imgBase64 || null,
-              imgMime:   imgMime   || null,
-              imgName:   imgName   || null,
+          var servizio = document.getElementById('servizio').value;
+
+          function doInsert(imgUrl) {
+            sb.from('appointments').insert({
+              barber:  state.barber,
+              name:    nome,
+              phone:   telefono,
+              service: servizio,
+              date:    state.date,
+              time:    state.time,
+              notes:   note || null,
+              img_url: imgUrl || null,
+              status:  'pending'
             })
-          })
-          .then(function (r) { return r.json(); })
-          .then(function (res) {
-            if (res.error) throw new Error(res.error);
-            doSuccess();
-          })
-          .catch(function () { doSuccess(); });
+            .then(function (res) {
+              if (res.error) { doBookingError(); return; }
+              return fetch(window.MB_CONFIG.EDGE_FN_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  barber:  state.barber,
+                  name:    nome,
+                  phone:   telefono,
+                  service: servizio,
+                  date:    state.date,
+                  time:    state.time,
+                  notes:   note || null
+                })
+              });
+            })
+            .then(function () { doSuccess(); })
+            .catch(function () { doSuccess(); });
+          }
+
+          if (imgBase64 && imgMime && imgName) {
+            var ext  = imgName.split('.').pop();
+            var path = state.barber + '/' + state.date + '_' + state.time.replace(':', '') + '.' + ext;
+            var blob = base64ToBlob(imgBase64, imgMime);
+            sb.storage.from('bookings').upload(path, blob, { contentType: imgMime, upsert: true })
+              .then(function (res) {
+                if (res.error) { doInsert(null); return; }
+                var urlData = sb.storage.from('bookings').getPublicUrl(path);
+                doInsert(urlData.data ? urlData.data.publicUrl : null);
+              })
+              .catch(function () { doInsert(null); });
+          } else {
+            doInsert(null);
+          }
+        }
+
+        function base64ToBlob(b64, mime) {
+          var bytes = atob(b64);
+          var arr   = new Uint8Array(bytes.length);
+          for (var i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+          return new Blob([arr], { type: mime });
+        }
+
+        function doBookingError() {
+          var btn = document.getElementById('submitBtn');
+          btn.disabled = false;
+          btn.classList.remove('is-loading');
+          alert('Errore durante la prenotazione. Riprova tra qualche minuto.');
         }
 
         if (file) {
