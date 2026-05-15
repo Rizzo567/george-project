@@ -1,0 +1,243 @@
+/* ─── RESET / BASE ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--asphalt);
+  color: var(--canvas);
+  font-family: var(--font-body);
+  min-height: 100vh;
+}
+
+/* ─── WRAPPER ─── */
+.admin-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px var(--page-margin) 80px;
+}
+
+/* ─── LOGO ─── */
+.admin-logo {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--canvas);
+  margin-bottom: 48px;
+}
+.admin-logo span { color: var(--ember); }
+
+/* ─── AUTH SECTION ─── */
+#authSection { max-width: 420px; }
+
+.admin-title {
+  font-family: var(--font-display);
+  font-size: 40px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--canvas);
+  margin-bottom: 8px;
+}
+.admin-sub {
+  font-size: var(--body-s);
+  color: var(--silver);
+  letter-spacing: 0.04em;
+  margin-bottom: 40px;
+}
+
+/* ─── FORM AUTH ─── */
+.auth-form { display: flex; flex-direction: column; gap: 20px; }
+.auth-form label {
+  font-size: var(--eyebrow);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--silver);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+}
+.auth-form input {
+  width: 100%;
+  background: #111;
+  border: 1px solid rgba(229,225,216,0.15);
+  color: var(--canvas);
+  font-family: var(--font-body);
+  font-size: var(--body);
+  padding: 14px 18px;
+  outline: none;
+  border-radius: 0;
+  transition: border-color 0.2s;
+}
+.auth-form input:focus { border-color: var(--ember); }
+
+.btn-auth {
+  background: var(--ember);
+  color: var(--asphalt);
+  border: none;
+  padding: 16px 32px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+.btn-auth:hover { background: #ff7a3c; }
+.btn-auth:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.auth-link {
+  background: none;
+  border: none;
+  color: var(--silver);
+  font-family: var(--font-body);
+  font-size: var(--body-s);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+.auth-link:hover { color: var(--canvas); }
+
+.auth-msg {
+  font-size: var(--body-s);
+  letter-spacing: 0.04em;
+  padding: 12px 16px;
+  border: 1px solid;
+}
+.auth-msg--error { color: #ff6b6b; border-color: rgba(255,107,107,0.3); background: rgba(255,107,107,0.06); }
+.auth-msg--ok    { color: #6bff8d; border-color: rgba(107,255,141,0.3); background: rgba(107,255,141,0.06); }
+
+/* ─── DASHBOARD ─── */
+#dashSection { display: none; }
+
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.dash-title {
+  font-family: var(--font-display);
+  font-size: 36px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.btn-logout {
+  background: none;
+  border: 1px solid rgba(229,225,216,0.2);
+  color: var(--silver);
+  font-family: var(--font-body);
+  font-size: var(--body-s);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-logout:hover { border-color: var(--canvas); color: var(--canvas); }
+
+/* ─── FILTRI ─── */
+.dash-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.filter-btn {
+  background: none;
+  border: 1px solid rgba(229,225,216,0.15);
+  color: var(--silver);
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.filter-btn:hover { border-color: rgba(229,225,216,0.4); color: var(--canvas); }
+.filter-btn.is-active {
+  background: var(--canvas);
+  border-color: var(--canvas);
+  color: var(--asphalt);
+  font-weight: 600;
+}
+
+/* ─── TABELLA ─── */
+.apt-table-wrap { overflow-x: auto; }
+.apt-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.apt-table th {
+  font-size: var(--eyebrow);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--silver);
+  font-weight: 500;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(229,225,216,0.1);
+}
+.apt-table td {
+  font-size: var(--body-s);
+  color: var(--canvas);
+  padding: 16px 16px;
+  border-bottom: 1px solid rgba(229,225,216,0.06);
+  vertical-align: middle;
+}
+.apt-table tr:hover td { background: rgba(229,225,216,0.03); }
+
+/* Status badge */
+.status-badge {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 4px 10px;
+  border: 1px solid;
+}
+.status-badge--pending   { color: #f0c040; border-color: rgba(240,192,64,0.4); }
+.status-badge--confirmed { color: #6bff8d; border-color: rgba(107,255,141,0.4); }
+.status-badge--completed { color: var(--silver); border-color: rgba(142,142,142,0.3); }
+.status-badge--cancelled { color: #ff6b6b; border-color: rgba(255,107,107,0.3); }
+
+/* Azioni */
+.apt-actions { display: flex; gap: 8px; }
+.apt-btn {
+  background: none;
+  border: 1px solid rgba(229,225,216,0.2);
+  color: var(--silver);
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.apt-btn:hover { border-color: var(--ember); color: var(--ember); }
+.apt-btn--cancel:hover { border-color: #ff6b6b; color: #ff6b6b; }
+.apt-btn--complete:hover { border-color: #6bff8d; color: #6bff8d; }
+
+/* Empty state */
+.dash-empty {
+  font-size: var(--body-s);
+  color: var(--silver);
+  letter-spacing: 0.06em;
+  padding: 48px 0;
+  text-align: center;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .admin-wrap { padding: 32px 20px 64px; }
+  .apt-table th, .apt-table td { padding: 12px 10px; }
+  .apt-actions { flex-direction: column; }
+}

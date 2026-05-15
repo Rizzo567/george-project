@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Mister Barber</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+<div class="admin-wrap">
+
+  <div class="admin-logo">Mister <span>Barber</span></div>
+
+  <!-- ── AUTH SECTION ── -->
+  <section id="authSection">
+    <h1 class="admin-title" id="authTitle">Accedi</h1>
+    <p class="admin-sub" id="authSub">Pannello prenotazioni</p>
+
+    <!-- Login form -->
+    <form class="auth-form" id="loginForm">
+      <div>
+        <label for="authEmail">Email</label>
+        <input type="email" id="authEmail" placeholder="la tua email" required autocomplete="email">
+      </div>
+      <div>
+        <label for="authPassword">Password</label>
+        <input type="password" id="authPassword" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <div id="loginMsg"></div>
+      <button class="btn-auth" type="submit" id="loginBtn">Entra</button>
+      <button type="button" class="auth-link" id="forgotLink">Hai dimenticato la password?</button>
+    </form>
+
+    <!-- Forgot password form -->
+    <form class="auth-form" id="forgotForm" style="display:none;">
+      <div>
+        <label for="forgotEmail">La tua email</label>
+        <input type="email" id="forgotEmail" placeholder="la tua email" required>
+      </div>
+      <div id="forgotMsg"></div>
+      <button class="btn-auth" type="submit" id="forgotBtn">Invia link di reset</button>
+      <button type="button" class="auth-link" id="backToLoginLink">&larr; Torna al login</button>
+    </form>
+
+    <!-- Reset password form (mostrato dopo click sul link dell'email) -->
+    <form class="auth-form" id="resetForm" style="display:none;">
+      <h1 class="admin-title" style="margin-bottom:8px;">Nuova password</h1>
+      <p class="admin-sub">Scegli una password sicura</p>
+      <div>
+        <label for="newPassword">Nuova password</label>
+        <input type="password" id="newPassword" placeholder="min. 8 caratteri" required minlength="8" autocomplete="new-password">
+      </div>
+      <div id="resetMsg"></div>
+      <button class="btn-auth" type="submit" id="resetBtn">Salva password</button>
+    </form>
+  </section>
+
+  <!-- ── DASHBOARD SECTION ── -->
+  <section id="dashSection">
+    <div class="dash-header">
+      <h1 class="dash-title">Prenotazioni</h1>
+      <button class="btn-logout" id="logoutBtn">Esci</button>
+    </div>
+
+    <!-- Filtri barbiere -->
+    <div class="dash-filters" id="barberFilters">
+      <button class="filter-btn is-active" data-barber="">Tutti</button>
+      <button class="filter-btn" data-barber="george">George</button>
+      <button class="filter-btn" data-barber="berlin">Berlin</button>
+    </div>
+
+    <!-- Filtri status -->
+    <div class="dash-filters" id="statusFilters">
+      <button class="filter-btn is-active" data-status="">Tutti gli status</button>
+      <button class="filter-btn" data-status="pending">In attesa</button>
+      <button class="filter-btn" data-status="confirmed">Confermati</button>
+      <button class="filter-btn" data-status="completed">Completati</button>
+      <button class="filter-btn" data-status="cancelled">Annullati</button>
+    </div>
+
+    <div class="apt-table-wrap">
+      <table class="apt-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Ora</th>
+            <th>Cliente</th>
+            <th>Telefono</th>
+            <th>Barbiere</th>
+            <th>Servizio</th>
+            <th>Note</th>
+            <th>Status</th>
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="aptTableBody"></tbody>
+      </table>
+      <p class="dash-empty" id="dashEmpty" style="display:none;">Nessuna prenotazione trovata.</p>
+    </div>
+  </section>
+
+</div>
+
+<script src="assets/js/admin.js"></script>
+</body>
+</html>
