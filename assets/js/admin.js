@@ -248,9 +248,6 @@
 
   function actionButtons(apt) {
     var btns = '<div class="apt-actions">';
-    if (apt.status === 'pending') {
-      btns += '<button class="apt-btn" data-id="' + apt.id + '" data-action="confirmed">Conferma</button>';
-    }
     if (apt.status !== 'completed' && apt.status !== 'cancelled') {
       btns += '<button class="apt-btn apt-btn--complete" data-id="' + apt.id + '" data-action="completed">Completo</button>';
       btns += '<button class="apt-btn apt-btn--cancel" data-id="' + apt.id + '" data-action="cancelled">Annulla</button>';

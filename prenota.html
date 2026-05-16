@@ -1155,7 +1155,7 @@
               time:    state.time,
               notes:   note || null,
               img_url: imgUrl || null,
-              status:  'pending'
+              status:  'confirmed'
             })
             .then(function (res) {
               if (res.error) { doBookingError(); return; }
