@@ -269,6 +269,19 @@
       .then(function (res) {
         if (res.error) {
           btn.disabled = false;
+        } else if (action === 'cancelled') {
+          var row = btn.closest('tr');
+          row.style.transition = 'opacity 0.3s';
+          row.style.opacity = '0.4';
+          var cells = row.querySelectorAll('td');
+          cells[cells.length - 1].innerHTML = '<span style="font-family:var(--font-body);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#e85a1f;">Deleting…</span>';
+          setTimeout(function () {
+            row.style.transition = 'opacity 0.4s';
+            row.style.opacity = '0';
+            setTimeout(function () {
+              row.remove();
+            }, 400);
+          }, 3000);
         } else {
           loadAppointments();
         }
