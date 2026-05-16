@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="admin-wrap">
@@ -65,6 +66,91 @@
     <div class="dash-header">
       <h1 class="dash-title">Prenotazioni</h1>
       <button class="btn-logout" id="logoutBtn">Esci</button>
+    </div>
+
+    <!-- ── PROSSIMO APPUNTAMENTO ── -->
+    <div class="prossimo-card">
+      <div class="prossimo-eyebrow">Prossimo appuntamento</div>
+      <div id="prossimoBody">—</div>
+    </div>
+
+    <!-- ── STATS ── -->
+    <div class="stats-section">
+      <div class="kpi-row">
+        <div class="kpi-card" style="--i:0">
+          <div class="kpi-label">Totale</div>
+          <div class="kpi-value" id="kpiTotal">—</div>
+          <div class="kpi-sub">prenotazioni</div>
+        </div>
+        <div class="kpi-card" style="--i:1">
+          <div class="kpi-label">Oggi</div>
+          <div class="kpi-value" id="kpiToday">—</div>
+          <div class="kpi-sub" id="kpiTodaySub">appuntamenti</div>
+        </div>
+        <div class="kpi-card kpi-card--accent" style="--i:2">
+          <div class="kpi-label">George</div>
+          <div class="kpi-value" id="kpiGeorge">—</div>
+          <div class="kpi-trend" id="trendGeorge"></div>
+        </div>
+        <div class="kpi-card" style="--i:3">
+          <div class="kpi-label">Berlin</div>
+          <div class="kpi-value" id="kpiBerlin">—</div>
+          <div class="kpi-trend" id="trendBerlin"></div>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card" style="--i:0; grid-column:1; grid-row:1">
+          <div class="chart-card-hd">
+            <div>
+              <div class="chart-card-title">Andamento</div>
+              <div class="chart-card-period">ultimi 14 giorni · media</div>
+            </div>
+            <div class="live-badge">
+              <span class="live-dot"></span>
+              <span class="live-label">Live</span>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chartTimeline"></canvas>
+          </div>
+        </div>
+        <div class="chart-card" style="--i:1; grid-column:2; grid-row:1">
+          <div class="chart-card-hd">
+            <div>
+              <div class="chart-card-title">Top Servizi</div>
+              <div class="chart-card-period">per volume</div>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chartServizi"></canvas>
+          </div>
+        </div>
+        <div class="chart-card" style="--i:2; grid-column:1/-1; grid-row:2">
+          <div class="chart-card-hd">
+            <div>
+              <div class="chart-card-title">George vs Berlin</div>
+              <div class="chart-card-period">confronto ultimi 14 giorni</div>
+            </div>
+            <div class="chart-barbers-legend">
+              <span class="bl-dot bl-dot--george"></span><span class="bl-name">George</span>
+              <span class="bl-dot bl-dot--berlin"></span><span class="bl-name">Berlin</span>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chartBarbers"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DAY DETAIL PANEL ── -->
+    <div class="day-panel is-hidden" id="dayPanel">
+      <div class="day-panel-hd">
+        <button class="day-panel-back" id="dayPanelBack">← Chiudi</button>
+        <span class="day-panel-title" id="dayPanelTitle">—</span>
+        <span class="day-panel-count" id="dayPanelCount"></span>
+      </div>
+      <div class="day-panel-body" id="dayPanelBody"></div>
     </div>
 
     <!-- Filtri barbiere -->
