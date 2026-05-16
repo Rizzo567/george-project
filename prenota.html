@@ -1008,24 +1008,34 @@
         hint.textContent  = 'Caricamento orari…';
         grid.innerHTML    = '';
 
-        sb.from('appointments')
+        var calendarPromise = fetch('/api/available?barber=' + barber + '&date=' + date)
+          .then(function (r) { return r.json(); })
+          .catch(function () { return { slots: null }; });
+
+        var supabasePromise = sb.from('appointments')
           .select('time')
           .eq('barber', barber)
           .eq('date', date)
           .in('status', ['pending', 'confirmed'])
-          .then(function (res) {
-            var bookedTimes = (res.data || []).map(function (r) {
-              return r.time.slice(0, 5);
+          .then(function (res) { return (res.data || []).map(function (r) { return r.time.slice(0, 5); }); })
+          .catch(function () { return []; });
+
+        Promise.all([calendarPromise, supabasePromise]).then(function (results) {
+          var calData    = results[0];
+          var dbBooked   = results[1];
+
+          var slots;
+          if (calData.slots && calData.slots.length) {
+            slots = calData.slots.map(function (s) {
+              return { time: s.time, available: s.available && dbBooked.indexOf(s.time) === -1 };
             });
-            var all = fallbackSlots();
-            var slots = all.map(function (s) {
-              return { time: s.time, available: bookedTimes.indexOf(s.time) === -1 };
+          } else {
+            slots = fallbackSlots().map(function (s) {
+              return { time: s.time, available: dbBooked.indexOf(s.time) === -1 };
             });
-            renderSlots(slots);
-          })
-          .catch(function () {
-            renderSlots(fallbackSlots());
-          });
+          }
+          renderSlots(slots);
+        });
       }
 
       function fallbackSlots() {
@@ -1149,19 +1159,42 @@
             })
             .then(function (res) {
               if (res.error) { doBookingError(); return; }
-              return fetch(window.MB_CONFIG.EDGE_FN_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  barber:  state.barber,
-                  name:    nome,
-                  phone:   telefono,
-                  service: servizio,
-                  date:    state.date,
-                  time:    state.time,
-                  notes:   note || null
+
+              var calBody = {
+                barber:   state.barber,
+                nome:     nome,
+                telefono: telefono,
+                servizio: servizio,
+                data:     state.date,
+                ora:      state.time,
+                notes:    note || null
+              };
+              if (imgBase64 && imgMime) {
+                calBody.imgBase64 = imgBase64;
+                calBody.imgMime   = imgMime;
+                calBody.imgName   = imgName;
+              }
+
+              return Promise.all([
+                fetch('/api/book', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(calBody)
+                }),
+                fetch(window.MB_CONFIG.EDGE_FN_URL, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    barber:  state.barber,
+                    name:    nome,
+                    phone:   telefono,
+                    service: servizio,
+                    date:    state.date,
+                    time:    state.time,
+                    notes:   note || null
+                  })
                 })
-              });
+              ]);
             })
             .then(function () { doSuccess(); })
             .catch(function () { doSuccess(); });
