@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Security headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
   <title>Prenotazione Confermata — MISTER BARBER</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -240,19 +246,40 @@
       var DAYS   = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
 
       var raw = sessionStorage.getItem('mbooking');
-      if (raw) {
-        var b    = JSON.parse(raw);
+      var validBarber = false, validDate = false, validTime = false;
+      var b = null;
+      try {
+        b = raw ? JSON.parse(raw) : null;
+        if (b && typeof b === 'object') {
+          validBarber = b.barber === 'george' || b.barber === 'berlin';
+          validDate   = typeof b.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(b.date);
+          validTime   = typeof b.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(b.time);
+        }
+      } catch (e) { b = null; }
+
+      if (b && validBarber && validDate && validTime) {
         var name = b.barber === 'george' ? 'George' : 'Berlin';
         var d    = new Date(b.date + 'T12:00:00');
         var dateStr = DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
 
-        document.getElementById('confName').textContent   = name;
-        document.getElementById('confDetail').innerHTML   =
-          '<strong>' + dateStr + '</strong><br>alle <strong>' + b.time + '</strong>';
+        // SECURITY: usa textContent / createElement invece di innerHTML con valori
+        document.getElementById('confName').textContent = name;
+        var detail = document.getElementById('confDetail');
+        detail.textContent = ''; // clear
+        var strong1 = document.createElement('strong');
+        strong1.textContent = dateStr;
+        detail.appendChild(strong1);
+        detail.appendChild(document.createElement('br'));
+        detail.appendChild(document.createTextNode('alle '));
+        var strong2 = document.createElement('strong');
+        strong2.textContent = b.time;
+        detail.appendChild(strong2);
+
         var thumbMap = {
-          george: 'assets/img/character/george-fit1_3_-removebg-preview.png'
+          george: 'assets/img/character/george-fit1_3_-removebg-preview.png',
+          berlin: 'assets/img/berlin-thumb.png'
         };
-        document.getElementById('confThumb').src = thumbMap[b.barber] || ('assets/img/' + b.barber + '-thumb.png');
+        document.getElementById('confThumb').src = thumbMap[b.barber];
         document.getElementById('confThumb').alt = name;
 
         sessionStorage.removeItem('mbooking');

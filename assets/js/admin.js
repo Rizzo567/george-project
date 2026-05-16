@@ -77,12 +77,35 @@
     });
   }
 
-  // ── Login ──────────────────────────────────────────────────
+  // ── Login (con throttling client-side per anti-brute-force) ──
+  var loginAttempts = 0;
+  var lockoutUntil  = 0;
+
   loginForm.addEventListener('submit', function (e) {
     e.preventDefault();
+
+    // Client-side lockout (defense in depth — il vero limite è server-side Supabase)
+    var now = Date.now();
+    if (now < lockoutUntil) {
+      var sec = Math.ceil((lockoutUntil - now) / 1000);
+      showMsg(loginMsg, 'Troppi tentativi. Riprova tra ' + sec + 's.', 'error');
+      return;
+    }
+
     var email    = document.getElementById('authEmail').value.trim();
     var password = document.getElementById('authPassword').value;
     var btn      = document.getElementById('loginBtn');
+
+    // Validazione base lato client
+    if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showMsg(loginMsg, 'Email non valida.', 'error');
+      return;
+    }
+    if (!password || password.length < 6 || password.length > 256) {
+      showMsg(loginMsg, 'Password non valida.', 'error');
+      return;
+    }
+
     clearMsg(loginMsg);
     btn.disabled = true;
     btn.textContent = 'Accesso in corso…';
@@ -90,10 +113,20 @@
     sb.auth.signInWithPassword({ email: email, password: password })
       .then(function (res) {
         if (res.error) {
-          showMsg(loginMsg, 'Credenziali errate. Riprova.', 'error');
+          loginAttempts++;
+          // Backoff esponenziale dopo 3 tentativi: 5s, 15s, 30s, 60s, 120s...
+          if (loginAttempts >= 3) {
+            var delaySec = Math.min(5 * Math.pow(2, loginAttempts - 3), 300);
+            lockoutUntil = Date.now() + delaySec * 1000;
+            showMsg(loginMsg, 'Troppi tentativi. Attendi ' + delaySec + 's prima di riprovare.', 'error');
+          } else {
+            // Messaggio generico per non rivelare se l'email esiste
+            showMsg(loginMsg, 'Credenziali errate. Riprova.', 'error');
+          }
           btn.disabled = false;
           btn.textContent = 'Entra';
         } else {
+          loginAttempts = 0;
           showDash();
         }
       });

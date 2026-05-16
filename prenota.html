@@ -4,13 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Prenota il tuo appuntamento da Mister Barber — Via Torino 38, Pavia.">
+
+  <!-- Security headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
   <title>PRENOTA — MISTER BARBER</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- SECURITY: pinning a versione esatta + crossorigin per SRI/error reporting -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="assets/js/config.js"></script>
 
   <style>
@@ -1012,11 +1019,11 @@
           .then(function (r) { return r.json(); })
           .catch(function () { return { slots: null }; });
 
-        var supabasePromise = sb.from('appointments')
+        // SECURITY: legge dalla VIEW appointment_slots (no PII) invece che dalla tabella
+        var supabasePromise = sb.from('appointment_slots')
           .select('time')
           .eq('barber', barber)
           .eq('date', date)
-          .in('status', ['pending', 'confirmed'])
           .then(function (res) { return (res.data || []).map(function (r) { return r.time.slice(0, 5); }); })
           .catch(function () { return []; });
 
@@ -1115,6 +1122,20 @@
       document.getElementById('imgRef').addEventListener('change', function (e) {
         var file = e.target.files[0];
         if (!file) return;
+        // SECURITY: validazione client-side dimensione (server applica 5MB hard limit)
+        var MAX_BYTES = 5 * 1024 * 1024;
+        if (file.size > MAX_BYTES) {
+          alert('Immagine troppo grande (max 5MB).');
+          e.target.value = '';
+          return;
+        }
+        // SECURITY: whitelist MIME type
+        var ALLOWED = ['image/jpeg','image/jpg','image/png','image/webp','image/heic'];
+        if (file.type && ALLOWED.indexOf(file.type) === -1) {
+          alert('Formato immagine non supportato. Usa JPG, PNG o WEBP.');
+          e.target.value = '';
+          return;
+        }
         var preview = document.getElementById('uploadPreview');
         var reader  = new FileReader();
         reader.onload = function (ev) {
@@ -1128,13 +1149,17 @@
 
       document.getElementById('prenotaForm').addEventListener('submit', function (e) {
         e.preventDefault();
-        var nome     = document.getElementById('nome').value.trim();
-        var telefono = document.getElementById('telefono').value.trim();
-        var note     = document.getElementById('note-taglio').value.trim();
+        var nome     = document.getElementById('nome').value.trim().slice(0, 100);
+        var telefono = document.getElementById('telefono').value.trim().slice(0, 32);
+        var note     = document.getElementById('note-taglio').value.trim().slice(0, 500);
         var servizio = document.getElementById('servizio').value;
-        if (!nome)     { document.getElementById('nome').focus(); return; }
-        if (!telefono) { document.getElementById('telefono').focus(); return; }
-        if (!servizio) { document.getElementById('servizio').focus(); return; }
+        // SECURITY: validazione client (server applica controlli definitivi)
+        var ALLOWED_SVC = ['Cut','Fade','Beard','Razor','Full'];
+        var PHONE_RE = /^[\d\s+\-()]{5,32}$/;
+        if (!nome || nome.length < 1)            { document.getElementById('nome').focus(); alert('Nome non valido.'); return; }
+        if (!PHONE_RE.test(telefono))            { document.getElementById('telefono').focus(); alert('Telefono non valido.'); return; }
+        if (ALLOWED_SVC.indexOf(servizio) < 0)   { document.getElementById('servizio').focus(); alert('Seleziona un servizio valido.'); return; }
+        if (!state.barber || !state.date || !state.time) { alert('Sessione scaduta. Riprova la prenotazione.'); return; }
 
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
@@ -1201,10 +1226,15 @@
           }
 
           if (imgBase64 && imgMime && imgName) {
-            var ext  = imgName.split('.').pop();
-            var path = state.barber + '/' + state.date + '_' + state.time.replace(':', '') + '.' + ext;
+            // SECURITY: nome file safe + uuid per evitare collisioni/upsert overwrite
+            var rawExt = (imgName.split('.').pop() || '').toLowerCase();
+            var safeExt = /^[a-z0-9]{1,5}$/.test(rawExt) ? rawExt : 'jpg';
+            var uuid = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
+              return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
+            });
+            var path = state.barber + '/' + state.date + '_' + state.time.replace(':', '') + '_' + uuid + '.' + safeExt;
             var blob = base64ToBlob(imgBase64, imgMime);
-            sb.storage.from('bookings').upload(path, blob, { contentType: imgMime, upsert: true })
+            sb.storage.from('bookings').upload(path, blob, { contentType: imgMime, upsert: false })
               .then(function (res) {
                 if (res.error) { doInsert(null); return; }
                 var urlData = sb.storage.from('bookings').getPublicUrl(path);

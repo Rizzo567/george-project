@@ -1,26 +1,69 @@
 import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, WORK_RANGES, SLOT_MINUTES, pad } from './_google.js';
 
-const HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-};
+// ────────────────────────────────────────────────────────────────────
+// SECURITY: CORS lockdown (vedi book.js per dettagli)
+// ────────────────────────────────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  'https://misterbarber.it',
+  'https://www.misterbarber.it',
+  'https://mister-barber.pages.dev',
+  'https://george-website.pages.dev',
+];
+
+function buildCorsHeaders(request) {
+  const origin = request?.headers?.get?.('Origin') || '';
+  const allow  = ALLOWED_ORIGINS.includes(origin)
+    || /^https:\/\/[a-z0-9-]+\.pages\.dev$/.test(origin)
+    || origin === ''
+      ? origin || ALLOWED_ORIGINS[0]
+      : ALLOWED_ORIGINS[0];
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': allow,
+    'Vary': 'Origin',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Cache-Control': 'no-store',
+  };
+}
+
+const ALLOWED_BARBERS = ['george', 'berlin'];
 
 export async function onRequestGet({ request, env }) {
+  const corsHeaders = buildCorsHeaders(request);
   const { searchParams } = new URL(request.url);
   const barber = searchParams.get('barber');
   const date   = searchParams.get('date');
 
-  if (!barber || !date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return json({ error: 'Parametri non validi' }, 400);
+  // ── Validazione input ────────────────────────────────────────
+  if (!ALLOWED_BARBERS.includes(barber)) {
+    return json({ error: 'Barbiere non valido' }, 400, corsHeaders);
+  }
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return json({ error: 'Data non valida' }, 400, corsHeaders);
+  }
+  // Limite range temporale (no query a date assurde)
+  const reqDate = new Date(date + 'T12:00:00Z');
+  if (isNaN(reqDate.getTime())) {
+    return json({ error: 'Data non valida' }, 400, corsHeaders);
+  }
+  const now = new Date();
+  const minDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const maxDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+  if (reqDate < minDate || reqDate > maxDate) {
+    return json({ slots: [] }, 200, corsHeaders);
   }
 
-  // Blocca domenica (0 = domenica)
-  const dayOfWeek = new Date(date + 'T12:00:00Z').getUTCDay();
-  if (dayOfWeek === 0) return json({ slots: [] });
+  // Blocca domenica
+  const dayOfWeek = reqDate.getUTCDay();
+  if (dayOfWeek === 0) return json({ slots: [] }, 200, corsHeaders);
 
   const calendarId     = getCalendarId(barber, env);
   const serviceAccount = getServiceAccount(barber, env);
-  if (!calendarId || !serviceAccount.email) return json({ error: 'Barbiere non configurato' }, 400);
+  if (!calendarId || !serviceAccount.email) {
+    return json({ error: 'Barbiere non configurato' }, 400, corsHeaders);
+  }
 
   const tz = romeOffset(date);
 
@@ -40,7 +83,7 @@ export async function onRequestGet({ request, env }) {
 
     const fbData = await fbRes.json();
     const busy   = fbData.calendars?.[calendarId]?.busy ?? [];
-    const now    = new Date();
+    const nowD   = new Date();
 
     const slots = [];
     for (const range of WORK_RANGES) {
@@ -50,7 +93,7 @@ export async function onRequestGet({ request, env }) {
         const slotStart = new Date(`${date}T${pad(h)}:${pad(min)}:00${tz}`);
         const slotEnd   = new Date(slotStart.getTime() + SLOT_MINUTES * 60000);
 
-        if (slotEnd <= now) continue;
+        if (slotEnd <= nowD) continue;
 
         const isBusy = busy.some(({ start, end }) =>
           slotStart < new Date(end) && slotEnd > new Date(start)
@@ -60,18 +103,26 @@ export async function onRequestGet({ request, env }) {
       }
     }
 
-    return json({ slots });
+    return json({ slots }, 200, corsHeaders);
   } catch (err) {
-    return json({ error: err.message }, 500);
+    console.error('available.js error:', err.message);
+    // Non esporre dettagli interni
+    return json({ error: 'Errore interno' }, 500, corsHeaders);
   }
 }
 
-export async function onRequestOptions() {
+export async function onRequestOptions({ request }) {
+  const corsHeaders = buildCorsHeaders(request);
   return new Response(null, {
-    headers: { ...HEADERS, 'Access-Control-Allow-Methods': 'GET, OPTIONS' },
+    headers: {
+      ...corsHeaders,
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
+    },
   });
 }
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: HEADERS });
+function json(data, status = 200, headers = {}) {
+  return new Response(JSON.stringify(data), { status, headers });
 }
