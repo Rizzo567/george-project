@@ -272,10 +272,6 @@
 
       </div>
 
-      <!-- postazione characters (entrano quando la mappa si espande) -->
-      <img class="s03-berlin-post" src="assets/img/character/berlin-postazione.jpeg" alt="" aria-hidden="true">
-      <img class="s03-george-post" src="assets/img/character/george-postazione.jpeg" alt="" aria-hidden="true">
-
     </section>
 
   </main>
@@ -360,11 +356,7 @@
             if (george) george.classList.add('is-exiting');
             setTimeout(function() {
               card.classList.add('is-expanded');
-              var bp = document.querySelector('.s03-berlin-post');
-              var gp = document.querySelector('.s03-george-post');
-              if (bp) bp.classList.add('is-visible');
-              if (gp) gp.classList.add('is-visible');
-            }, 220);
+              }, 220);
           }, 3000);
         }
       }, { threshold: 0.3 });
@@ -386,11 +378,8 @@
         var george = document.querySelector('.s03-george');
         var ball   = document.querySelector('.s03-ball');
 
-        var berlinPost = document.querySelector('.s03-berlin-post');
-        var georgePost = document.querySelector('.s03-george-post');
-
         if (!expanding) {
-          // collapsing → riporta i personaggi basket, nascondi postazione
+          // collapsing → riporta i personaggi basket
           [berlin, george, ball].forEach(function(el) {
             if (!el) return;
             el.classList.remove('is-exiting', 'is-entering');
@@ -401,18 +390,14 @@
               el.removeEventListener('animationend', handler);
             });
           });
-          if (berlinPost) berlinPost.classList.remove('is-visible');
-          if (georgePost) georgePost.classList.remove('is-visible');
         } else {
-          // expanding → manda via i personaggi basket, mostra postazione
+          // expanding → manda via i personaggi basket
           [berlin, george, ball].forEach(function(el) {
             if (!el) return;
             el.classList.remove('is-exiting', 'is-entering');
             void el.offsetWidth;
             el.classList.add('is-exiting');
           });
-          if (berlinPost) berlinPost.classList.add('is-visible');
-          if (georgePost) georgePost.classList.add('is-visible');
         }
       });
 
