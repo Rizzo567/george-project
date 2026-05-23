@@ -1,4 +1,4 @@
-import { getAccessToken, uploadToDrive, getCalendarId, getServiceAccount, romeOffset, pad } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, pad } from './_google.js';
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: CORS lockdown
@@ -36,8 +36,6 @@ function buildCorsHeaders(request) {
 // ────────────────────────────────────────────────────────────────────
 const ALLOWED_SERVICES = ['Cut', 'Fade', 'Beard', 'Razor', 'Full'];
 const ALLOWED_BARBERS  = ['george', 'berlin'];
-const ALLOWED_MIMES    = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic'];
-const MAX_IMG_BYTES    = 5 * 1024 * 1024; // 5 MB
 
 function isValidDate(s) {
   if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
@@ -71,26 +69,6 @@ function isValidPhone(s) {
   if (trimmed.length < 5 || trimmed.length > 32) return false;
   // Caratteri ammessi: cifre, +, spazi, trattini, parentesi
   return /^[\d\s+\-()]+$/.test(trimmed);
-}
-
-function isValidFileName(s) {
-  if (typeof s !== 'string') return false;
-  if (s.length > 256) return false;
-  // No path traversal, no slash, no null bytes
-  return !/[\/\\\x00]/.test(s) && !s.includes('..');
-}
-
-// Stima dimensione decodificata di una stringa base64 (4 char → 3 byte)
-function base64DecodedLength(b64) {
-  if (typeof b64 !== 'string') return 0;
-  const pad = (b64.endsWith('==') ? 2 : b64.endsWith('=') ? 1 : 0);
-  return Math.floor(b64.length * 3 / 4) - pad;
-}
-
-function isValidBase64(s) {
-  if (typeof s !== 'string') return false;
-  if (s.length > 10_000_000) return false; // sanity guard
-  return /^[A-Za-z0-9+/=\s]*$/.test(s);
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -167,7 +145,7 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); }
   catch { return json({ error: 'Body non valido' }, 400, corsHeaders); }
 
-  let { barber, nome, telefono, data, ora, servizio, note, imgBase64, imgMime, imgName, imgUrl } = body;
+  let { barber, nome, telefono, data, ora, servizio, note, imgUrl } = body;
 
   // ── Validazione ────────────────────────────────────────────────
   if (!ALLOWED_BARBERS.includes(barber)) {
@@ -196,38 +174,13 @@ export async function onRequestPost({ request, env }) {
     note = null;
   }
 
-  // Validazione imgUrl (Supabase public URL — fallback se Drive non funziona)
+  // Validazione imgUrl (Supabase public URL)
   let safeImgUrl = null;
   if (imgUrl != null && imgUrl !== '') {
     const trimmedUrl = String(imgUrl).trim();
     if (trimmedUrl.startsWith('https://') && trimmedUrl.length <= 2048) {
       safeImgUrl = trimmedUrl;
     }
-  }
-
-  // Validazione immagine
-  let safeImgBase64 = null;
-  let safeImgMime   = null;
-  let safeImgName   = null;
-  if (imgBase64 || imgMime || imgName) {
-    if (!imgBase64 || !imgMime || !imgName) {
-      return json({ error: 'Dati immagine incompleti' }, 400, corsHeaders);
-    }
-    if (!ALLOWED_MIMES.includes(imgMime)) {
-      return json({ error: 'Tipo immagine non supportato' }, 400, corsHeaders);
-    }
-    if (!isValidFileName(imgName)) {
-      return json({ error: 'Nome file non valido' }, 400, corsHeaders);
-    }
-    if (!isValidBase64(imgBase64)) {
-      return json({ error: 'Immagine non valida' }, 400, corsHeaders);
-    }
-    if (base64DecodedLength(imgBase64) > MAX_IMG_BYTES) {
-      return json({ error: 'Immagine troppo grande (max 5MB)' }, 413, corsHeaders);
-    }
-    safeImgBase64 = imgBase64;
-    safeImgMime   = imgMime;
-    safeImgName   = imgName;
   }
 
   // ── Dedup: stesso slot già prenotato? ──────────────────────────
@@ -248,29 +201,12 @@ export async function onRequestPost({ request, env }) {
   const endH = Math.floor(endTotal / 60);
   const endM = endTotal % 60;
 
-  // ── Drive upload (isolato: se fallisce non blocca Calendar) ──────────
-  let driveLink = null;
-  if (safeImgBase64 && safeImgMime) {
-    try {
-      const fileName = safeImgName || `riferimento_${data}.jpg`;
-      const { webViewLink } = await uploadToDrive(serviceAccount, safeImgBase64, safeImgMime, fileName);
-      driveLink = webViewLink || null;
-    } catch (driveErr) {
-      // Drive API non abilitata o quota superata — logga e continua
-      console.error('Drive upload failed (non-blocking):', driveErr.message);
-    }
-  }
-
-  // Sorgente immagine: Drive se disponibile, altrimenti URL Supabase pubblica
-  const imgFallbackUrl = !driveLink ? safeImgUrl : null;
-
   try {
     // Componi description in modo safe (nessun input grezzo nelle linee strutturate)
     const description = [
       `Tel: ${telefono}`,
       note ? `Note: ${note}` : null,
-      driveLink     ? `Immagine: ${driveLink}`     : null,
-      imgFallbackUrl ? `Immagine: ${imgFallbackUrl}` : null,
+      safeImgUrl ? `Immagine riferimento: ${safeImgUrl}` : null,
     ].filter(Boolean).join('\n');
 
     const event = {
@@ -278,14 +214,10 @@ export async function onRequestPost({ request, env }) {
       description,
       start: { dateTime: `${data}T${pad(startH)}:${pad(startM)}:00${tz}`, timeZone: 'Europe/Rome' },
       end:   { dateTime: `${data}T${pad(endH)}:${pad(endM)}:00${tz}`,   timeZone: 'Europe/Rome' },
-      ...(driveLink && {
-        attachments: [{ fileUrl: driveLink, title: 'Immagine di riferimento' }],
-      }),
     };
 
     const token = await getAccessToken(serviceAccount);
-    const calUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`
-      + (driveLink ? '?supportsAttachments=true' : '');
+    const calUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
 
     const res = await fetch(calUrl, {
       method: 'POST',
@@ -298,7 +230,7 @@ export async function onRequestPost({ request, env }) {
       throw new Error(err.error?.message ?? 'Errore Google Calendar');
     }
 
-    return json({ ok: driveLink ? 'drive' : (imgFallbackUrl ? 'url' : 'no-img') }, 200, corsHeaders);
+    return json({ ok: safeImgUrl ? 'url' : 'no-img' }, 200, corsHeaders);
   } catch (err) {
     // Non esporre dettagli interni al client
     console.error('book.js error:', err.message);

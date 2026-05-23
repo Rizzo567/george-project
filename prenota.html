@@ -1194,12 +1194,6 @@
                 ora:      state.time,
                 notes:    note || null
               };
-              if (imgBase64 && imgMime) {
-                calBody.imgBase64 = imgBase64;
-                calBody.imgMime   = imgMime;
-                calBody.imgName   = imgName;
-              }
-              // Passa URL Supabase come fallback se Drive non disponibile
               if (imgUrl) { calBody.imgUrl = imgUrl; }
 
               return Promise.all([
