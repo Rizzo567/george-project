@@ -167,7 +167,7 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); }
   catch { return json({ error: 'Body non valido' }, 400, corsHeaders); }
 
-  let { barber, nome, telefono, data, ora, servizio, note, imgBase64, imgMime, imgName } = body;
+  let { barber, nome, telefono, data, ora, servizio, note, imgBase64, imgMime, imgName, imgUrl } = body;
 
   // ── Validazione ────────────────────────────────────────────────
   if (!ALLOWED_BARBERS.includes(barber)) {
@@ -194,6 +194,15 @@ export async function onRequestPost({ request, env }) {
     note = sanitizeText(note, 500);
   } else {
     note = null;
+  }
+
+  // Validazione imgUrl (Supabase public URL — fallback se Drive non funziona)
+  let safeImgUrl = null;
+  if (imgUrl != null && imgUrl !== '') {
+    const trimmedUrl = String(imgUrl).trim();
+    if (trimmedUrl.startsWith('https://') && trimmedUrl.length <= 2048) {
+      safeImgUrl = trimmedUrl;
+    }
   }
 
   // Validazione immagine
@@ -239,20 +248,29 @@ export async function onRequestPost({ request, env }) {
   const endH = Math.floor(endTotal / 60);
   const endM = endTotal % 60;
 
-  try {
-    // Upload immagine su Drive se presente
-    let driveLink = null;
-    if (safeImgBase64 && safeImgMime) {
+  // ── Drive upload (isolato: se fallisce non blocca Calendar) ──────────
+  let driveLink = null;
+  if (safeImgBase64 && safeImgMime) {
+    try {
       const fileName = safeImgName || `riferimento_${data}.jpg`;
       const { webViewLink } = await uploadToDrive(serviceAccount, safeImgBase64, safeImgMime, fileName);
-      driveLink = webViewLink;
+      driveLink = webViewLink || null;
+    } catch (driveErr) {
+      // Drive API non abilitata o quota superata — logga e continua
+      console.error('Drive upload failed (non-blocking):', driveErr.message);
     }
+  }
 
+  // Sorgente immagine: Drive se disponibile, altrimenti URL Supabase pubblica
+  const imgFallbackUrl = !driveLink ? safeImgUrl : null;
+
+  try {
     // Componi description in modo safe (nessun input grezzo nelle linee strutturate)
     const description = [
       `Tel: ${telefono}`,
       note ? `Note: ${note}` : null,
-      driveLink ? `Immagine riferimento: ${driveLink}` : null,
+      driveLink     ? `Immagine: ${driveLink}`     : null,
+      imgFallbackUrl ? `Immagine: ${imgFallbackUrl}` : null,
     ].filter(Boolean).join('\n');
 
     const event = {
@@ -280,7 +298,7 @@ export async function onRequestPost({ request, env }) {
       throw new Error(err.error?.message ?? 'Errore Google Calendar');
     }
 
-    return json({ ok: true }, 200, corsHeaders);
+    return json({ ok: driveLink ? 'drive' : (imgFallbackUrl ? 'url' : 'no-img') }, 200, corsHeaders);
   } catch (err) {
     // Non esporre dettagli interni al client
     console.error('book.js error:', err.message);

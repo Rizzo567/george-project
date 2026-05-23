@@ -222,7 +222,7 @@
   function loadAppointments() {
     var tbody = document.getElementById('aptTableBody');
     var empty = document.getElementById('dashEmpty');
-    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--silver);padding:24px 16px;font-size:13px;">Caricamento…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="color:var(--silver);padding:24px 16px;font-size:13px;">Caricamento…</td></tr>';
     empty.classList.add('is-hidden');
 
     var query = sb.from('appointments')
@@ -235,7 +235,7 @@
 
     query.then(function (res) {
       if (res.error) {
-        tbody.innerHTML = '<tr><td colspan="9" style="color:#ff6b6b;padding:24px 16px;">Errore caricamento dati.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="color:#ff6b6b;padding:24px 16px;">Errore caricamento dati.</td></tr>';
         return;
       }
       renderTable(res.data || []);
@@ -259,6 +259,16 @@
       var dateStr     = dateObj.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' });
       var timeStr     = (apt.time || '').slice(0, 5);
 
+      var fotoCell = apt.img_url
+        ? '<td style="padding:6px 8px;">' +
+            '<a href="' + esc(apt.img_url) + '" target="_blank" rel="noopener noreferrer" title="Apri immagine">' +
+              '<img src="' + esc(apt.img_url) + '" ' +
+                'style="width:44px;height:44px;object-fit:cover;display:block;border:1px solid rgba(229,225,216,0.12);" ' +
+                'loading="lazy" alt="Riferimento taglio">' +
+            '</a>' +
+          '</td>'
+        : '<td style="color:var(--silver);font-size:12px;text-align:center;">—</td>';
+
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td>' + dateStr + '</td>' +
@@ -268,6 +278,7 @@
         '<td>' + barberLabel + '</td>' +
         '<td>' + esc(apt.service) + '</td>' +
         '<td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(apt.notes || '—') + '</td>' +
+        fotoCell +
         '<td>' + statusBadge(apt.status) + '</td>' +
         '<td>' + actionButtons(apt) + '</td>';
       tbody.appendChild(tr);
