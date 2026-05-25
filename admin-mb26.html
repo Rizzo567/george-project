@@ -227,71 +227,106 @@
 </div>
 
 <style>
-  /* ── FILTER TRIGGER ── */
+  /* ─────────────────────────────────────────────
+     FILTER TRIGGER — taste-skill edition
+     Dark glass · spring physics · inner refraction
+  ───────────────────────────────────────────── */
+
   .filter-trigger-wrap {
     position: relative;
     display: inline-block;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
   }
+
+  /* Bottone ··· */
   .filter-trigger-btn {
     position: relative;
-    background: #1A1A1A;
-    border: 1px solid rgba(229,225,216,0.12);
-    color: #E5E1D8;
-    font-size: 22px;
-    letter-spacing: 0.08em;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    background: rgba(26,20,16,0.9);
+    border: 1px solid rgba(229,225,216,0.1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    color: rgba(229,225,216,0.7);
+    font-size: 18px;
+    letter-spacing: 0.15em;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border-color 0.18s, background 0.18s;
+    transition: border-color 0.2s ease, background 0.2s ease,
+                box-shadow 0.2s ease, transform 0.12s ease,
+                color 0.2s ease;
     line-height: 1;
-    padding-bottom: 6px;
+    padding-bottom: 4px;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
-  .filter-trigger-btn:hover,
+  .filter-trigger-btn:hover {
+    border-color: rgba(232,90,31,0.35);
+    background: rgba(30,22,16,0.95);
+    color: #E5E1D8;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08),
+                0 0 0 3px rgba(232,90,31,0.08);
+  }
+  .filter-trigger-btn:active {
+    transform: scale(0.96) translateY(1px);
+  }
   .filter-trigger-btn.is-open {
     border-color: rgba(232,90,31,0.5);
-    background: #1f1a18;
+    background: rgba(30,22,16,0.98);
+    color: #E85A1F;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08),
+                0 0 0 3px rgba(232,90,31,0.1);
   }
   .filter-dots { pointer-events: none; }
 
-  /* pallino arancio se filtri attivi */
+  /* Pallino stato attivo */
   .filter-active-dot {
     position: absolute;
-    top: 9px;
-    right: 9px;
-    width: 7px;
-    height: 7px;
+    top: 8px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: #E85A1F;
     display: none;
-    border: 1.5px solid #0B0B0B;
+    border: 1.5px solid #0D0B09;
+    box-shadow: 0 0 6px rgba(232,90,31,0.6);
   }
   .filter-active-dot.is-visible { display: block; }
 
-  /* ── POPUP ── */
+  /* ─── POPUP ─── */
   .filter-popup {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 8px);
     left: 0;
-    z-index: 200;
-    background: #161210;
-    border: 1px solid rgba(229,225,216,0.12);
-    border-radius: 16px;
-    padding: 20px 20px 16px;
-    min-width: 260px;
-    box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+    z-index: 300;
 
-    /* hidden state */
+    /* Glass surface */
+    background: rgba(14,11,9,0.92);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(229,225,216,0.1);
+    /* Inner refraction — taste-skill liquid glass */
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.07),
+      inset 0 -1px 0 rgba(0,0,0,0.3),
+      0 24px 64px rgba(0,0,0,0.7),
+      0 4px 16px rgba(0,0,0,0.4);
+    border-radius: 20px;
+    padding: 0;
+    min-width: 272px;
+    overflow: hidden;
+
+    /* Hidden state */
     opacity: 0;
     pointer-events: none;
-    transform: scale(0.88) translateY(-6px);
+    transform: scale(0.86) translateY(-8px);
     transform-origin: top left;
-    transition: opacity 0.22s cubic-bezier(0.34,1.56,0.64,1),
-                transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    transition:
+      opacity 0.26s cubic-bezier(0.34, 1.48, 0.64, 1),
+      transform 0.26s cubic-bezier(0.34, 1.48, 0.64, 1);
   }
   .filter-popup.is-open {
     opacity: 1;
@@ -299,53 +334,92 @@
     transform: scale(1) translateY(0);
   }
 
+  /* Header popup */
+  .filter-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid rgba(229,225,216,0.06);
+  }
   .filter-popup-label {
     font-family: 'Inter', Arial, sans-serif;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
-    letter-spacing: 0.28em;
+    letter-spacing: 0.32em;
     text-transform: uppercase;
-    color: #8E8E8E;
-    margin-bottom: 16px;
+    color: rgba(142,142,142,0.8);
   }
-  .filter-popup-section { margin-bottom: 16px; }
+  .filter-popup-reset {
+    background: none;
+    border: none;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: rgba(232,90,31,0.6);
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s;
+    text-transform: uppercase;
+  }
+  .filter-popup-reset:hover { color: #E85A1F; }
+
+  /* Corpo popup */
+  .filter-popup-body { padding: 14px 18px 18px; }
+
+  .filter-popup-section { margin-bottom: 14px; }
   .filter-popup-section:last-child { margin-bottom: 0; }
+
   .filter-popup-section-title {
     font-family: 'Inter', Arial, sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.12em;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #5A5A5A;
-    margin-bottom: 10px;
+    color: rgba(90,90,90,0.9);
+    margin-bottom: 8px;
   }
+
   .filter-popup-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
   }
+
+  /* Chips */
   .filter-chip {
-    background: #1A1A1A;
-    border: 1px solid rgba(229,225,216,0.1);
-    color: #8E8E8E;
+    background: rgba(26,26,26,0.8);
+    border: 1px solid rgba(229,225,216,0.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    color: rgba(142,142,142,0.9);
     font-family: 'Inter', Arial, sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.06em;
-    padding: 7px 14px;
-    border-radius: 20px;
+    letter-spacing: 0.04em;
+    padding: 6px 13px;
+    border-radius: 99px;
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    transition:
+      border-color 0.15s ease,
+      color 0.15s ease,
+      background 0.15s ease,
+      transform 0.1s ease,
+      box-shadow 0.15s ease;
     white-space: nowrap;
   }
   .filter-chip:hover {
-    border-color: rgba(232,90,31,0.4);
+    border-color: rgba(232,90,31,0.3);
     color: #E5E1D8;
+    background: rgba(232,90,31,0.06);
   }
+  .filter-chip:active { transform: scale(0.95); }
   .filter-chip.is-active {
-    background: rgba(232,90,31,0.15);
-    border-color: #E85A1F;
+    background: rgba(232,90,31,0.14);
+    border-color: rgba(232,90,31,0.55);
     color: #E85A1F;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 0 0 2px rgba(232,90,31,0.08);
   }
 </style>
 

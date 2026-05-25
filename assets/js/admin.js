@@ -280,8 +280,7 @@
     empty.classList.add('is-hidden');
 
     var query = sb.from('appointments')
-      .select('*')
-      .neq('date', todayStr);         // escludi oggi — già nella sezione Oggi
+      .select('*');
 
     if (activeBarber) query = query.eq('barber', activeBarber);
     if (activeStatus) {
@@ -291,7 +290,7 @@
     }
 
     if (!showStorico) {
-      // Modalità default: prossimi 14 giorni (domani in poi)
+      // Modalità default: prossimi 14 giorni (domani in poi, escludi oggi)
       var futureLimit = new Date();
       futureLimit.setDate(futureLimit.getDate() + 14);
       query = query
@@ -300,9 +299,9 @@
         .order('date', { ascending: true })
         .order('time', { ascending: true });
     } else {
-      // Storico: tutto il passato, ordine inverso
+      // Storico: passato + oggi completati/cancellati (non i confirmed di oggi che stanno in "Oggi")
       query = query
-        .lt('date', todayStr)
+        .or('date.lt.' + todayStr + ',and(date.eq.' + todayStr + ',status.neq.confirmed)')
         .order('date', { ascending: false })
         .order('time', { ascending: false });
     }
@@ -369,7 +368,8 @@
     if (activeStatus) {
       query = query.eq('status', activeStatus);
     } else {
-      query = query.neq('status', 'cancelled');
+      // Solo confirmed nella sezione Oggi — i completed spariscono qui e vanno in storico
+      query = query.eq('status', 'confirmed');
     }
 
     query.then(function (res) {
