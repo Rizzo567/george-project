@@ -1080,8 +1080,9 @@
           slots.push((ph < 10 ? '0' : '') + ph + ':' + (pm < 10 ? '0' : '') + pm);
         }
 
-        // Slot extra Berlin dopo 18:00
+        // Slot extra dopo l'orario standard
         if (barber === 'berlin') slots.push('18:45');
+        if (barber === 'george') slots.push('18:20');
 
         return slots.map(function (t) { return { time: t, available: true }; });
       }
