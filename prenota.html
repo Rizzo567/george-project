@@ -6,7 +6,7 @@
   <meta name="description" content="Prenota il tuo appuntamento da Mister Barber — Via Torino 38, Pavia.">
 
   <!-- Security headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.emailjs.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 
@@ -18,11 +18,7 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <!-- SECURITY: pinning a versione esatta + crossorigin per SRI/error reporting -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="assets/js/config.js"></script>
-  <script>
-    emailjs.init({ publicKey: window.MB_CONFIG.EMAILJS_PUBLIC_KEY });
-  </script>
 
   <style>
     /* ─── PRENOTA PAGE ─── */
@@ -1237,6 +1233,7 @@
               var calBody = {
                 barber:   state.barber,
                 nome:     nome,
+                email:    email || null,
                 telefono: telefono,
                 servizio: servizio,
                 data:     state.date,
@@ -1335,32 +1332,7 @@
         btn.classList.remove('is-loading');
         btn.classList.add('is-success');
 
-        // ── Email di conferma al cliente ──────────────────────
-        var barberLabel = state.barber === 'george' ? 'George' : 'Berlin';
-        var dateObj = new Date(state.date + 'T12:00:00');
-        var dateStr = DAYS[dateObj.getDay()] + ' ' +
-                      dateObj.getDate() + ' ' + MONTHS[dateObj.getMonth()] + ' ' +
-                      dateObj.getFullYear();
-
-        var barberImg = window.location.origin + '/assets/img/character/' +
-          (state.barber === 'george'
-            ? 'george-fit1-removebg-preview.png'
-            : 'berlin-canotta-removebg-preview.png');
-
-        console.log('EmailJS send → email:', state.email, 'nome:', state.nome);
-        emailjs.send(window.MB_CONFIG.EMAILJS_SERVICE_ID, window.MB_CONFIG.EMAILJS_TEMPLATE_ID, {
-          email:        state.email,
-          to_name:      state.nome,
-          barbiere:     barberLabel,
-          barbiere_img: barberImg,
-          data:         dateStr,
-          orario:       state.time,
-          servizio:     state.servizio
-        }).then(function(res) {
-          console.log('EmailJS ok:', res);
-        }).catch(function(err) {
-          console.error('EmailJS error:', err);
-        });
+        // Email di conferma inviata server-side da /api/book (nessuna chiave esposta al client)
 
         sessionStorage.setItem('mbooking', JSON.stringify({
           barber: state.barber,

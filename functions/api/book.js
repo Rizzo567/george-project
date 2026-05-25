@@ -145,7 +145,7 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); }
   catch { return json({ error: 'Body non valido' }, 400, corsHeaders); }
 
-  let { barber, nome, telefono, data, ora, servizio, note, imgUrl } = body;
+  let { barber, nome, telefono, data, ora, servizio, note, imgUrl, email } = body;
 
   // ── Validazione ────────────────────────────────────────────────
   if (!ALLOWED_BARBERS.includes(barber)) {
@@ -231,7 +231,113 @@ export async function onRequestPost({ request, env }) {
     }
 
     const createdEvent = await res.json();
-    return json({ ok: true, eventId: createdEvent.id ?? null }, 200, corsHeaders);
+    const eventId = createdEvent.id ?? null;
+
+    // ── Email di conferma al cliente (server-side via Resend) ──
+    if (email && env.RESEND_API_KEY) {
+      const emailSanitized = sanitizeText(email, 254);
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailSanitized)) {
+        const barberLabel = barber === 'george' ? 'George' : 'Berlin';
+        const [yyyy, mm, dd] = data.split('-');
+        const dateObj = new Date(`${data}T12:00:00Z`);
+        const DAYS   = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+        const MONTHS = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+        const dateStr = `${DAYS[dateObj.getUTCDay()]} ${dd} ${MONTHS[dateObj.getUTCMonth()]} ${yyyy}`;
+
+        const emailHtml = `<!DOCTYPE html>
+<html lang="it"><head><meta charset="UTF-8"><meta name="color-scheme" content="light"></head>
+<body style="margin:0;padding:0;background-color:#F5F4F1;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F5F4F1;padding:40px 16px;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background-color:#FFFFFF;">
+<tr><td style="background-color:#E85A1F;height:4px;font-size:0;line-height:0;">&nbsp;</td></tr>
+<tr><td style="padding:36px 40px 32px;background-color:#0B0B0B;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+    <td><div style="font-family:Impact,Arial,sans-serif;font-size:30px;letter-spacing:0.06em;text-transform:uppercase;line-height:0.9;">
+      <span style="color:#E5E1D8;">Mister</span><br><span style="color:#E85A1F;">Barber</span>
+    </div></td>
+    <td align="right" valign="middle">
+      <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;letter-spacing:0.28em;text-transform:uppercase;color:#E85A1F;background-color:rgba(232,90,31,0.15);padding:6px 12px;border:1px solid #E85A1F;">CONFIRMED</span>
+    </td>
+  </tr></table>
+</td></tr>
+<tr><td style="padding:40px 40px 0;background-color:#FFFFFF;">
+  <p style="font-family:Arial,sans-serif;font-size:15px;color:#1A1A1A;line-height:1.7;margin:0 0 32px;">
+    Ciao <strong>${nome}</strong>,<br><br>La tua prenotazione è confermata. Ti aspettiamo puntuale.
+  </p>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E8E6E1;border-left:4px solid #E85A1F;margin-bottom:32px;">
+    <tr><td style="padding:28px 28px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F0EDE8;">
+        <tr>
+          <td>
+            <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;letter-spacing:0.22em;text-transform:uppercase;color:#8E8E8E;display:block;margin-bottom:6px;">Barbiere</span>
+            <span style="font-family:Impact,Arial,sans-serif;font-size:26px;letter-spacing:0.04em;text-transform:uppercase;color:#0B0B0B;">${barberLabel}</span>
+          </td>
+        </tr>
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F0EDE8;">
+        <tr>
+          <td width="50%">
+            <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;letter-spacing:0.22em;text-transform:uppercase;color:#8E8E8E;display:block;margin-bottom:6px;">Data</span>
+            <span style="font-family:Impact,Arial,sans-serif;font-size:22px;letter-spacing:0.04em;text-transform:uppercase;color:#0B0B0B;">${dateStr}</span>
+          </td>
+          <td width="50%">
+            <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;letter-spacing:0.22em;text-transform:uppercase;color:#8E8E8E;display:block;margin-bottom:6px;">Orario</span>
+            <span style="font-family:Impact,Arial,sans-serif;font-size:22px;letter-spacing:0.04em;color:#E85A1F;">${ora}</span>
+          </td>
+        </tr>
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+        <tr><td>
+          <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;letter-spacing:0.22em;text-transform:uppercase;color:#8E8E8E;display:block;margin-bottom:6px;">Servizio</span>
+          <span style="font-family:Impact,Arial,sans-serif;font-size:22px;letter-spacing:0.04em;text-transform:uppercase;color:#0B0B0B;">${servizio || '—'}</span>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F5F4F1;margin-bottom:36px;">
+    <tr><td style="padding:16px 20px;">
+      <span style="font-family:Arial,sans-serif;font-size:12px;color:#5A5A5A;line-height:1.7;letter-spacing:0.04em;">
+        Via Torino 38, Pavia &nbsp;·&nbsp; Mar – Sab 09:00 – 19:00
+      </span>
+    </td></tr>
+  </table>
+</td></tr>
+<tr><td style="padding:24px 40px 32px;background-color:#FFFFFF;border-top:1px solid #F0EDE8;">
+  <p style="font-family:Arial,sans-serif;font-size:11px;color:#8E8E8E;letter-spacing:0.06em;margin:0;line-height:1.8;">
+    Devi spostare o cancellare?<br>
+    <a href="mailto:superberlin0204@gmail.com" style="color:#E85A1F;text-decoration:none;font-weight:bold;">superberlin0204@gmail.com</a>
+  </p>
+</td></tr>
+<tr><td style="background-color:#0B0B0B;padding:14px 40px;">
+  <p style="font-family:Arial,sans-serif;font-size:10px;color:#5A5A5A;letter-spacing:0.12em;text-transform:uppercase;margin:0;">
+    © 2026 Mister Barber — Via Torino 38, Pavia
+  </p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+
+        // Fire-and-forget — non blocca la risposta al client
+        fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Mister Barber <noreply@misterbarber.it>',
+            to:   [emailSanitized],
+            reply_to: 'superberlin0204@gmail.com',
+            subject: `Prenotazione confermata — ${barberLabel} · ${ora}`,
+            html: emailHtml,
+          }),
+        }).catch(err => console.error('Resend email error:', err.message));
+      }
+    }
+
+    return json({ ok: true, eventId }, 200, corsHeaders);
   } catch (err) {
     // Non esporre dettagli interni al client
     console.error('book.js error:', err.message);
