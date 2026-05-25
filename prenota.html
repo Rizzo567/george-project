@@ -1057,17 +1057,29 @@
       }
 
       function fallbackSlots(barber) {
-        // George: 40min servizio + 5min pausa = slot ogni 45min, continui senza pausa pranzo
-        // Berlin: 60min servizio, nessuna pausa, slot ogni 60min, continui senza pausa pranzo
-        var step = barber === 'george' ? 45 : 60;
-        var startMin = 9 * 60;   // 09:00
-        var endMin   = 18 * 60;  // ultimo slot max 18:00
+        // George: 40min servizio + 5min pausa = slot ogni 45min
+        // Berlin: 60min servizio, nessuna pausa = slot ogni 60min
+        // Pausa pranzo 12:00-13:00 per entrambi: mattina si ferma, pomeriggio riparte da 13:00
+        var step     = barber === 'george' ? 45 : 60;
+        var breakStart = 12 * 60; // 12:00
+        var breakEnd   = 13 * 60; // 13:00
+        var endMin     = 18 * 60; // ultimo slot max 18:00
         var slots = [];
-        for (var m = startMin; m <= endMin; m += step) {
+
+        // Mattina: da 09:00 fino a prima della pausa
+        for (var m = 9 * 60; m < breakStart; m += step) {
           var h = Math.floor(m / 60);
           var mm = m % 60;
           slots.push((h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm);
         }
+
+        // Pomeriggio: riparte da 13:00
+        for (var p = breakEnd; p <= endMin; p += step) {
+          var ph = Math.floor(p / 60);
+          var pm = p % 60;
+          slots.push((ph < 10 ? '0' : '') + ph + ':' + (pm < 10 ? '0' : '') + pm);
+        }
+
         return slots.map(function (t) { return { time: t, available: true }; });
       }
 
