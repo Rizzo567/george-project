@@ -958,3 +958,32 @@ body {
   font-size: 10px;
   justify-content: center;
 }
+
+/* ─── STORICO BUTTON ─── */
+.storico-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 28px 0 8px;
+}
+
+.storico-btn {
+  background: none;
+  border: 1px solid rgba(229,225,216,0.12);
+  color: var(--silver);
+  font-family: var(--font-body);
+  font-size: var(--eyebrow);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 10px 28px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.storico-btn:hover {
+  border-color: rgba(229,225,216,0.3);
+  color: var(--canvas);
+}
+.storico-btn.is-active {
+  border-color: rgba(232,90,31,0.4);
+  color: var(--ember);
+}

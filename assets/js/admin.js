@@ -10,6 +10,7 @@
   // ── State ──────────────────────────────────────────────────
   var activeBarber    = '';
   var activeStatus    = '';
+  var showStorico     = false;
   var allAppointments = [];
   var lastDates14     = [];
 
@@ -218,6 +219,12 @@
     loadAppointments();
   });
 
+  // ── Storico toggle ─────────────────────────────────────────
+  document.getElementById('storicoBtn').addEventListener('click', function () {
+    showStorico = !showStorico;
+    loadAppointments();
+  });
+
   // ── Carica appuntamenti ────────────────────────────────────
   function loadAppointments() {
     var listEl = document.getElementById('aptList');
@@ -227,11 +234,17 @@
 
     var query = sb.from('appointments')
       .select('*')
-      .order('date', { ascending: true })
-      .order('time', { ascending: true });
+      .order('date', { ascending: false })
+      .order('time', { ascending: false });
 
     if (activeBarber) query = query.eq('barber', activeBarber);
     if (activeStatus) query = query.eq('status', activeStatus);
+
+    if (!showStorico) {
+      var cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 6);
+      query = query.gte('date', cutoff.toISOString().slice(0, 10));
+    }
 
     query.then(function (res) {
       if (res.error) {
@@ -239,7 +252,20 @@
         return;
       }
       renderList(res.data || []);
+      updateStoricoBtn();
     });
+  }
+
+  function updateStoricoBtn() {
+    var btn = document.getElementById('storicoBtn');
+    if (!btn) return;
+    if (showStorico) {
+      btn.textContent = 'Nascondi storico';
+      btn.classList.add('is-active');
+    } else {
+      btn.textContent = 'Visualizza storico';
+      btn.classList.remove('is-active');
+    }
   }
 
   // ── Render lista compatta ──────────────────────────────────
@@ -263,11 +289,22 @@
       groups[d].push(apt);
     });
 
+    var todayStr     = new Date().toISOString().slice(0, 10);
+    var yesterdayObj = new Date(); yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+    var yesterdayStr = yesterdayObj.toISOString().slice(0, 10);
+
     groupOrder.forEach(function (dateStr) {
-      var dateObj  = new Date(dateStr + 'T12:00:00');
-      var dayLabel = dateObj.toLocaleDateString('it-IT', {
-        weekday: 'short', day: '2-digit', month: 'short'
-      });
+      var dayLabel;
+      if (dateStr === todayStr) {
+        dayLabel = 'Oggi';
+      } else if (dateStr === yesterdayStr) {
+        dayLabel = 'Ieri';
+      } else {
+        var dateObj = new Date(dateStr + 'T12:00:00');
+        dayLabel = dateObj.toLocaleDateString('it-IT', {
+          weekday: 'short', day: '2-digit', month: 'short'
+        });
+      }
 
       var sep = document.createElement('div');
       sep.className   = 'apt-date-sep';
