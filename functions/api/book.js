@@ -234,8 +234,11 @@ export async function onRequestPost({ request, env }) {
     const eventId = createdEvent.id ?? null;
 
     // ── Email di conferma al cliente (server-side via Resend) ──
+    let emailDebug = { hasEmail: !!email, hasKey: !!env.RESEND_API_KEY, sent: false, error: null };
     if (email && env.RESEND_API_KEY) {
       const emailSanitized = sanitizeText(email, 254);
+      emailDebug.sanitized = emailSanitized;
+      emailDebug.validFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailSanitized);
       if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailSanitized)) {
         const barberLabel = barber === 'george' ? 'George' : 'Berlin';
         const [yyyy, mm, dd] = data.split('-');
@@ -336,15 +339,19 @@ export async function onRequestPost({ request, env }) {
           });
           if (!resendRes.ok) {
             const errText = await resendRes.text();
+            emailDebug.error = `${resendRes.status}: ${errText}`;
             console.error('Resend error:', resendRes.status, errText);
+          } else {
+            emailDebug.sent = true;
           }
         } catch (emailErr) {
+          emailDebug.error = emailErr.message;
           console.error('Resend fetch error:', emailErr.message);
         }
       }
     }
 
-    return json({ ok: true, eventId }, 200, corsHeaders);
+    return json({ ok: true, eventId, _emailDebug: emailDebug }, 200, corsHeaders);
   } catch (err) {
     // Non esporre dettagli interni al client
     console.error('book.js error:', err.message);
