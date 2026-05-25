@@ -1079,9 +1079,9 @@
           slots.push((ph < 10 ? '0' : '') + ph + ':' + (pm < 10 ? '0' : '') + pm);
         }
 
-        // Slot extra dopo l'orario standard
+
         if (barber === 'berlin') slots.push('18:45');
-        if (barber === 'george') slots.push('18:20');
+        if (barber === 'george') slots.push('18:15');
 
         return slots.map(function (t) { return { time: t, available: true }; });
       }
@@ -1198,6 +1198,11 @@
         if (!email || !EMAIL_RE.test(email))     { document.getElementById('email').focus(); alert('Email non valida.'); return; }
         if (ALLOWED_SVC.indexOf(servizio) < 0)   { document.getElementById('servizio').focus(); alert('Seleziona un servizio valido.'); return; }
         if (!state.barber || !state.date || !state.time) { alert('Sessione scaduta. Riprova la prenotazione.'); return; }
+
+        // Salvo su state per renderli accessibili a doSuccess() (scope IIFE)
+        state.nome     = nome;
+        state.email    = email;
+        state.servizio = servizio;
 
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
@@ -1324,15 +1329,20 @@
             ? 'george-fit1-removebg-preview.png'
             : 'berlin-canotta-removebg-preview.png');
 
+        console.log('EmailJS send → email:', state.email, 'nome:', state.nome);
         emailjs.send(window.MB_CONFIG.EMAILJS_SERVICE_ID, window.MB_CONFIG.EMAILJS_TEMPLATE_ID, {
-          email:       email,
-          to_name:     nome,
-          barbiere:    barberLabel,
+          email:        state.email,
+          to_name:      state.nome,
+          barbiere:     barberLabel,
           barbiere_img: barberImg,
-          data:        dateStr,
-          orario:      state.time,
-          servizio:    servizio
-        }).catch(function () { /* fail silently — prenotazione già salvata */ });
+          data:         dateStr,
+          orario:       state.time,
+          servizio:     state.servizio
+        }).then(function(res) {
+          console.log('EmailJS ok:', res);
+        }).catch(function(err) {
+          console.error('EmailJS error:', err);
+        });
 
         sessionStorage.setItem('mbooking', JSON.stringify({
           barber: state.barber,

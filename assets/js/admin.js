@@ -249,7 +249,11 @@
       .lt('date', todayStr);          // escludi oggi — già nella sezione Oggi
 
     if (activeBarber) query = query.eq('barber', activeBarber);
-    if (activeStatus) query = query.eq('status', activeStatus);
+    if (activeStatus) {
+      query = query.eq('status', activeStatus);
+    } else {
+      query = query.neq('status', 'cancelled');
+    }
 
     if (!showStorico) {
       var cutoff = new Date();
@@ -316,7 +320,11 @@
       .order('time', { ascending: true });
 
     if (activeBarber) query = query.eq('barber', activeBarber);
-    if (activeStatus) query = query.eq('status', activeStatus);
+    if (activeStatus) {
+      query = query.eq('status', activeStatus);
+    } else {
+      query = query.neq('status', 'cancelled');
+    }
 
     query.then(function (res) {
       if (res.error) return;
