@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+</head>
+<body style="margin:0;padding:0;background-color:#F5F4F1;font-family:Arial,sans-serif;-webkit-text-size-adjust:100%;mso-line-height-rule:exactly;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F5F4F1;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background-color:#FFFFFF;">
+
+          <!-- TOP BAR arancio -->
+          <tr>
+            <td style="background-color:#E85A1F;height:4px;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+
+          <!-- HEADER -->
+          <tr>
+            <td style="padding:36px 40px 32px 40px;background-color:#0B0B0B;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td>
+                    <div style="font-family:Impact,Arial,sans-serif;font-size:30px;letter-spacing:0.06em;text-transform:uppercase;line-height:0.9;">
+                      <span style="color:#E5E1D8;">Mister</span><br>
+                      <span style="color:#E85A1F;">Barber</span>
+                    </div>
+                  </td>
+                  <td align="right" valign="middle">
+                    <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;letter-spacing:0.28em;text-transform:uppercase;color:#E85A1F;background-color:rgba(232,90,31,0.15);padding:6px 12px;border:1px solid #E85A1F;">CONFIRMED</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td style="padding:40px 40px 0 40px;background-color:#FFFFFF;">
+
+              <!-- Greeting -->
+              <p style="font-family:Arial,sans-serif;font-size:15px;color:#1A1A1A;line-height:1.7;margin:0 0 32px 0;">
+                Ciao <strong>{{to_name}}</strong>,<br><br>
+                La tua prenotazione è confermata. Ti aspettiamo puntuale.
+              </p>
+
+              <!-- BOOKING DETAILS -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E8E6E1;border-left:4px solid #E85A1F;margin-bottom:32px;">
+                <tr>
+                  <td style="padding:28px 28px 0 28px;">
+
+                    <!-- Barbiere -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F0EDE8;">
+                      <tr>
+                        <td>
+                          <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;letter-spacing:0.22em;text-transform:uppercase;color:#8E8E8E;display:block;margin-bottom:6px;">Barbiere</span>
+                          <span style="font-family:Impact,Arial,sans-serif;font-size:26px;letter-spacing:0.04em;text-transform:uppercase;color:#0B0B0B;">{{barbiere}}</span>
+                        </td>
+                        <td align="right" valign="bottom">
+                          <img src="{{barbiere_img}}" alt="{{barbiere}}" width="80" style="display:block;width:80px;height:auto;max-height:100px;object-fit:contain;">
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Data -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F0EDE8;">
+                      <tr>
+                        <td width="50%">
+                          <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;letter-spacing:0.22em;text-transform:uppercase;color:#8E8E8E;display:block;margin-bottom:6px;">Data</span>
+                          <span style="font-family:Impact,Arial,sans-serif;font-size:22px;letter-spacing:0.04em;text-transform:uppercase;color:#0B0B0B;">{{data}}</span>
+                        </td>
+                        <td width="50%">
+                          <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;letter-spacing:0.22em;text-transform:uppercase;color:#8E8E8E;display:block;margin-bottom:6px;">Orario</span>
+                          <span style="font-family:Impact,Arial,sans-serif;font-size:22px;letter-spacing:0.04em;color:#E85A1F;">{{orario}}</span>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Servizio -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+                      <tr>
+                        <td>
+                          <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:bold;letter-spacing:0.22em;text-transform:uppercase;color:#8E8E8E;display:block;margin-bottom:6px;">Servizio</span>
+                          <span style="font-family:Impact,Arial,sans-serif;font-size:22px;letter-spacing:0.04em;text-transform:uppercase;color:#0B0B0B;">{{servizio}}</span>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Indirizzo -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F5F4F1;margin-bottom:36px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <span style="font-family:Arial,sans-serif;font-size:12px;color:#5A5A5A;line-height:1.7;letter-spacing:0.04em;">
+                      📍 Via Torino 38, Pavia&nbsp;&nbsp;·&nbsp;&nbsp;Mar – Sab&nbsp;&nbsp;09:00 – 19:00
+                    </span>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="padding:24px 40px 32px 40px;background-color:#FFFFFF;border-top:1px solid #F0EDE8;">
+              <p style="font-family:Arial,sans-serif;font-size:11px;color:#8E8E8E;letter-spacing:0.06em;margin:0;line-height:1.8;">
+                Devi spostare o cancellare?<br>
+                <a href="mailto:superberlin0204@gmail.com" style="color:#E85A1F;text-decoration:none;font-weight:bold;">superberlin0204@gmail.com</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- BOTTOM BAR -->
+          <tr>
+            <td style="background-color:#0B0B0B;padding:14px 40px;">
+              <p style="font-family:Arial,sans-serif;font-size:10px;color:#5A5A5A;letter-spacing:0.12em;text-transform:uppercase;margin:0;">
+                © 2026 Mister Barber — Via Torino 38, Pavia
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

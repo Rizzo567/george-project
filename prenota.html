@@ -1044,7 +1044,9 @@
           var slots;
           if (calData.slots && calData.slots.length) {
             slots = calData.slots.map(function (s) {
-              return { time: s.time, available: s.available && dbBooked.indexOf(s.time) === -1 };
+              // Supabase è source of truth: slot libero se non c'è prenotazione attiva in DB
+              // Calendar viene ignorato per la disponibilità (evita eventi stale da cancellazioni)
+              return { time: s.time, available: dbBooked.indexOf(s.time) === -1 };
             });
           } else {
             slots = fallbackSlots(barber).map(function (s) {
