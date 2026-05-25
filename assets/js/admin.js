@@ -58,6 +58,7 @@
       startChartAnimations();
     }
     loadStatsData();
+    loadTodaySection();
     loadAppointments();
     if (!autoCompleteTimer) {
       checkAutoComplete();
@@ -210,6 +211,7 @@
     });
     btn.classList.add('is-active');
     activeBarber = btn.dataset.barber;
+    loadTodaySection();
     loadAppointments();
   });
 
@@ -221,6 +223,7 @@
     });
     btn.classList.add('is-active');
     activeStatus = btn.dataset.status;
+    loadTodaySection();
     loadAppointments();
   });
 
@@ -230,17 +233,20 @@
     loadAppointments();
   });
 
-  // ── Carica appuntamenti ────────────────────────────────────
+  // ── Carica appuntamenti (esclude oggi) ────────────────────
   function loadAppointments() {
-    var listEl = document.getElementById('aptList');
-    var empty  = document.getElementById('dashEmpty');
+    var listEl    = document.getElementById('aptList');
+    var empty     = document.getElementById('dashEmpty');
+    var hdEl      = document.getElementById('listSectionHd');
+    var todayStr  = new Date().toISOString().slice(0, 10);
     listEl.innerHTML = '<div class="apt-list-loading">Caricamento…</div>';
     empty.classList.add('is-hidden');
 
     var query = sb.from('appointments')
       .select('*')
       .order('date', { ascending: false })
-      .order('time', { ascending: false });
+      .order('time', { ascending: false })
+      .lt('date', todayStr);          // escludi oggi — già nella sezione Oggi
 
     if (activeBarber) query = query.eq('barber', activeBarber);
     if (activeStatus) query = query.eq('status', activeStatus);
@@ -256,7 +262,18 @@
         listEl.innerHTML = '<div class="apt-list-loading" style="color:#ff6b6b;">Errore caricamento dati.</div>';
         return;
       }
-      renderList(res.data || []);
+      var rows = res.data || [];
+      // Mostra/nascondi header sezione
+      if (hdEl) {
+        if (rows.length) {
+          hdEl.classList.remove('is-hidden');
+          var lbl = document.getElementById('listSectionLabel');
+          if (lbl) lbl.textContent = showStorico ? 'Storico' : 'Settimana';
+        } else {
+          hdEl.classList.add('is-hidden');
+        }
+      }
+      renderList(rows);
       updateStoricoBtn();
     });
   }
@@ -271,6 +288,81 @@
       btn.textContent = 'Visualizza storico';
       btn.classList.remove('is-active');
     }
+  }
+
+  // ── Sezione Oggi ───────────────────────────────────────────
+  function loadTodaySection() {
+    var todayStr  = new Date().toISOString().slice(0, 10);
+    var sectionEl = document.getElementById('todaySection');
+    var listEl    = document.getElementById('todayList');
+    var emptyEl   = document.getElementById('todayEmpty');
+    var badgeEl   = document.getElementById('todayBadge');
+    var subEl     = document.getElementById('todaySubtitle');
+
+    // Sottotitolo data
+    if (subEl) {
+      var d = new Date();
+      subEl.textContent = d.toLocaleDateString('it-IT', {
+        weekday: 'long', day: '2-digit', month: 'long'
+      });
+    }
+
+    listEl.innerHTML = '';
+    emptyEl.classList.add('is-hidden');
+
+    var query = sb.from('appointments')
+      .select('*')
+      .eq('date', todayStr)
+      .order('time', { ascending: true });
+
+    if (activeBarber) query = query.eq('barber', activeBarber);
+    if (activeStatus) query = query.eq('status', activeStatus);
+
+    query.then(function (res) {
+      if (res.error) return;
+      var rows = res.data || [];
+
+      // Badge conteggio
+      if (badgeEl) {
+        badgeEl.textContent = rows.length
+          ? rows.length + (rows.length === 1 ? ' taglio' : ' tagli')
+          : '';
+      }
+
+      sectionEl.classList.remove('is-hidden');
+
+      if (!rows.length) {
+        emptyEl.classList.remove('is-hidden');
+        return;
+      }
+
+      rows.forEach(function (apt) {
+        var barberLabel = apt.barber === 'george' ? 'George' : 'Berlin';
+        var timeStr     = (apt.time || '').slice(0, 5);
+
+        var card = document.createElement('div');
+        card.className = 'today-card today-card--' + esc(apt.status);
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+
+        card.innerHTML =
+          '<div class="today-card-time">' + esc(timeStr) + '</div>' +
+          '<div class="today-card-info">' +
+            '<div class="today-card-name">' + esc(apt.name) + '</div>' +
+            '<div class="today-card-meta">' + barberLabel + ' &middot; ' + esc(apt.service) + '</div>' +
+          '</div>' +
+          '<div class="today-card-right">' +
+            '<span class="status-badge status-badge--' + esc(apt.status) + '">' + esc(apt.status) + '</span>' +
+          '</div>';
+
+        card.addEventListener('click', function () { showAptDetail(apt); });
+        card.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showAptDetail(apt); }
+        });
+
+        listEl.appendChild(card);
+      });
+    });
   }
 
   // ── Render lista compatta ──────────────────────────────────
@@ -464,6 +556,7 @@
           } else {
             closeAptDetail();
             loadStatsData();
+            loadTodaySection();
             loadAppointments();
           }
         });
@@ -495,11 +588,12 @@
         if (res.error || !res.data || !res.data.length) return;
 
         var toComplete = res.data.filter(function (apt) {
+          // Giorni passati: completa sempre
+          if (apt.date < todayStr) return true;
+          // Oggi: completa solo se il slot è già finito
           if (!apt.time) return false;
-          var timeStr  = apt.time.slice(0, 5);           // "HH:MM"
-          var slotStart = new Date(apt.date + 'T' + timeStr + ':00');
-          var duration  = slotDurationMin(apt.barber);
-          var autoAt    = new Date(slotStart.getTime() + (duration + 1) * 60000);
+          var slotStart = new Date(apt.date + 'T' + apt.time.slice(0, 5) + ':00');
+          var autoAt    = new Date(slotStart.getTime() + (slotDurationMin(apt.barber) + 1) * 60000);
           return now >= autoAt;
         });
 
@@ -512,6 +606,7 @@
           .then(function (res2) {
             if (!res2.error) {
               loadStatsData();
+              loadTodaySection();
               loadAppointments();
             }
           });

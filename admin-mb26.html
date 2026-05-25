@@ -176,6 +176,23 @@
       <button class="filter-btn" data-status="cancelled">Annullati</button>
     </div>
 
+    <!-- ── SEZIONE OGGI ── -->
+    <div id="todaySection" class="today-section is-hidden">
+      <div class="today-hd">
+        <div class="today-hd-left">
+          <div class="today-title">Oggi</div>
+          <div class="today-subtitle" id="todaySubtitle"></div>
+        </div>
+        <div class="today-badge" id="todayBadge"></div>
+      </div>
+      <div id="todayList" class="today-list"></div>
+      <p class="today-empty is-hidden" id="todayEmpty">Nessun appuntamento oggi.</p>
+    </div>
+
+    <!-- ── LISTA PRECEDENTE ── -->
+    <div class="list-section-hd is-hidden" id="listSectionHd">
+      <span id="listSectionLabel">Settimana</span>
+    </div>
     <div id="aptList" class="apt-list"></div>
     <p class="dash-empty is-hidden" id="dashEmpty">Nessuna prenotazione trovata.</p>
     <div class="storico-wrap" id="storicoWrap">
