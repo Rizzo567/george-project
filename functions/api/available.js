@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, WORK_RANGES, SLOT_MINUTES, pad } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getWorkRanges, getSlotMinutes, pad } from './_google.js';
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: CORS lockdown (vedi book.js per dettagli)
@@ -85,13 +85,16 @@ export async function onRequestGet({ request, env }) {
     const busy   = fbData.calendars?.[calendarId]?.busy ?? [];
     const nowD   = new Date();
 
+    const slotMin    = getSlotMinutes(barber);
+    const workRanges = getWorkRanges(barber);
+
     const slots = [];
-    for (const range of WORK_RANGES) {
-      for (let m = range.start; m < range.end; m += SLOT_MINUTES) {
+    for (const range of workRanges) {
+      for (let m = range.start; m < range.end; m += slotMin) {
         const h   = Math.floor(m / 60);
         const min = m % 60;
         const slotStart = new Date(`${date}T${pad(h)}:${pad(min)}:00${tz}`);
-        const slotEnd   = new Date(slotStart.getTime() + SLOT_MINUTES * 60000);
+        const slotEnd   = new Date(slotStart.getTime() + slotMin * 60000);
 
         if (slotEnd <= nowD) continue;
 

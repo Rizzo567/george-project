@@ -562,6 +562,17 @@
             btn.disabled    = false;
             btn.textContent = action === 'completed' ? 'Segna completo' : 'Annulla';
           } else {
+            // Se cancellato → rimuovi anche da Google Calendar
+            if (action === 'cancelled' && apt.calendar_event_id && apt.barber) {
+              fetch('/api/cancel-calendar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  barber:  apt.barber,
+                  eventId: apt.calendar_event_id
+                })
+              }).catch(function() { /* fail silently */ });
+            }
             closeAptDetail();
             loadStatsData();
             loadTodaySection();

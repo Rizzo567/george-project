@@ -230,7 +230,8 @@ export async function onRequestPost({ request, env }) {
       throw new Error(err.error?.message ?? 'Errore Google Calendar');
     }
 
-    return json({ ok: safeImgUrl ? 'url' : 'no-img' }, 200, corsHeaders);
+    const createdEvent = await res.json();
+    return json({ ok: true, eventId: createdEvent.id ?? null }, 200, corsHeaders);
   } catch (err) {
     // Non esporre dettagli interni al client
     console.error('book.js error:', err.message);

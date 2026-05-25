@@ -1214,6 +1214,7 @@
         function sendBooking(imgBase64, imgMime, imgName) {
 
           function doInsert(imgUrl) {
+            // .select('id').single() per ottenere l'ID riga appena inserita
             sb.from('appointments').insert({
               barber:  state.barber,
               name:    nome,
@@ -1225,9 +1226,11 @@
               notes:   note || null,
               img_url: imgUrl || null,
               status:  'confirmed'
-            })
+            }).select('id').single()
             .then(function (res) {
               if (res.error) { doBookingError(); return; }
+
+              var aptId = res.data && res.data.id;
 
               var calBody = {
                 barber:   state.barber,
@@ -1240,26 +1243,39 @@
               };
               if (imgUrl) { calBody.imgUrl = imgUrl; }
 
-              return Promise.all([
-                fetch('/api/book', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(calBody)
-                }),
-                fetch(window.MB_CONFIG.EDGE_FN_URL, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    barber:  state.barber,
-                    name:    nome,
-                    phone:   telefono,
-                    service: servizio,
-                    date:    state.date,
-                    time:    state.time,
-                    notes:   note || null
+              // Chiama /api/book, salva eventId su Supabase, poi notifica
+              return fetch('/api/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(calBody)
+              })
+              .then(function(r) { return r.ok ? r.json() : {}; })
+              .then(function(bookData) {
+                var tasks = [
+                  fetch(window.MB_CONFIG.EDGE_FN_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      barber:  state.barber,
+                      name:    nome,
+                      phone:   telefono,
+                      service: servizio,
+                      date:    state.date,
+                      time:    state.time,
+                      notes:   note || null
+                    })
                   })
-                })
-              ]);
+                ];
+                // Salva calendar_event_id per poter cancellare l'evento dopo
+                if (bookData.eventId && aptId) {
+                  tasks.push(
+                    sb.from('appointments')
+                      .update({ calendar_event_id: bookData.eventId })
+                      .eq('id', aptId)
+                  );
+                }
+                return Promise.all(tasks);
+              });
             })
             .then(function () { doSuccess(); })
             .catch(function () { doSuccess(); });

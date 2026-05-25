@@ -1,10 +1,33 @@
 // Google Calendar API helpers — due service account separati
 
+// Legacy (non usare nei nuovi moduli)
 export const SLOT_MINUTES = 30;
-export const WORK_RANGES = [
+export const WORK_RANGES  = [
   { start: 9 * 60,  end: 12 * 60 },
   { start: 13 * 60, end: 20 * 60 },
 ];
+
+// Per-barber slot duration
+export function getSlotMinutes(barber) {
+  return barber === 'george' ? 45 : 60;
+}
+
+// Per-barber work ranges (matching frontend fallbackSlots)
+export function getWorkRanges(barber) {
+  if (barber === 'george') {
+    return [
+      { start: 9 * 60,        end: 12 * 60       }, // 09:00–11:15
+      { start: 13 * 60,       end: 18 * 60        }, // 13:00–17:30
+      { start: 18 * 60 + 15,  end: 18 * 60 + 16  }, // 18:15 extra
+    ];
+  }
+  // berlin
+  return [
+    { start: 9 * 60,        end: 12 * 60       }, // 09:00–11:00
+    { start: 13 * 60,       end: 19 * 60       }, // 13:00–18:00
+    { start: 18 * 60 + 45,  end: 18 * 60 + 46 }, // 18:45 extra
+  ];
+}
 
 export function getCalendarId(barber, env) {
   return barber === 'george' ? env.GEORGE_CALENDAR_ID : env.BERLIN_CALENDAR_ID;
