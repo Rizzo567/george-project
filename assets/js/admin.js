@@ -202,27 +202,64 @@
     sb.auth.signOut().then(function () { showAuthMode('login'); });
   });
 
-  // ── Filtri ─────────────────────────────────────────────────
+  // ── Popup filtri ───────────────────────────────────────────
+  var filterBtn   = document.getElementById('filterTriggerBtn');
+  var filterPopup = document.getElementById('filterPopup');
+  var filterDot   = document.getElementById('filterActiveDot');
+
+  function updateFilterDot() {
+    var active = activeBarber !== '' || activeStatus !== '';
+    filterDot.classList.toggle('is-visible', active);
+  }
+
+  function openFilterPopup() {
+    filterPopup.classList.add('is-open');
+    filterBtn.classList.add('is-open');
+    filterPopup.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeFilterPopup() {
+    filterPopup.classList.remove('is-open');
+    filterBtn.classList.remove('is-open');
+    filterPopup.setAttribute('aria-hidden', 'true');
+  }
+
+  filterBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    filterPopup.classList.contains('is-open') ? closeFilterPopup() : openFilterPopup();
+  });
+
+  // Chiudi cliccando fuori
+  document.addEventListener('click', function (e) {
+    if (!filterPopup.contains(e.target) && e.target !== filterBtn) {
+      closeFilterPopup();
+    }
+  });
+
+  // ── Filtri barbiere ─────────────────────────────────────────
   document.getElementById('barberFilters').addEventListener('click', function (e) {
-    var btn = e.target.closest('.filter-btn');
+    var btn = e.target.closest('.filter-chip');
     if (!btn) return;
-    document.querySelectorAll('#barberFilters .filter-btn').forEach(function (b) {
+    document.querySelectorAll('#barberFilters .filter-chip').forEach(function (b) {
       b.classList.remove('is-active');
     });
     btn.classList.add('is-active');
     activeBarber = btn.dataset.barber;
+    updateFilterDot();
     loadTodaySection();
     loadAppointments();
   });
 
+  // ── Filtri status ───────────────────────────────────────────
   document.getElementById('statusFilters').addEventListener('click', function (e) {
-    var btn = e.target.closest('.filter-btn');
+    var btn = e.target.closest('.filter-chip');
     if (!btn) return;
-    document.querySelectorAll('#statusFilters .filter-btn').forEach(function (b) {
+    document.querySelectorAll('#statusFilters .filter-chip').forEach(function (b) {
       b.classList.remove('is-active');
     });
     btn.classList.add('is-active');
     activeStatus = btn.dataset.status;
+    updateFilterDot();
     loadTodaySection();
     loadAppointments();
   });

@@ -161,19 +161,36 @@
       <div class="day-panel-body" id="dayPanelBody"></div>
     </div>
 
-    <!-- Filtri barbiere -->
-    <div class="dash-filters" id="barberFilters">
-      <button class="filter-btn is-active" data-barber="">Tutti</button>
-      <button class="filter-btn" data-barber="george">George</button>
-      <button class="filter-btn" data-barber="berlin">Berlin</button>
-    </div>
+    <!-- Filtri — bottone ··· -->
+    <div class="filter-trigger-wrap" id="filterTriggerWrap">
+      <button class="filter-trigger-btn" id="filterTriggerBtn" aria-label="Filtri">
+        <span class="filter-dots">···</span>
+        <span class="filter-active-dot" id="filterActiveDot"></span>
+      </button>
 
-    <!-- Filtri status -->
-    <div class="dash-filters" id="statusFilters">
-      <button class="filter-btn is-active" data-status="">Tutti gli status</button>
-      <button class="filter-btn" data-status="confirmed">Confermati</button>
-      <button class="filter-btn" data-status="completed">Completati</button>
-      <button class="filter-btn" data-status="cancelled">Annullati</button>
+      <!-- Popup filtri -->
+      <div class="filter-popup" id="filterPopup" aria-hidden="true">
+        <div class="filter-popup-label">Filtri</div>
+
+        <div class="filter-popup-section">
+          <div class="filter-popup-section-title">Barbiere</div>
+          <div class="filter-popup-chips" id="barberFilters">
+            <button class="filter-chip is-active" data-barber="">Tutti</button>
+            <button class="filter-chip" data-barber="george">George</button>
+            <button class="filter-chip" data-barber="berlin">Berlin</button>
+          </div>
+        </div>
+
+        <div class="filter-popup-section">
+          <div class="filter-popup-section-title">Status</div>
+          <div class="filter-popup-chips" id="statusFilters">
+            <button class="filter-chip is-active" data-status="">Tutti</button>
+            <button class="filter-chip" data-status="confirmed">Confermati</button>
+            <button class="filter-chip" data-status="completed">Completati</button>
+            <button class="filter-chip" data-status="cancelled">Annullati</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ── SEZIONE OGGI ── -->
@@ -208,6 +225,129 @@
     <div id="aptDetailContent"></div>
   </div>
 </div>
+
+<style>
+  /* ── FILTER TRIGGER ── */
+  .filter-trigger-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 24px;
+  }
+  .filter-trigger-btn {
+    position: relative;
+    background: #1A1A1A;
+    border: 1px solid rgba(229,225,216,0.12);
+    color: #E5E1D8;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.18s, background 0.18s;
+    line-height: 1;
+    padding-bottom: 6px;
+  }
+  .filter-trigger-btn:hover,
+  .filter-trigger-btn.is-open {
+    border-color: rgba(232,90,31,0.5);
+    background: #1f1a18;
+  }
+  .filter-dots { pointer-events: none; }
+
+  /* pallino arancio se filtri attivi */
+  .filter-active-dot {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #E85A1F;
+    display: none;
+    border: 1.5px solid #0B0B0B;
+  }
+  .filter-active-dot.is-visible { display: block; }
+
+  /* ── POPUP ── */
+  .filter-popup {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    z-index: 200;
+    background: #161210;
+    border: 1px solid rgba(229,225,216,0.12);
+    border-radius: 16px;
+    padding: 20px 20px 16px;
+    min-width: 260px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+
+    /* hidden state */
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.88) translateY(-6px);
+    transform-origin: top left;
+    transition: opacity 0.22s cubic-bezier(0.34,1.56,0.64,1),
+                transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .filter-popup.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1) translateY(0);
+  }
+
+  .filter-popup-label {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #8E8E8E;
+    margin-bottom: 16px;
+  }
+  .filter-popup-section { margin-bottom: 16px; }
+  .filter-popup-section:last-child { margin-bottom: 0; }
+  .filter-popup-section-title {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #5A5A5A;
+    margin-bottom: 10px;
+  }
+  .filter-popup-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .filter-chip {
+    background: #1A1A1A;
+    border: 1px solid rgba(229,225,216,0.1);
+    color: #8E8E8E;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    padding: 7px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+  .filter-chip:hover {
+    border-color: rgba(232,90,31,0.4);
+    color: #E5E1D8;
+  }
+  .filter-chip.is-active {
+    background: rgba(232,90,31,0.15);
+    border-color: #E85A1F;
+    color: #E85A1F;
+  }
+</style>
 
 <script src="assets/js/config.js"></script>
 <script src="assets/js/admin.js"></script>
