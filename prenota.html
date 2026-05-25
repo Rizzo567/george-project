@@ -6,7 +6,7 @@
   <meta name="description" content="Prenota il tuo appuntamento da Mister Barber — Via Torino 38, Pavia.">
 
   <!-- Security headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.emailjs.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 
@@ -18,7 +18,12 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <!-- SECURITY: pinning a versione esatta + crossorigin per SRI/error reporting -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="assets/js/config.js"></script>
+  <script>
+    /* ── EmailJS init ── TODO: sostituisci YOUR_EMAILJS_PUBLIC_KEY con la tua chiave pubblica */
+    emailjs.init({ publicKey: 'YOUR_EMAILJS_PUBLIC_KEY' });
+  </script>
 
   <style>
     /* ─── PRENOTA PAGE ─── */
@@ -722,6 +727,12 @@
             </div>
 
             <div class="form-field form-field--full">
+              <label class="form-label" for="email">Email</label>
+              <input class="form-input" type="email" id="email" name="email"
+                placeholder="la@tua.email" autocomplete="email" required>
+            </div>
+
+            <div class="form-field form-field--full">
               <label class="form-label" for="servizio">Servizio</label>
               <select class="form-input" id="servizio" name="servizio" required style="cursor:pointer;appearance:none;-webkit-appearance:none;">
                 <option value="" disabled selected>Scegli il servizio</option>
@@ -1152,13 +1163,16 @@
         e.preventDefault();
         var nome     = document.getElementById('nome').value.trim().slice(0, 100);
         var telefono = document.getElementById('telefono').value.trim().slice(0, 32);
+        var email    = document.getElementById('email').value.trim().slice(0, 254);
         var note     = document.getElementById('note-taglio').value.trim().slice(0, 500);
         var servizio = document.getElementById('servizio').value;
         // SECURITY: validazione client (server applica controlli definitivi)
         var ALLOWED_SVC = ['Cut','Fade','Beard','Razor','Full'];
         var PHONE_RE = /^[\d\s+\-()]{5,32}$/;
+        var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!nome || nome.length < 1)            { document.getElementById('nome').focus(); alert('Nome non valido.'); return; }
         if (!PHONE_RE.test(telefono))            { document.getElementById('telefono').focus(); alert('Telefono non valido.'); return; }
+        if (!email || !EMAIL_RE.test(email))     { document.getElementById('email').focus(); alert('Email non valida.'); return; }
         if (ALLOWED_SVC.indexOf(servizio) < 0)   { document.getElementById('servizio').focus(); alert('Seleziona un servizio valido.'); return; }
         if (!state.barber || !state.date || !state.time) { alert('Sessione scaduta. Riprova la prenotazione.'); return; }
 
@@ -1176,6 +1190,7 @@
               barber:  state.barber,
               name:    nome,
               phone:   telefono,
+              email:   email || null,
               service: servizio,
               date:    state.date,
               time:    state.time,
@@ -1273,6 +1288,23 @@
         var btn = document.getElementById('submitBtn');
         btn.classList.remove('is-loading');
         btn.classList.add('is-success');
+
+        // ── Email di conferma al cliente ──────────────────────
+        var barberLabel = state.barber === 'george' ? 'George' : 'Berlin';
+        var dateObj = new Date(state.date + 'T12:00:00');
+        var dateStr = DAYS[dateObj.getDay()] + ' ' +
+                      dateObj.getDate() + ' ' + MONTHS[dateObj.getMonth()] + ' ' +
+                      dateObj.getFullYear();
+
+        /* TODO: sostituisci YOUR_SERVICE_ID e YOUR_TEMPLATE_ID con i valori del tuo account EmailJS */
+        emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+          to_email:  email,
+          to_name:   nome,
+          barbiere:  barberLabel,
+          data:      dateStr,
+          orario:    state.time,
+          servizio:  servizio
+        }).catch(function () { /* fail silently — prenotazione già salvata */ });
 
         sessionStorage.setItem('mbooking', JSON.stringify({
           barber: state.barber,
