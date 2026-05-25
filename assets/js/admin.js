@@ -244,9 +244,7 @@
 
     var query = sb.from('appointments')
       .select('*')
-      .order('date', { ascending: false })
-      .order('time', { ascending: false })
-      .lt('date', todayStr);          // escludi oggi — già nella sezione Oggi
+      .neq('date', todayStr);         // escludi oggi — già nella sezione Oggi
 
     if (activeBarber) query = query.eq('barber', activeBarber);
     if (activeStatus) {
@@ -256,9 +254,20 @@
     }
 
     if (!showStorico) {
-      var cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - 6);
-      query = query.gte('date', cutoff.toISOString().slice(0, 10));
+      // Modalità default: prossimi 14 giorni (domani in poi)
+      var futureLimit = new Date();
+      futureLimit.setDate(futureLimit.getDate() + 14);
+      query = query
+        .gt('date', todayStr)
+        .lte('date', futureLimit.toISOString().slice(0, 10))
+        .order('date', { ascending: true })
+        .order('time', { ascending: true });
+    } else {
+      // Storico: tutto il passato, ordine inverso
+      query = query
+        .lt('date', todayStr)
+        .order('date', { ascending: false })
+        .order('time', { ascending: false });
     }
 
     query.then(function (res) {
@@ -272,7 +281,7 @@
         if (rows.length) {
           hdEl.classList.remove('is-hidden');
           var lbl = document.getElementById('listSectionLabel');
-          if (lbl) lbl.textContent = showStorico ? 'Storico' : 'Settimana';
+          if (lbl) lbl.textContent = showStorico ? 'Storico' : 'Prossimi 14 giorni';
         } else {
           hdEl.classList.add('is-hidden');
         }
@@ -289,7 +298,7 @@
       btn.textContent = 'Nascondi storico';
       btn.classList.add('is-active');
     } else {
-      btn.textContent = 'Visualizza storico';
+      btn.textContent = 'Visualizza storico passato';
       btn.classList.remove('is-active');
     }
   }
