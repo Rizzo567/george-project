@@ -220,9 +220,9 @@
 
   // ── Carica appuntamenti ────────────────────────────────────
   function loadAppointments() {
-    var tbody = document.getElementById('aptTableBody');
-    var empty = document.getElementById('dashEmpty');
-    tbody.innerHTML = '<tr><td colspan="10" style="color:var(--silver);padding:24px 16px;font-size:13px;">Caricamento…</td></tr>';
+    var listEl = document.getElementById('aptList');
+    var empty  = document.getElementById('dashEmpty');
+    listEl.innerHTML = '<div class="apt-list-loading">Caricamento…</div>';
     empty.classList.add('is-hidden');
 
     var query = sb.from('appointments')
@@ -235,53 +235,70 @@
 
     query.then(function (res) {
       if (res.error) {
-        tbody.innerHTML = '<tr><td colspan="10" style="color:#ff6b6b;padding:24px 16px;">Errore caricamento dati.</td></tr>';
+        listEl.innerHTML = '<div class="apt-list-loading" style="color:#ff6b6b;">Errore caricamento dati.</div>';
         return;
       }
-      renderTable(res.data || []);
+      renderList(res.data || []);
     });
   }
 
-  // ── Render tabella ─────────────────────────────────────────
-  function renderTable(rows) {
-    var tbody = document.getElementById('aptTableBody');
-    var empty = document.getElementById('dashEmpty');
-    tbody.innerHTML = '';
+  // ── Render lista compatta ──────────────────────────────────
+  function renderList(rows) {
+    var listEl = document.getElementById('aptList');
+    var empty  = document.getElementById('dashEmpty');
+    listEl.innerHTML = '';
 
     if (!rows.length) {
       empty.classList.remove('is-hidden');
       return;
     }
+    empty.classList.add('is-hidden');
 
+    // Raggruppa per data
+    var groups     = {};
+    var groupOrder = [];
     rows.forEach(function (apt) {
-      var barberLabel = apt.barber === 'george' ? 'George' : 'Berlin';
-      var dateObj     = new Date(apt.date + 'T12:00:00');
-      var dateStr     = dateObj.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' });
-      var timeStr     = (apt.time || '').slice(0, 5);
+      var d = apt.date;
+      if (!groups[d]) { groups[d] = []; groupOrder.push(d); }
+      groups[d].push(apt);
+    });
 
-      var fotoCell = apt.img_url
-        ? '<td style="padding:6px 8px;">' +
-            '<a href="' + esc(apt.img_url) + '" target="_blank" rel="noopener noreferrer" title="Apri immagine">' +
-              '<img src="' + esc(apt.img_url) + '" ' +
-                'style="width:44px;height:44px;object-fit:cover;display:block;border:1px solid rgba(229,225,216,0.12);" ' +
-                'loading="lazy" alt="Riferimento taglio">' +
-            '</a>' +
-          '</td>'
-        : '<td style="color:var(--silver);font-size:12px;text-align:center;">—</td>';
+    groupOrder.forEach(function (dateStr) {
+      var dateObj  = new Date(dateStr + 'T12:00:00');
+      var dayLabel = dateObj.toLocaleDateString('it-IT', {
+        weekday: 'short', day: '2-digit', month: 'short'
+      });
 
-      var tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td>' + dateStr + '</td>' +
-        '<td>' + timeStr + '</td>' +
-        '<td style="font-weight:500;">' + esc(apt.name) + '</td>' +
-        '<td>' + esc(apt.phone) + '</td>' +
-        '<td>' + barberLabel + '</td>' +
-        '<td>' + esc(apt.service) + '</td>' +
-        '<td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(apt.notes || '—') + '</td>' +
-        fotoCell +
-        '<td>' + statusBadge(apt.status) + '</td>' +
-        '<td>' + actionButtons(apt) + '</td>';
-      tbody.appendChild(tr);
+      var sep = document.createElement('div');
+      sep.className   = 'apt-date-sep';
+      sep.textContent = dayLabel;
+      listEl.appendChild(sep);
+
+      groups[dateStr].forEach(function (apt) {
+        var barberLabel = apt.barber === 'george' ? 'George' : 'Berlin';
+        var timeStr     = (apt.time || '').slice(0, 5);
+
+        var row = document.createElement('div');
+        row.className = 'apt-row';
+        row.setAttribute('role', 'button');
+        row.setAttribute('tabindex', '0');
+
+        row.innerHTML =
+          '<div class="apt-row-time">'    + esc(timeStr) + '</div>' +
+          '<div class="apt-row-info">' +
+            '<div class="apt-row-name">'  + esc(apt.name) + '</div>' +
+            '<div class="apt-row-meta">'  + barberLabel + ' &middot; ' + esc(apt.service) + '</div>' +
+          '</div>' +
+          '<span class="apt-status-dot apt-status-dot--' + esc(apt.status) + '" title="' + esc(apt.status) + '"></span>' +
+          '<div class="apt-row-chevron">&#8250;</div>';
+
+        row.addEventListener('click', function () { showAptDetail(apt); });
+        row.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showAptDetail(apt); }
+        });
+
+        listEl.appendChild(row);
+      });
     });
   }
 
@@ -297,49 +314,125 @@
     return '<span class="status-badge status-badge--' + esc(status) + '">' + esc(status) + '</span>';
   }
 
-  function actionButtons(apt) {
-    var btns = '<div class="apt-actions">';
+  // ── Detail panel ───────────────────────────────────────────
+  function showAptDetail(apt) {
+    var overlay = document.getElementById('aptDetailOverlay');
+    var content = document.getElementById('aptDetailContent');
+
+    var barberLabel = apt.barber === 'george' ? 'George' : 'Berlin';
+    var dateObj     = new Date(apt.date + 'T12:00:00');
+    var dateStr     = dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: '2-digit', month: 'long' });
+    var timeStr     = (apt.time || '').slice(0, 5);
+
+    var photoHtml = apt.img_url
+      ? '<div class="apt-detail-photo-wrap">' +
+          '<img src="' + esc(apt.img_url) + '" alt="Riferimento taglio" loading="lazy">' +
+        '</div>'
+      : '';
+
+    var notesHtml = (apt.notes && apt.notes.trim())
+      ? '<div class="apt-detail-notes">' +
+          '<div class="adf-label">Note</div>' +
+          '<div class="adf-value">' + esc(apt.notes) + '</div>' +
+        '</div>'
+      : '';
+
+    var actionsHtml = '';
     if (apt.status !== 'completed' && apt.status !== 'cancelled') {
-      btns += '<button class="apt-btn apt-btn--complete" data-id="' + apt.id + '" data-action="completed">Completo</button>';
-      btns += '<button class="apt-btn apt-btn--cancel" data-id="' + apt.id + '" data-action="cancelled">Annulla</button>';
+      actionsHtml =
+        '<div class="apt-detail-actions-wrap">' +
+          '<button class="apt-btn apt-btn--complete" data-id="' + apt.id + '" data-action="completed">Segna completo</button>' +
+          '<button class="apt-btn apt-btn--cancel"   data-id="' + apt.id + '" data-action="cancelled">Annulla</button>' +
+        '</div>';
+    } else {
+      actionsHtml = '<div style="height:28px;"></div>';
     }
-    btns += '</div>';
-    return btns;
+
+    content.innerHTML =
+      '<div class="apt-detail-drag"></div>' +
+      '<div class="apt-detail-topbar">' +
+        statusBadge(apt.status) +
+        '<button class="apt-detail-close-btn" id="aptDetailCloseBtn" aria-label="Chiudi">' +
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +
+            '<path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' +
+          '</svg>' +
+        '</button>' +
+      '</div>' +
+      photoHtml +
+      '<div class="apt-detail-heading">' +
+        '<div class="apt-detail-apt-name">' + esc(apt.name) + '</div>' +
+        '<div class="apt-detail-apt-service">' + esc(apt.service) + '</div>' +
+      '</div>' +
+      '<div class="apt-detail-fields">' +
+        '<div class="apt-detail-field">' +
+          '<div class="adf-label">Data</div>' +
+          '<div class="adf-value">' + esc(dateStr) + '</div>' +
+        '</div>' +
+        '<div class="apt-detail-field">' +
+          '<div class="adf-label">Ora</div>' +
+          '<div class="adf-value">' + esc(timeStr) + '</div>' +
+        '</div>' +
+        '<div class="apt-detail-field">' +
+          '<div class="adf-label">Barbiere</div>' +
+          '<div class="adf-value">' + barberLabel + '</div>' +
+        '</div>' +
+        '<div class="apt-detail-field">' +
+          '<div class="adf-label">Telefono</div>' +
+          '<div class="adf-value"><a href="tel:' + esc(apt.phone) + '">' + esc(apt.phone) + '</a></div>' +
+        '</div>' +
+      '</div>' +
+      notesHtml +
+      actionsHtml;
+
+    // Apri
+    overlay.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+
+    // Close button
+    document.getElementById('aptDetailCloseBtn').addEventListener('click', closeAptDetail, { once: true });
+
+    // Backdrop click
+    overlay.addEventListener('click', function onBd(e) {
+      if (e.target === overlay) {
+        closeAptDetail();
+        overlay.removeEventListener('click', onBd);
+      }
+    });
+
+    // ESC key
+    document.addEventListener('keydown', function onEsc(e) {
+      if (e.key === 'Escape') { closeAptDetail(); }
+    }, { once: true });
+
+    // Azioni nel detail
+    content.addEventListener('click', function (e) {
+      var btn = e.target.closest('.apt-btn[data-action]');
+      if (!btn) return;
+      var id     = btn.dataset.id;
+      var action = btn.dataset.action;
+      btn.disabled    = true;
+      btn.textContent = action === 'completed' ? 'Salvataggio…' : 'Annullamento…';
+      sb.from('appointments')
+        .update({ status: action })
+        .eq('id', id)
+        .then(function (res) {
+          if (res.error) {
+            btn.disabled    = false;
+            btn.textContent = action === 'completed' ? 'Segna completo' : 'Annulla';
+          } else {
+            closeAptDetail();
+            loadStatsData();
+            loadAppointments();
+          }
+        });
+    });
   }
 
-  // ── Azioni status (event delegation) ──────────────────────
-  document.getElementById('aptTableBody').addEventListener('click', function (e) {
-    var btn = e.target.closest('.apt-btn[data-action]');
-    if (!btn) return;
-    var id     = btn.dataset.id;
-    var action = btn.dataset.action;
-    btn.disabled = true;
-    sb.from('appointments')
-      .update({ status: action })
-      .eq('id', id)
-      .then(function (res) {
-        if (res.error) {
-          btn.disabled = false;
-        } else if (action === 'cancelled') {
-          var row = btn.closest('tr');
-          row.style.transition = 'opacity 0.3s';
-          row.style.opacity = '0.4';
-          var cells = row.querySelectorAll('td');
-          cells[cells.length - 1].innerHTML = '<span style="font-family:var(--font-body);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#e85a1f;">Deleting…</span>';
-          setTimeout(function () {
-            row.style.transition = 'opacity 0.4s';
-            row.style.opacity = '0';
-            setTimeout(function () {
-              row.remove();
-              loadStatsData();
-            }, 400);
-          }, 3000);
-        } else {
-          loadStatsData();
-          loadAppointments();
-        }
-      });
-  });
+  function closeAptDetail() {
+    var overlay = document.getElementById('aptDetailOverlay');
+    overlay.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
 
   // ── Chart instances ────────────────────────────────────────
   var chartTimeline = null;

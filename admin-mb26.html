@@ -176,28 +176,17 @@
       <button class="filter-btn" data-status="cancelled">Annullati</button>
     </div>
 
-    <div class="apt-table-wrap">
-      <table class="apt-table">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Ora</th>
-            <th>Cliente</th>
-            <th>Telefono</th>
-            <th>Barbiere</th>
-            <th>Servizio</th>
-            <th>Note</th>
-            <th>Foto</th>
-            <th>Status</th>
-            <th>Azioni</th>
-          </tr>
-        </thead>
-        <tbody id="aptTableBody"></tbody>
-      </table>
-      <p class="dash-empty is-hidden" id="dashEmpty">Nessuna prenotazione trovata.</p>
-    </div>
+    <div id="aptList" class="apt-list"></div>
+    <p class="dash-empty is-hidden" id="dashEmpty">Nessuna prenotazione trovata.</p>
   </section>
 
+</div>
+
+<!-- ── DETAIL OVERLAY ── -->
+<div id="aptDetailOverlay" class="apt-overlay" role="dialog" aria-modal="true">
+  <div class="apt-detail-card" id="aptDetailCard">
+    <div id="aptDetailContent"></div>
+  </div>
 </div>
 
 <script src="assets/js/config.js"></script>
