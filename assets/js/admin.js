@@ -8,11 +8,12 @@
   );
 
   // ── State ──────────────────────────────────────────────────
-  var activeBarber    = '';
-  var activeStatus    = '';
-  var showStorico     = false;
-  var allAppointments = [];
-  var lastDates14     = [];
+  var activeBarber       = '';
+  var activeStatus       = '';
+  var showStorico        = false;
+  var allAppointments    = [];
+  var lastDates14        = [];
+  var autoCompleteTimer  = null;
 
   // ── DOM refs ───────────────────────────────────────────────
   var authSection = document.getElementById('authSection');
@@ -58,6 +59,10 @@
     }
     loadStatsData();
     loadAppointments();
+    if (!autoCompleteTimer) {
+      checkAutoComplete();
+      autoCompleteTimer = setInterval(checkAutoComplete, 60000);
+    }
   }
 
   // ── Init ───────────────────────────────────────────────────
@@ -469,6 +474,48 @@
     var overlay = document.getElementById('aptDetailOverlay');
     overlay.classList.remove('is-open');
     document.body.style.overflow = '';
+  }
+
+  // ── Auto-complete appuntamenti scaduti ─────────────────────
+  // George = 45 min/slot · Berlin = 60 min/slot
+  // Completa automaticamente 1 min dopo la fine dello slot
+  function slotDurationMin(barber) {
+    return barber === 'george' ? 45 : 60;
+  }
+
+  function checkAutoComplete() {
+    var now      = new Date();
+    var todayStr = now.toISOString().slice(0, 10);
+
+    sb.from('appointments')
+      .select('id, date, time, barber')
+      .eq('status', 'confirmed')
+      .lte('date', todayStr)
+      .then(function (res) {
+        if (res.error || !res.data || !res.data.length) return;
+
+        var toComplete = res.data.filter(function (apt) {
+          if (!apt.time) return false;
+          var timeStr  = apt.time.slice(0, 5);           // "HH:MM"
+          var slotStart = new Date(apt.date + 'T' + timeStr + ':00');
+          var duration  = slotDurationMin(apt.barber);
+          var autoAt    = new Date(slotStart.getTime() + (duration + 1) * 60000);
+          return now >= autoAt;
+        });
+
+        if (!toComplete.length) return;
+
+        var ids = toComplete.map(function (a) { return a.id; });
+        sb.from('appointments')
+          .update({ status: 'completed' })
+          .in('id', ids)
+          .then(function (res2) {
+            if (!res2.error) {
+              loadStatsData();
+              loadAppointments();
+            }
+          });
+      });
   }
 
   // ── Chart instances ────────────────────────────────────────
