@@ -327,7 +327,7 @@ export async function onRequestPost({ request, env }) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Mister Barber <noreply@misterbarber.it>',
+            from: 'Mister Barber <noreply@misterbarber.shop>',
             to:   [emailSanitized],
             reply_to: 'superberlin0204@gmail.com',
             subject: `Prenotazione confermata — ${barberLabel} · ${ora}`,
