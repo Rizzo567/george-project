@@ -319,21 +319,28 @@ export async function onRequestPost({ request, env }) {
 </table>
 </body></html>`;
 
-        // Fire-and-forget — non blocca la risposta al client
-        fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: 'Mister Barber <noreply@misterbarber.shop>',
-            to:   [emailSanitized],
-            reply_to: 'superberlin0204@gmail.com',
-            subject: `Prenotazione confermata — ${barberLabel} · ${ora}`,
-            html: emailHtml,
-          }),
-        }).catch(err => console.error('Resend email error:', err.message));
+        try {
+          const resendRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: 'Mister Barber <noreply@misterbarber.shop>',
+              to:   [emailSanitized],
+              reply_to: 'superberlin0204@gmail.com',
+              subject: `Prenotazione confermata — ${barberLabel} · ${ora}`,
+              html: emailHtml,
+            }),
+          });
+          if (!resendRes.ok) {
+            const errText = await resendRes.text();
+            console.error('Resend error:', resendRes.status, errText);
+          }
+        } catch (emailErr) {
+          console.error('Resend fetch error:', emailErr.message);
+        }
       }
     }
 
