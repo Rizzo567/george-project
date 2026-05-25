@@ -161,36 +161,15 @@
       <div class="day-panel-body" id="dayPanelBody"></div>
     </div>
 
-    <!-- Filtri — bottone ··· -->
+    <!-- Filtri — bottone ingranaggio -->
     <div class="filter-trigger-wrap" id="filterTriggerWrap">
-      <button class="filter-trigger-btn" id="filterTriggerBtn" aria-label="Filtri">
-        <span class="filter-dots">···</span>
+      <button class="filter-trigger-btn" id="filterTriggerBtn" aria-label="Apri filtri">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
         <span class="filter-active-dot" id="filterActiveDot"></span>
       </button>
-
-      <!-- Popup filtri -->
-      <div class="filter-popup" id="filterPopup" aria-hidden="true">
-        <div class="filter-popup-label">Filtri</div>
-
-        <div class="filter-popup-section">
-          <div class="filter-popup-section-title">Barbiere</div>
-          <div class="filter-popup-chips" id="barberFilters">
-            <button class="filter-chip is-active" data-barber="">Tutti</button>
-            <button class="filter-chip" data-barber="george">George</button>
-            <button class="filter-chip" data-barber="berlin">Berlin</button>
-          </div>
-        </div>
-
-        <div class="filter-popup-section">
-          <div class="filter-popup-section-title">Status</div>
-          <div class="filter-popup-chips" id="statusFilters">
-            <button class="filter-chip is-active" data-status="">Tutti</button>
-            <button class="filter-chip" data-status="confirmed">Confermati</button>
-            <button class="filter-chip" data-status="completed">Completati</button>
-            <button class="filter-chip" data-status="cancelled">Annullati</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- ── SEZIONE OGGI ── -->
@@ -219,6 +198,43 @@
 
 </div>
 
+<!-- ── FILTER MODAL ── -->
+<div id="filterModalOverlay" class="filter-modal-overlay" role="dialog" aria-modal="true" aria-label="Filtri">
+  <div class="filter-modal-card" id="filterModalCard">
+    <div class="filter-modal-topbar">
+      <div class="filter-modal-title">Filtri</div>
+      <button class="filter-modal-close" id="filterModalClose" aria-label="Chiudi">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="filter-modal-body">
+      <div class="filter-modal-section">
+        <div class="filter-modal-section-title">Barbiere</div>
+        <div class="filter-modal-chips" id="barberFilters">
+          <button class="filter-chip is-active" data-barber="">Tutti</button>
+          <button class="filter-chip" data-barber="george">George</button>
+          <button class="filter-chip" data-barber="berlin">Berlin</button>
+        </div>
+      </div>
+
+      <div class="filter-modal-section">
+        <div class="filter-modal-section-title">Status</div>
+        <div class="filter-modal-chips" id="statusFilters">
+          <button class="filter-chip is-active" data-status="">Tutti</button>
+          <button class="filter-chip" data-status="confirmed">Confermati</button>
+          <button class="filter-chip" data-status="completed">Completati</button>
+          <button class="filter-chip" data-status="cancelled">Annullati</button>
+        </div>
+      </div>
+
+      <button class="filter-modal-reset-btn" id="filterResetBtn">Reset filtri</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── DETAIL OVERLAY ── -->
 <div id="aptDetailOverlay" class="apt-overlay" role="dialog" aria-modal="true">
   <div class="apt-detail-card" id="aptDetailCard">
@@ -227,26 +243,21 @@
 </div>
 
 <style>
-  /* ─────────────────────────────────────────────
-     FILTER TRIGGER — taste-skill edition
-     Dark glass · spring physics · inner refraction
-  ───────────────────────────────────────────── */
+  /* ──────────────────────────────────────────────
+     FILTER TRIGGER — bottone ingranaggio
+  ────────────────────────────────────────────── */
 
   .filter-trigger-wrap {
-    position: relative;
     display: inline-block;
     margin-bottom: 28px;
   }
 
-  /* Bottone ··· */
   .filter-trigger-btn {
     position: relative;
     background: rgba(26,20,16,0.9);
     border: 1px solid rgba(229,225,216,0.1);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-    color: rgba(229,225,216,0.7);
-    font-size: 18px;
-    letter-spacing: 0.15em;
+    color: rgba(229,225,216,0.65);
     width: 44px;
     height: 44px;
     border-radius: 14px;
@@ -254,13 +265,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border-color 0.2s ease, background 0.2s ease,
-                box-shadow 0.2s ease, transform 0.12s ease,
-                color 0.2s ease;
-    line-height: 1;
-    padding-bottom: 4px;
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
+    transition:
+      border-color 0.2s ease,
+      background 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.12s ease,
+      color 0.2s ease;
   }
   .filter-trigger-btn:hover {
     border-color: rgba(232,90,31,0.35);
@@ -269,19 +281,16 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08),
                 0 0 0 3px rgba(232,90,31,0.08);
   }
-  .filter-trigger-btn:active {
-    transform: scale(0.96) translateY(1px);
-  }
+  .filter-trigger-btn:active { transform: scale(0.95) translateY(1px); }
   .filter-trigger-btn.is-open {
-    border-color: rgba(232,90,31,0.5);
+    border-color: rgba(232,90,31,0.55);
     background: rgba(30,22,16,0.98);
     color: #E85A1F;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08),
-                0 0 0 3px rgba(232,90,31,0.1);
+                0 0 0 3px rgba(232,90,31,0.12);
   }
-  .filter-dots { pointer-events: none; }
 
-  /* Pallino stato attivo */
+  /* Pallino filtro attivo */
   .filter-active-dot {
     position: absolute;
     top: 8px;
@@ -293,119 +302,138 @@
     display: none;
     border: 1.5px solid #0D0B09;
     box-shadow: 0 0 6px rgba(232,90,31,0.6);
+    pointer-events: none;
   }
   .filter-active-dot.is-visible { display: block; }
 
-  /* ─── POPUP ─── */
-  .filter-popup {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    z-index: 300;
+  /* ──────────────────────────────────────────────
+     FILTER MODAL OVERLAY — centrato, come apt detail
+  ────────────────────────────────────────────── */
 
-    /* Glass surface */
-    background: rgba(14,11,9,0.92);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
+  .filter-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: transparent;
+    pointer-events: none;
+    transition: background 0.25s ease;
+  }
+  .filter-modal-overlay.is-open {
+    background: rgba(8,6,4,0.72);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    pointer-events: auto;
+  }
+
+  /* Card centrata */
+  .filter-modal-card {
+    width: 100%;
+    max-width: 360px;
+    background: #1A1410;
     border: 1px solid rgba(229,225,216,0.1);
-    /* Inner refraction — taste-skill liquid glass */
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.07),
-      inset 0 -1px 0 rgba(0,0,0,0.3),
-      0 24px 64px rgba(0,0,0,0.7),
-      0 4px 16px rgba(0,0,0,0.4);
-    border-radius: 20px;
-    padding: 0;
-    min-width: 272px;
+      inset 0 -1px 0 rgba(0,0,0,0.35),
+      0 40px 100px rgba(0,0,0,0.85),
+      0 8px 32px rgba(0,0,0,0.5);
+    border-radius: 22px;
     overflow: hidden;
 
-    /* Hidden state */
+    /* Animazione pop-up */
     opacity: 0;
-    pointer-events: none;
-    transform: scale(0.86) translateY(-8px);
-    transform-origin: top left;
+    transform: scale(0.84) translateY(12px);
     transition:
-      opacity 0.26s cubic-bezier(0.34, 1.48, 0.64, 1),
-      transform 0.26s cubic-bezier(0.34, 1.48, 0.64, 1);
+      opacity 0.28s cubic-bezier(0.34, 1.48, 0.64, 1),
+      transform 0.28s cubic-bezier(0.34, 1.48, 0.64, 1);
   }
-  .filter-popup.is-open {
+  .filter-modal-overlay.is-open .filter-modal-card {
     opacity: 1;
-    pointer-events: auto;
     transform: scale(1) translateY(0);
   }
 
-  /* Header popup */
-  .filter-popup-header {
+  /* Top bar */
+  .filter-modal-topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 18px 12px;
-    border-bottom: 1px solid rgba(229,225,216,0.06);
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid rgba(229,225,216,0.07);
   }
-  .filter-popup-label {
+  .filter-modal-title {
     font-family: 'Inter', Arial, sans-serif;
-    font-size: 9px;
+    font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: rgba(142,142,142,0.8);
+    letter-spacing: 0.02em;
+    color: #E5E1D8;
   }
-  .filter-popup-reset {
-    background: none;
+  .filter-modal-close {
+    background: rgba(229,225,216,0.07);
     border: none;
-    font-family: 'Inter', Arial, sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    color: rgba(232,90,31,0.6);
+    color: rgba(229,225,216,0.55);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    padding: 0;
-    transition: color 0.15s;
-    text-transform: uppercase;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
   }
-  .filter-popup-reset:hover { color: #E85A1F; }
+  .filter-modal-close:hover {
+    background: rgba(229,225,216,0.13);
+    color: #E5E1D8;
+  }
 
-  /* Corpo popup */
-  .filter-popup-body { padding: 14px 18px 18px; }
+  /* Corpo */
+  .filter-modal-body {
+    padding: 20px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
 
-  .filter-popup-section { margin-bottom: 14px; }
-  .filter-popup-section:last-child { margin-bottom: 0; }
+  .filter-modal-section { display: flex; flex-direction: column; gap: 10px; }
 
-  .filter-popup-section-title {
+  .filter-modal-section-title {
     font-family: 'Inter', Arial, sans-serif;
     font-size: 9px;
     font-weight: 600;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: rgba(90,90,90,0.9);
-    margin-bottom: 8px;
+    color: rgba(142,142,142,0.7);
   }
 
-  .filter-popup-chips {
+  .filter-modal-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 7px;
   }
 
   /* Chips */
   .filter-chip {
-    background: rgba(26,26,26,0.8);
-    border: 1px solid rgba(229,225,216,0.08);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(229,225,216,0.1);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-    color: rgba(142,142,142,0.9);
+    color: rgba(160,155,150,0.9);
     font-family: 'Inter', Arial, sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.04em;
-    padding: 6px 13px;
+    letter-spacing: 0.02em;
+    padding: 7px 16px;
     border-radius: 99px;
     cursor: pointer;
+    white-space: nowrap;
     transition:
       border-color 0.15s ease,
       color 0.15s ease,
       background 0.15s ease,
       transform 0.1s ease,
       box-shadow 0.15s ease;
-    white-space: nowrap;
   }
   .filter-chip:hover {
     border-color: rgba(232,90,31,0.3);
@@ -414,12 +442,33 @@
   }
   .filter-chip:active { transform: scale(0.95); }
   .filter-chip.is-active {
-    background: rgba(232,90,31,0.14);
-    border-color: rgba(232,90,31,0.55);
+    background: rgba(232,90,31,0.15);
+    border-color: rgba(232,90,31,0.6);
     color: #E85A1F;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.05),
       0 0 0 2px rgba(232,90,31,0.08);
+  }
+
+  /* Bottone reset */
+  .filter-modal-reset-btn {
+    background: none;
+    border: 1px solid rgba(229,225,216,0.1);
+    color: rgba(160,155,150,0.6);
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    padding: 9px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .filter-modal-reset-btn:hover {
+    border-color: rgba(232,90,31,0.35);
+    color: #E85A1F;
+    background: rgba(232,90,31,0.05);
   }
 </style>
 

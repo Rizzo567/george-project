@@ -202,38 +202,59 @@
     sb.auth.signOut().then(function () { showAuthMode('login'); });
   });
 
-  // ── Popup filtri ───────────────────────────────────────────
-  var filterBtn   = document.getElementById('filterTriggerBtn');
-  var filterPopup = document.getElementById('filterPopup');
-  var filterDot   = document.getElementById('filterActiveDot');
+  // ── Modal filtri ────────────────────────────────────────────
+  var filterBtn     = document.getElementById('filterTriggerBtn');
+  var filterOverlay = document.getElementById('filterModalOverlay');
+  var filterDot     = document.getElementById('filterActiveDot');
 
   function updateFilterDot() {
     var active = activeBarber !== '' || activeStatus !== '';
     filterDot.classList.toggle('is-visible', active);
   }
 
-  function openFilterPopup() {
-    filterPopup.classList.add('is-open');
+  function openFilterModal() {
+    filterOverlay.classList.add('is-open');
     filterBtn.classList.add('is-open');
-    filterPopup.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
   }
 
-  function closeFilterPopup() {
-    filterPopup.classList.remove('is-open');
+  function closeFilterModal() {
+    filterOverlay.classList.remove('is-open');
     filterBtn.classList.remove('is-open');
-    filterPopup.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
   }
 
-  filterBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    filterPopup.classList.contains('is-open') ? closeFilterPopup() : openFilterPopup();
+  filterBtn.addEventListener('click', function () {
+    filterOverlay.classList.contains('is-open') ? closeFilterModal() : openFilterModal();
   });
 
-  // Chiudi cliccando fuori
-  document.addEventListener('click', function (e) {
-    if (!filterPopup.contains(e.target) && e.target !== filterBtn) {
-      closeFilterPopup();
-    }
+  // Chiudi cliccando sul backdrop
+  filterOverlay.addEventListener('click', function (e) {
+    if (e.target === filterOverlay) closeFilterModal();
+  });
+
+  // Chiudi col pulsante X
+  document.getElementById('filterModalClose').addEventListener('click', closeFilterModal);
+
+  // Chiudi con ESC
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && filterOverlay.classList.contains('is-open')) closeFilterModal();
+  });
+
+  // Reset filtri
+  document.getElementById('filterResetBtn').addEventListener('click', function () {
+    activeBarber = '';
+    activeStatus = '';
+    document.querySelectorAll('#barberFilters .filter-chip').forEach(function (b) {
+      b.classList.toggle('is-active', b.dataset.barber === '');
+    });
+    document.querySelectorAll('#statusFilters .filter-chip').forEach(function (b) {
+      b.classList.toggle('is-active', b.dataset.status === '');
+    });
+    updateFilterDot();
+    loadTodaySection();
+    loadAppointments();
+    closeFilterModal();
   });
 
   // ── Filtri barbiere ─────────────────────────────────────────
