@@ -21,8 +21,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="assets/js/config.js"></script>
   <script>
-    /* ── EmailJS init ── TODO: sostituisci YOUR_EMAILJS_PUBLIC_KEY con la tua chiave pubblica */
-    emailjs.init({ publicKey: 'YOUR_EMAILJS_PUBLIC_KEY' });
+    emailjs.init({ publicKey: window.MB_CONFIG.EMAILJS_PUBLIC_KEY });
   </script>
 
   <style>
@@ -1320,14 +1319,19 @@
                       dateObj.getDate() + ' ' + MONTHS[dateObj.getMonth()] + ' ' +
                       dateObj.getFullYear();
 
-        /* TODO: sostituisci YOUR_SERVICE_ID e YOUR_TEMPLATE_ID con i valori del tuo account EmailJS */
-        emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
-          to_email:  email,
-          to_name:   nome,
-          barbiere:  barberLabel,
-          data:      dateStr,
-          orario:    state.time,
-          servizio:  servizio
+        var barberImg = window.location.origin + '/assets/img/character/' +
+          (state.barber === 'george'
+            ? 'george-fit1-removebg-preview.png'
+            : 'berlin-canotta-removebg-preview.png');
+
+        emailjs.send(window.MB_CONFIG.EMAILJS_SERVICE_ID, window.MB_CONFIG.EMAILJS_TEMPLATE_ID, {
+          to_email:    email,
+          to_name:     nome,
+          barbiere:    barberLabel,
+          barbiere_img: barberImg,
+          data:        dateStr,
+          orario:      state.time,
+          servizio:    servizio
         }).catch(function () { /* fail silently — prenotazione già salvata */ });
 
         sessionStorage.setItem('mbooking', JSON.stringify({
