@@ -139,8 +139,10 @@ async function isSlotAlreadyBooked(env, barber, date, time) {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function persistEventId(env, apptId, eventId) {
-  const url = (env.SUPABASE_URL || SUPABASE_URL_PUBLIC).trim();
-  const key = (env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+  // URL pubblico da costante. service_role è segreta → solo da env, ma sanifichiamo
+  // togliendo OGNI whitespace (anche interno) da paste corrotti in dashboard.
+  const url = SUPABASE_URL_PUBLIC;
+  const key = (env.SUPABASE_SERVICE_ROLE_KEY || '').replace(/\s/g, '');
   if (!url || !key || !eventId || !UUID_RE.test(apptId || '')) return false;
   try {
     const r = await fetch(`${url}/rest/v1/appointments?id=eq.${encodeURIComponent(apptId)}`, {
