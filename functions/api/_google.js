@@ -32,8 +32,10 @@ export function getEventDuration(barber) {
 // ritorna null (nessuna chiusura → non blocca le prenotazioni).
 // ────────────────────────────────────────────────────────────────────
 export async function getClosure(env, barber, date) {
-  const url = env.SUPABASE_URL     || SUPABASE_URL_PUBLIC;
-  const key = env.SUPABASE_ANON_KEY || SUPABASE_ANON_PUBLIC;
+  // .trim(): le env incollate in dashboard possono avere newline/spazi finali
+  // che rendono invalido l'header (TypeError: Invalid header value).
+  const url = (env.SUPABASE_URL     || SUPABASE_URL_PUBLIC).trim();
+  const key = (env.SUPABASE_ANON_KEY || SUPABASE_ANON_PUBLIC).trim();
   if (!url || !key) return null;
 
   try {
