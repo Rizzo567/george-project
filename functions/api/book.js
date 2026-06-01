@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, pad } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getEventDuration, getClosure, closureWindow, pad } from './_google.js';
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: CORS lockdown
@@ -130,6 +130,35 @@ async function isSlotAlreadyBooked(env, barber, date, time) {
   }
 }
 
+// ────────────────────────────────────────────────────────────────────
+// Persiste calendar_event_id sulla riga appointments via Supabase REST con
+// SERVICE_ROLE key (bypassa RLS). Necessario perché l'UPDATE lato client con
+// anon key falliva sempre (anon non ha policy UPDATE). Best-effort: un errore
+// qui non deve far fallire la prenotazione (l'evento Calendar è già creato).
+// ────────────────────────────────────────────────────────────────────
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function persistEventId(env, apptId, eventId) {
+  const url = env.SUPABASE_URL;
+  const key = env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key || !eventId || !UUID_RE.test(apptId || '')) return false;
+  try {
+    const r = await fetch(`${url}/rest/v1/appointments?id=eq.${encodeURIComponent(apptId)}`, {
+      method: 'PATCH',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({ calendar_event_id: eventId }),
+    });
+    return r.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function onRequestPost({ request, env }) {
   const corsHeaders = buildCorsHeaders(request);
   const ip = request.headers.get('CF-Connecting-IP')
@@ -145,7 +174,7 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); }
   catch { return json({ error: 'Body non valido' }, 400, corsHeaders); }
 
-  let { barber, nome, telefono, data, ora, servizio, note, imgUrl, email } = body;
+  let { barber, nome, telefono, data, ora, servizio, note, imgUrl, email, apptId } = body;
 
   // ── Validazione ────────────────────────────────────────────────
   if (!ALLOWED_BARBERS.includes(barber)) {
@@ -188,6 +217,15 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'Slot già prenotato. Scegli un altro orario.' }, 409, corsHeaders);
   }
 
+  // ── Chiusura / festività: slot dentro un giorno chiuso? ────────
+  const closure    = await getClosure(env, barber, data);
+  const closureWin = closureWindow(closure);
+  const [startH, startM] = ora.split(':').map(Number);
+  const startMin = startH * 60 + startM;
+  if (closureWin === null || startMin < closureWin.start || startMin >= closureWin.end) {
+    return json({ error: 'Il barbiere è chiuso in questo giorno/orario.' }, 409, corsHeaders);
+  }
+
   // ── Config Google ──────────────────────────────────────────────
   const calendarId     = getCalendarId(barber, env);
   const serviceAccount = getServiceAccount(barber, env);
@@ -196,12 +234,42 @@ export async function onRequestPost({ request, env }) {
   }
 
   const tz = romeOffset(data);
-  const [startH, startM] = ora.split(':').map(Number);
-  const endTotal = startH * 60 + startM + 30;
+  // Durata reale per barbiere: George 40min, Berlin 60min
+  const duration = getEventDuration(barber);
+  const endTotal = startMin + duration;
   const endH = Math.floor(endTotal / 60);
   const endM = endTotal % 60;
 
   try {
+    // ── Guard autoritativo: il calendario è occupato su questa finestra? ──
+    // Chiude l'overbooking quando i barbieri bloccano i giorni creando eventi
+    // direttamente su Google Calendar (non presenti in Supabase).
+    const token = await getAccessToken(serviceAccount);
+
+    const startIso = `${data}T${pad(startH)}:${pad(startM)}:00${tz}`;
+    const endIso   = `${data}T${pad(endH)}:${pad(endM)}:00${tz}`;
+    const fbRes = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        timeMin: startIso,
+        timeMax: endIso,
+        timeZone: 'Europe/Rome',
+        items: [{ id: calendarId }],
+      }),
+    });
+    if (fbRes.ok) {
+      const fbData = await fbRes.json();
+      const busy   = fbData.calendars?.[calendarId]?.busy ?? [];
+      const sD = new Date(startIso);
+      const eD = new Date(endIso);
+      const overlaps = busy.some(({ start, end }) => sD < new Date(end) && eD > new Date(start));
+      if (overlaps) {
+        return json({ error: 'Slot non più disponibile. Scegli un altro orario.' }, 409, corsHeaders);
+      }
+    }
+    // Se la verifica freeBusy fallisce (fbRes non ok), si procede: la dedup
+    // Supabase resta come rete di sicurezza, non blocchiamo per un errore transitorio.
     // Componi description in modo safe (nessun input grezzo nelle linee strutturate)
     const description = [
       `Tel: ${telefono}`,
@@ -216,7 +284,6 @@ export async function onRequestPost({ request, env }) {
       end:   { dateTime: `${data}T${pad(endH)}:${pad(endM)}:00${tz}`,   timeZone: 'Europe/Rome' },
     };
 
-    const token = await getAccessToken(serviceAccount);
     const calUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
 
     const res = await fetch(calUrl, {
@@ -233,12 +300,16 @@ export async function onRequestPost({ request, env }) {
     const createdEvent = await res.json();
     const eventId = createdEvent.id ?? null;
 
+    // Collega l'evento Calendar alla riga DB (server-side, service_role).
+    // Senza questo la cancellazione admin non può eliminare l'evento Calendar
+    // → con Calendar autoritativo lo slot resterebbe bloccato dopo un annullamento.
+    if (eventId && apptId) {
+      await persistEventId(env, apptId, eventId);
+    }
+
     // ── Email di conferma al cliente (server-side via Resend) ──
-    let emailDebug = { hasEmail: !!email, hasKey: !!env.RESEND_API_KEY, sent: false, error: null };
     if (email && env.RESEND_API_KEY) {
       const emailSanitized = sanitizeText(email, 254);
-      emailDebug.sanitized = emailSanitized;
-      emailDebug.validFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailSanitized);
       if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailSanitized)) {
         const barberLabel = barber === 'george' ? 'George' : 'Berlin';
         const [yyyy, mm, dd] = data.split('-');
@@ -326,7 +397,7 @@ export async function onRequestPost({ request, env }) {
           const resendRes = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+              'Authorization': `Bearer ${env.RESEND_API_KEY.trim()}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -339,19 +410,15 @@ export async function onRequestPost({ request, env }) {
           });
           if (!resendRes.ok) {
             const errText = await resendRes.text();
-            emailDebug.error = `${resendRes.status}: ${errText}`;
             console.error('Resend error:', resendRes.status, errText);
-          } else {
-            emailDebug.sent = true;
           }
         } catch (emailErr) {
-          emailDebug.error = emailErr.message;
           console.error('Resend fetch error:', emailErr.message);
         }
       }
     }
 
-    return json({ ok: true, eventId, _emailDebug: emailDebug }, 200, corsHeaders);
+    return json({ ok: true, eventId }, 200, corsHeaders);
   } catch (err) {
     // Non esporre dettagli interni al client
     console.error('book.js error:', err.message);

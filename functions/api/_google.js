@@ -7,9 +7,72 @@ export const WORK_RANGES  = [
   { start: 13 * 60, end: 20 * 60 },
 ];
 
-// Per-barber slot duration
+// Per-barber slot duration (pitch della griglia: George 40min+5 pausa, Berlin 60min)
 export function getSlotMinutes(barber) {
   return barber === 'george' ? 45 : 60;
+}
+
+// Per-barber EVENT duration (durata reale dell'appuntamento sul calendario)
+// George: 40min di servizio (+5 di pausa lasciati liberi). Berlin: 60min pieni.
+export function getEventDuration(barber) {
+  return barber === 'george' ? 40 : 60;
+}
+
+// ────────────────────────────────────────────────────────────────────
+// CHIUSURE / FESTIVITÀ
+// Legge da Supabase REST (anon key) le chiusure che coprono `date` e si
+// applicano a `barber`. Ritorna la più restrittiva (full ha priorità).
+// Robusto al fallimento: se Supabase non è configurato o la fetch fallisce,
+// ritorna null (nessuna chiusura → non blocca le prenotazioni).
+// ────────────────────────────────────────────────────────────────────
+export async function getClosure(env, barber, date) {
+  const url = env.SUPABASE_URL;
+  const key = env.SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+
+  try {
+    // closures che coprono la data e valgono per questo barbiere (o 'both')
+    const reqUrl = `${url}/rest/v1/closures`
+      + `?select=scope,mode,custom_start,custom_end`
+      + `&start_date=lte.${encodeURIComponent(date)}`
+      + `&end_date=gte.${encodeURIComponent(date)}`
+      + `&or=(scope.eq.both,scope.eq.${encodeURIComponent(barber)})`;
+    const r = await fetch(reqUrl, {
+      headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: 'application/json' },
+    });
+    if (!r.ok) return null;
+    const rows = await r.json();
+    if (!Array.isArray(rows) || rows.length === 0) return null;
+    // full ha priorità assoluta; altrimenti la prima chiusura parziale
+    return rows.find(c => c.mode === 'full') || rows[0];
+  } catch {
+    return null;
+  }
+}
+
+// Dato un record closure, ritorna la finestra oraria CONSENTITA in minuti dalla
+// mezzanotte, oppure null se il giorno è completamente chiuso.
+export function closureWindow(closure) {
+  if (!closure) return { start: 0, end: 24 * 60 }; // nessuna chiusura: tutto aperto
+  switch (closure.mode) {
+    case 'full':           return null;                       // chiuso tutto il giorno
+    case 'morning_only':   return { start: 0, end: 12 * 60 }; // solo mattina (fino a 12:00)
+    case 'afternoon_only': return { start: 13 * 60, end: 24 * 60 }; // solo pomeriggio (da 13:00)
+    case 'custom': {
+      const s = hhmmToMin(closure.custom_start);
+      const e = hhmmToMin(closure.custom_end);
+      if (s == null || e == null || e <= s) return null;
+      return { start: s, end: e };
+    }
+    default: return { start: 0, end: 24 * 60 };
+  }
+}
+
+function hhmmToMin(t) {
+  if (typeof t !== 'string') return null;
+  const m = /^(\d{2}):(\d{2})/.exec(t);
+  if (!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
 }
 
 // Per-barber work ranges (matching frontend fallbackSlots)

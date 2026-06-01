@@ -1,5 +1,7 @@
 # MISTER BARBER — System Map
-> Stato: 2026-05-25 · Tutto operativo ✅
+> Stato: 2026-06-01 · Tutto operativo ✅
+> Update 2026-06-01: Google Calendar autoritativo per disponibilità · durata evento
+> per-barbiere (George 40min / Berlin 60min) · gestione chiusure/festività (tabella `closures`).
 
 ---
 
@@ -163,6 +165,24 @@ VIEW: appointment_slots
 → barber + date + time di tutti gli appuntamenti NON cancelled
 → usata da /api/available come source of truth disponibilità
 
+TABLE: closures (chiusure / festività · 2026-06-01)
+┌──────────────┬──────────┬───────────────────────────────────────────────┐
+│ Campo        │ Tipo     │ Note                                          │
+├──────────────┼──────────┼───────────────────────────────────────────────┤
+│ id           │ uuid PK  │ auto                                          │
+│ scope        │ text     │ 'both' | 'george' | 'berlin'                  │
+│ start_date   │ date     │ inizio intervallo (incluso)                   │
+│ end_date     │ date     │ fine intervallo (incluso) — ponti multi-day   │
+│ mode         │ text     │ full | morning_only | afternoon_only | custom │
+│ custom_start │ time     │ apertura (solo se mode=custom)                │
+│ custom_end   │ time     │ chiusura (solo se mode=custom)                │
+│ note         │ text     │ es. "Ponte 2 giugno" (nullable, ≤200)         │
+│ created_at   │ timestamptz │ auto                                       │
+└──────────────┴──────────┴───────────────────────────────────────────────┘
+→ scritta dal gestionale (authenticated), letta server-side da
+  /api/available e /api/book (anon select, nessun PII)
+RLS closures: anon → SELECT ✅ · authenticated → ALL ✅
+
 STORAGE: bucket "bookings" (pubblico)
 → foto riferimento taglio caricate dal cliente
 → URL salvata in img_url
@@ -181,16 +201,20 @@ RLS POLICIES:
 ├── INPUT:  barber, nome, email, telefono, servizio, data, ora, notes, imgUrl
 ├── SECURITY: rate limit 5req/min · CORS whitelist · input validation
 ├── DEDUP: controlla appointment_slots (stesso slot già preso?)
-├── Google Calendar: crea evento con service account
+├── CLOSURE: rifiuta (409) se la data/orario è in una chiusura
+├── FREEBUSY GUARD: rifiuta (409) se il calendario è occupato sulla finestra
+│   evento (Calendar autoritativo → blocca anche gli eventi creati a mano)
+├── Google Calendar: crea evento (durata George 40min / Berlin 60min)
 ├── Resend: invia email conferma al cliente
 └── OUTPUT: { ok: true, eventId }
 
 /api/available  (GET)
 ├── INPUT:  ?barber=&date=
-├── Legge appointment_slots da Supabase (source of truth)
-├── Genera griglia slot per barber (George 45min / Berlin 60min)
-├── Esclude slot già occupati
-└── OUTPUT: { slots: [...] }
+├── CLOSURE: se giorno chiuso → { slots: [], closed: true, reason }
+│   se mezza giornata/custom → restringe la finestra oraria
+├── Google Calendar freeBusy (autoritativo): marca busy gli slot occupati
+├── Genera griglia slot per barber (pitch George 45min / Berlin 60min)
+└── OUTPUT: { slots: [{time, available}], closed? }
 
 /api/cancel-calendar  (POST)
 ├── INPUT:  barber, eventId
@@ -206,6 +230,7 @@ ENV VARS (server-side, mai esposti al browser):
   BERLIN_CALENDAR_ID
   SUPABASE_URL
   SUPABASE_ANON_KEY
+  SUPABASE_SERVICE_ROLE_KEY  ← aggiunto 2026-06-01 (book.js scrive calendar_event_id)
   RESEND_API_KEY  ← aggiunto 2026-05-25
 ```
 

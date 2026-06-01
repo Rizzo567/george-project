@@ -60,6 +60,7 @@
     loadStatsData();
     loadTodaySection();
     loadAppointments();
+    loadClosures();
     if (!autoCompleteTimer) {
       checkAutoComplete();
       autoCompleteTimer = setInterval(checkAutoComplete, 60000);
@@ -1189,6 +1190,177 @@
     setTimeout(function() {
       panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 60);
+  }
+
+  // ── Chiusure / Festività ───────────────────────────────────
+  var MODE_LABELS = {
+    full:           'Chiuso tutto il giorno',
+    morning_only:   'Aperti solo mattina',
+    afternoon_only: 'Aperti solo pomeriggio',
+    custom:         'Orario personalizzato'
+  };
+  var SCOPE_LABELS = { both: 'Entrambi', george: 'George', berlin: 'Berlin' };
+
+  var clForm      = document.getElementById('closuresForm');
+  var clAddBtn    = document.getElementById('closuresAddBtn');
+  var clCancelBtn = document.getElementById('clCancelBtn');
+  var clModeSel   = document.getElementById('clMode');
+  var clCustomRow = document.getElementById('clCustomRow');
+  var clMsg       = document.getElementById('clMsg');
+  var clSaveBtn   = document.getElementById('clSaveBtn');
+
+  function clShowMsg(text, type) {
+    clMsg.textContent = text;
+    clMsg.className = 'cf-msg' + (type ? ' is-' + type : '');
+  }
+
+  function toggleCustomRow() {
+    if (clModeSel.value === 'custom') clCustomRow.classList.remove('is-hidden');
+    else clCustomRow.classList.add('is-hidden');
+  }
+
+  if (clModeSel) clModeSel.addEventListener('change', toggleCustomRow);
+
+  if (clAddBtn) {
+    clAddBtn.addEventListener('click', function () {
+      var hidden = clForm.classList.contains('is-hidden');
+      if (hidden) {
+        clForm.classList.remove('is-hidden');
+        clAddBtn.textContent = '− Chiudi';
+        var today = new Date().toISOString().slice(0, 10);
+        document.getElementById('clStart').value = today;
+        document.getElementById('clEnd').value   = today;
+        clShowMsg('', '');
+        toggleCustomRow();
+      } else {
+        clForm.classList.add('is-hidden');
+        clAddBtn.textContent = '+ Aggiungi';
+      }
+    });
+  }
+
+  if (clCancelBtn) {
+    clCancelBtn.addEventListener('click', function () {
+      clForm.classList.add('is-hidden');
+      clAddBtn.textContent = '+ Aggiungi';
+    });
+  }
+
+  if (clForm) {
+    clForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var scope = document.getElementById('clScope').value;
+      var mode  = clModeSel.value;
+      var start = document.getElementById('clStart').value;
+      var end   = document.getElementById('clEnd').value;
+      var note  = document.getElementById('clNote').value.trim();
+
+      if (!start || !end) { clShowMsg('Inserisci le date.', 'error'); return; }
+      if (end < start)    { clShowMsg('La data finale precede quella iniziale.', 'error'); return; }
+
+      var payload = {
+        scope: scope,
+        start_date: start,
+        end_date: end,
+        mode: mode,
+        custom_start: null,
+        custom_end: null,
+        note: note || null
+      };
+
+      if (mode === 'custom') {
+        var cs = document.getElementById('clCustomStart').value;
+        var ce = document.getElementById('clCustomEnd').value;
+        if (!cs || !ce)  { clShowMsg('Inserisci orario di apertura e chiusura.', 'error'); return; }
+        if (ce <= cs)    { clShowMsg('L’orario di chiusura deve essere dopo l’apertura.', 'error'); return; }
+        payload.custom_start = cs;
+        payload.custom_end   = ce;
+      }
+
+      clSaveBtn.disabled = true;
+      clSaveBtn.textContent = 'Salvataggio…';
+
+      sb.from('closures').insert(payload).then(function (res) {
+        clSaveBtn.disabled = false;
+        clSaveBtn.textContent = 'Salva chiusura';
+        if (res.error) {
+          clShowMsg('Errore: ' + res.error.message, 'error');
+          return;
+        }
+        clForm.classList.add('is-hidden');
+        clAddBtn.textContent = '+ Aggiungi';
+        document.getElementById('clNote').value = '';
+        loadClosures();
+      });
+    });
+  }
+
+  function fmtDmy(ds) {
+    var d = new Date(ds + 'T12:00:00');
+    return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+  }
+
+  function loadClosures() {
+    var listEl  = document.getElementById('closuresList');
+    var emptyEl = document.getElementById('closuresEmpty');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    var todayStr = new Date().toISOString().slice(0, 10);
+    // Mostra chiusure che non sono già completamente passate
+    sb.from('closures')
+      .select('*')
+      .gte('end_date', todayStr)
+      .order('start_date', { ascending: true })
+      .then(function (res) {
+        if (res.error) { emptyEl.classList.add('is-hidden'); return; }
+        var rows = res.data || [];
+        if (!rows.length) {
+          emptyEl.classList.remove('is-hidden');
+          return;
+        }
+        emptyEl.classList.add('is-hidden');
+
+        rows.forEach(function (c) {
+          var dates = c.start_date === c.end_date
+            ? fmtDmy(c.start_date)
+            : fmtDmy(c.start_date) + ' → ' + fmtDmy(c.end_date);
+
+          var modeLabel = MODE_LABELS[c.mode] || c.mode;
+          if (c.mode === 'custom' && c.custom_start && c.custom_end) {
+            modeLabel = 'Aperti ' + c.custom_start.slice(0, 5) + '–' + c.custom_end.slice(0, 5);
+          }
+
+          var row = document.createElement('div');
+          row.className = 'closure-row';
+          row.innerHTML =
+            '<div class="closure-row-dates">' + esc(dates) + '</div>' +
+            '<div class="closure-row-info">' +
+              '<div class="closure-row-mode">' + esc(modeLabel) + '</div>' +
+              '<div class="closure-row-meta">' +
+                '<span class="closure-scope-pill">' + esc(SCOPE_LABELS[c.scope] || c.scope) + '</span>' +
+                (c.note ? esc(c.note) : '') +
+              '</div>' +
+            '</div>' +
+            '<button class="closure-del-btn" data-id="' + esc(c.id) + '">Elimina</button>';
+
+          row.querySelector('.closure-del-btn').addEventListener('click', function () {
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = '…';
+            sb.from('closures').delete().eq('id', c.id).then(function (r2) {
+              if (r2.error) {
+                btn.disabled = false;
+                btn.textContent = 'Elimina';
+              } else {
+                loadClosures();
+              }
+            });
+          });
+
+          listEl.appendChild(row);
+        });
+      });
   }
 
   // ── Start ──────────────────────────────────────────────────

@@ -194,6 +194,72 @@
     <div class="storico-wrap" id="storicoWrap">
       <button class="storico-btn" id="storicoBtn">Visualizza storico</button>
     </div>
+
+    <!-- ── CHIUSURE / FESTIVITÀ ── -->
+    <div class="closures-section" id="closuresSection">
+      <div class="closures-hd">
+        <div>
+          <div class="closures-title">Chiusure &amp; Festività</div>
+          <div class="closures-sub">Giorni di chiusura, ponti e mezze giornate</div>
+        </div>
+        <button class="closures-add-btn" id="closuresAddBtn" type="button">+ Aggiungi</button>
+      </div>
+
+      <!-- Form (nascosto di default) -->
+      <form class="closures-form is-hidden" id="closuresForm">
+        <div class="cf-row">
+          <label class="cf-field">
+            <span class="cf-label">Per chi</span>
+            <select id="clScope" class="cf-input">
+              <option value="both">Entrambi</option>
+              <option value="george">Solo George</option>
+              <option value="berlin">Solo Berlin</option>
+            </select>
+          </label>
+          <label class="cf-field">
+            <span class="cf-label">Modalità</span>
+            <select id="clMode" class="cf-input">
+              <option value="full">Chiuso tutto il giorno</option>
+              <option value="morning_only">Aperti solo mattina</option>
+              <option value="afternoon_only">Aperti solo pomeriggio</option>
+              <option value="custom">Orario personalizzato</option>
+            </select>
+          </label>
+        </div>
+        <div class="cf-row">
+          <label class="cf-field">
+            <span class="cf-label">Dal giorno</span>
+            <input type="date" id="clStart" class="cf-input" required>
+          </label>
+          <label class="cf-field">
+            <span class="cf-label">Al giorno</span>
+            <input type="date" id="clEnd" class="cf-input" required>
+          </label>
+        </div>
+        <div class="cf-row cf-custom is-hidden" id="clCustomRow">
+          <label class="cf-field">
+            <span class="cf-label">Apre</span>
+            <input type="time" id="clCustomStart" class="cf-input">
+          </label>
+          <label class="cf-field">
+            <span class="cf-label">Chiude</span>
+            <input type="time" id="clCustomEnd" class="cf-input">
+          </label>
+        </div>
+        <label class="cf-field">
+          <span class="cf-label">Nota (opzionale)</span>
+          <input type="text" id="clNote" class="cf-input" maxlength="200" placeholder="Es. Ponte 2 giugno">
+        </label>
+        <div class="cf-msg" id="clMsg"></div>
+        <div class="cf-actions">
+          <button type="button" class="cf-btn cf-btn--ghost" id="clCancelBtn">Annulla</button>
+          <button type="submit" class="cf-btn cf-btn--save" id="clSaveBtn">Salva chiusura</button>
+        </div>
+      </form>
+
+      <div class="closures-list" id="closuresList"></div>
+      <p class="closures-empty is-hidden" id="closuresEmpty">Nessuna chiusura programmata.</p>
+    </div>
   </section>
 
 </div>

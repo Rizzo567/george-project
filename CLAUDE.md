@@ -1,5 +1,10 @@
 # George Website
 
+## Model Policy
+- Coding, debugging, architettura, ragionamento → **Opus 4.8** (`claude-opus-4-8`) SEMPRE
+- Riscrittura testi, azioni ripetitive, formatting → Sonnet 4.6
+- Regola permanente dal 2026-05-29, nessuna eccezione
+
 ## Cos'è
 Sito web per il cliente George. Build da zero partendo dalle immagini di riferimento nella cartella.
 

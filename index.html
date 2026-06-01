@@ -542,7 +542,7 @@
         el.querySelectorAll('.brand-char').forEach(function(c) { c.classList.add('animate'); });
       }
 
-      // Brand mark: Mister 0.5s, Barber 1.5s (special timing)
+      // Brand mark: Mister 0.5s, Barber 0.85s (cascata continua — gap 0.1s dopo fine Mister)
       var mark = document.querySelector('.brand-mark');
       if (mark) {
         function wrapChars(text, baseDelay) {
@@ -550,7 +550,7 @@
             return '<span class="brand-char" style="animation-delay:' + (baseDelay + i * STAGGER).toFixed(2) + 's">' + ch + '</span>';
           }).join('');
         }
-        mark.innerHTML = wrapChars('Mister', 0.5) + '<span class="second">' + wrapChars('Barber', 1.5) + '</span>';
+        mark.innerHTML = wrapChars('Mister', 0.5) + '<span class="second">' + wrapChars('Barber', 0.85) + '</span>';
       }
 
       // Text elements: split into chars, trigger on scroll

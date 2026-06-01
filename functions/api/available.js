@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getWorkRanges, getSlotMinutes, pad } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getWorkRanges, getSlotMinutes, getClosure, closureWindow, pad } from './_google.js';
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: CORS lockdown (vedi book.js per dettagli)
@@ -57,7 +57,16 @@ export async function onRequestGet({ request, env }) {
 
   // Blocca domenica
   const dayOfWeek = reqDate.getUTCDay();
-  if (dayOfWeek === 0) return json({ slots: [] }, 200, corsHeaders);
+  if (dayOfWeek === 0) return json({ slots: [], closed: true, reason: 'Domenica' }, 200, corsHeaders);
+
+  // ── Chiusure / festività ───────────────────────────────────
+  // closureWin = null  → giorno completamente chiuso
+  //            = {start,end} → finestra oraria consentita (minuti da mezzanotte)
+  const closure    = await getClosure(env, barber, date);
+  const closureWin = closureWindow(closure);
+  if (closureWin === null) {
+    return json({ slots: [], closed: true, reason: 'Chiuso' }, 200, corsHeaders);
+  }
 
   const calendarId     = getCalendarId(barber, env);
   const serviceAccount = getServiceAccount(barber, env);
@@ -91,6 +100,10 @@ export async function onRequestGet({ request, env }) {
     const slots = [];
     for (const range of workRanges) {
       for (let m = range.start; m < range.end; m += slotMin) {
+        // Rispetta la finestra di apertura ridotta da una chiusura parziale
+        // (mezza giornata / custom): scarta gli slot fuori finestra.
+        if (m < closureWin.start || m >= closureWin.end) continue;
+
         const h   = Math.floor(m / 60);
         const min = m % 60;
         const slotStart = new Date(`${date}T${pad(h)}:${pad(min)}:00${tz}`);

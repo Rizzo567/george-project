@@ -1,1 +1,7 @@
 assets/js/config.js
+
+# Secrets locali — mai su git
+.dev.vars
+.dev.vars.*
+.wrangler/
+.DS_Store

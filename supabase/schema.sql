@@ -94,8 +94,12 @@ create policy "auth_delete"
 -- Mostra solo data, ora, barbiere e status, e solo per slot attivi.
 -- ============================================================================
 drop view if exists public.appointment_slots;
+-- security_invoker = false (DEFINER): la view gira coi privilegi del proprietario
+-- (postgres) ed espone SOLO colonne non-PII. Necessario perché anon NON ha SELECT
+-- sulla tabella base appointments: con security_invoker=true anon vedrebbe 0 righe
+-- e la disponibilità slot si romperebbe.
 create view public.appointment_slots
-with (security_invoker = true)
+with (security_invoker = false)
 as
   select
     id,
@@ -166,3 +170,59 @@ $$;
 
 -- Solo service_role può invocarla (mai esposta al client)
 revoke all on function public.gdpr_delete_by_phone(text) from public, anon, authenticated;
+
+-- ============================================================================
+-- CHIUSURE / FESTIVITÀ (2026-06-01)
+-- Gestione giorni festivi, ponti e mezze giornate dal gestionale.
+-- Lette server-side da /api/available e /api/book (CF Functions, anon key)
+-- e scritte dal gestionale (authenticated).
+--
+-- scope:  'both' | 'george' | 'berlin'  → a quale barbiere si applica
+-- mode:   'full'          → chiuso tutto il giorno
+--         'morning_only'  → aperti solo mattina (09:00–12:00)
+--         'afternoon_only'→ aperti solo pomeriggio (13:00–chiusura)
+--         'custom'        → aperti solo nella finestra custom_start–custom_end
+-- start_date/end_date: intervallo inclusivo (per i ponti); per un singolo
+--                      giorno start_date == end_date.
+-- ============================================================================
+create table if not exists public.closures (
+  id           uuid        default gen_random_uuid() primary key,
+  scope        text        not null check (scope in ('both','george','berlin')),
+  start_date   date        not null,
+  end_date     date        not null check (end_date >= start_date),
+  mode         text        not null check (mode in ('full','morning_only','afternoon_only','custom')),
+  custom_start time,
+  custom_end   time,
+  note         text        check (note is null or char_length(note) <= 200),
+  created_at   timestamptz default now(),
+  -- se mode = custom, servono entrambi gli estremi e start < end
+  check (
+    mode <> 'custom'
+    or (custom_start is not null and custom_end is not null and custom_start < custom_end)
+  )
+);
+
+create index if not exists idx_closures_dates on public.closures (start_date, end_date);
+
+alter table public.closures enable row level security;
+
+-- Cleanup idempotente
+drop policy if exists "closures_anon_select" on public.closures;
+drop policy if exists "closures_auth_all"    on public.closures;
+
+-- ANON: può solo leggere (nessun dato personale qui) — serve a /api/available e
+-- /api/book che interrogano Supabase REST con la anon key.
+create policy "closures_anon_select"
+  on public.closures for select
+  to anon
+  using (true);
+
+-- AUTHENTICATED (gestionale): CRUD completo
+create policy "closures_auth_all"
+  on public.closures for all
+  to authenticated
+  using (true)
+  with check (scope in ('both','george','berlin'));
+
+grant select on public.closures to anon;
+grant select, insert, update, delete on public.closures to authenticated;
