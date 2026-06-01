@@ -1,5 +1,11 @@
 // Google Calendar API helpers — due service account separati
 
+// Supabase pubblico: URL + anon key sono pubblici per design (già esposti nel
+// client assets/js/config.js). Usati come fallback quando le env CF non sono
+// configurate, così la lettura closures non dipende da SUPABASE_URL/SUPABASE_ANON_KEY.
+export const SUPABASE_URL_PUBLIC  = 'https://ccmpysycifufktbrkiot.supabase.co';
+export const SUPABASE_ANON_PUBLIC = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjbXB5c3ljaWZ1Zmt0YnJraW90Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NjA3NzYsImV4cCI6MjA5NDQzNjc3Nn0.G0qWDUmFHGuVsEqX3TqbW0ztyqxTwyyoPYqmluXGAMA';
+
 // Legacy (non usare nei nuovi moduli)
 export const SLOT_MINUTES = 30;
 export const WORK_RANGES  = [
@@ -26,8 +32,8 @@ export function getEventDuration(barber) {
 // ritorna null (nessuna chiusura → non blocca le prenotazioni).
 // ────────────────────────────────────────────────────────────────────
 export async function getClosure(env, barber, date) {
-  const url = env.SUPABASE_URL;
-  const key = env.SUPABASE_ANON_KEY;
+  const url = env.SUPABASE_URL     || SUPABASE_URL_PUBLIC;
+  const key = env.SUPABASE_ANON_KEY || SUPABASE_ANON_PUBLIC;
   if (!url || !key) return null;
 
   try {

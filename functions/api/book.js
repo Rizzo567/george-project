@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getEventDuration, getClosure, closureWindow, pad } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getEventDuration, getClosure, closureWindow, pad, SUPABASE_URL_PUBLIC } from './_google.js';
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: CORS lockdown
@@ -139,7 +139,7 @@ async function isSlotAlreadyBooked(env, barber, date, time) {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function persistEventId(env, apptId, eventId) {
-  const url = env.SUPABASE_URL;
+  const url = env.SUPABASE_URL || SUPABASE_URL_PUBLIC;
   const key = env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key || !eventId || !UUID_RE.test(apptId || '')) return false;
   try {
