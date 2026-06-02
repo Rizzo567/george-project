@@ -101,7 +101,7 @@ function rateLimitCheck(ip) {
 // SECURITY: dedup tramite Supabase REST con anon key
 // Verifica che non esista già una prenotazione attiva con stesso barber+date+time
 // ────────────────────────────────────────────────────────────────────
-async function isSlotAlreadyBooked(env, barber, date, time) {
+async function isSlotAlreadyBooked(env, barber, date, time, apptId) {
   // Se le env vars non sono configurate, skip (dedup non blocca booking)
   const url = env.SUPABASE_URL;
   const key = env.SUPABASE_ANON_KEY;
@@ -110,10 +110,18 @@ async function isSlotAlreadyBooked(env, barber, date, time) {
   try {
     // Time può arrivare come HH:MM ma in DB è HH:MM:SS
     const timeFull = time.length === 5 ? time + ':00' : time;
+    // ESCLUDI la prenotazione corrente: il client inserisce la riga appointments
+    // PRIMA di chiamare /api/book (gli serve l'apptId), e appointment_slots la
+    // rispecchia subito (stesso id). Senza questo filtro il dedup troverebbe la
+    // prenotazione stessa → 409 su OGNI booking. Cerchiamo solo righe di ALTRI.
+    const excludeSelf = apptId && UUID_RE.test(apptId)
+      ? `&id=neq.${encodeURIComponent(apptId)}`
+      : '';
     const reqUrl = `${url}/rest/v1/appointment_slots`
       + `?barber=eq.${encodeURIComponent(barber)}`
       + `&date=eq.${encodeURIComponent(date)}`
       + `&time=eq.${encodeURIComponent(timeFull)}`
+      + excludeSelf
       + `&select=id&limit=1`;
     const r = await fetch(reqUrl, {
       headers: {
@@ -215,7 +223,7 @@ export async function onRequestPost({ request, env }) {
   }
 
   // ── Dedup: stesso slot già prenotato? ──────────────────────────
-  if (await isSlotAlreadyBooked(env, barber, data, ora)) {
+  if (await isSlotAlreadyBooked(env, barber, data, ora, apptId)) {
     return json({ error: 'Slot già prenotato. Scegli un altro orario.' }, 409, corsHeaders);
   }
 
