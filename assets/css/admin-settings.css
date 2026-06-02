@@ -37,7 +37,28 @@
   color: var(--ember, #E85A1F);
   background: rgba(30,22,16,0.96);
 }
+.settings-trigger-btn { position: relative; }
 .settings-trigger-btn:active { transform: scale(0.97); }
+
+/* Indicatore "filtri attivi" sul bottone Impostazioni.
+   La regola base .filter-active-dot (display/colore) vive in admin-mb26.html;
+   qui riposizioniamo il pallino sull'angolo del bottone Impostazioni. */
+.settings-trigger-btn .filter-active-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+}
+
+/* Tab "Filtri": i controlli spostati da #filtersHost dentro il pannello */
+.settings-tabpanel .st-filters-intro {
+  margin: 0 0 14px;
+  color: var(--silver, #8E8E8E);
+}
+.settings-tabpanel .filter-modal-body {
+  padding: 0;
+  gap: 22px;
+}
 .settings-trigger-btn:focus-visible {
   outline: 2px solid var(--ember, #E85A1F);
   outline-offset: 2px;
@@ -534,7 +555,6 @@
 .dash-customizable { display: flex; flex-direction: column; }
 .dash-customizable .dash-header { order: -100; }
 .dash-customizable #dayPanel,
-.dash-customizable .filter-trigger-wrap,
 .dash-customizable .list-section-hd,
 .dash-customizable .dash-empty,
 .dash-customizable .storico-wrap { order: 50; }

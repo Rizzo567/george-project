@@ -142,16 +142,32 @@
         '</header>' +
         '<nav class="settings-tabs" id="settingsTabs" role="tablist" aria-label="Sezioni impostazioni">' +
           '<button class="settings-tab is-active" role="tab" aria-selected="true" data-tab="orari" id="tabBtnOrari" aria-controls="tabPanelOrari">Orari</button>' +
+          '<button class="settings-tab" role="tab" aria-selected="false" data-tab="filtri" id="tabBtnFiltri" aria-controls="tabPanelFiltri">Filtri</button>' +
           '<button class="settings-tab" role="tab" aria-selected="false" data-tab="servizi" id="tabBtnServizi" aria-controls="tabPanelServizi">Servizi</button>' +
           '<button class="settings-tab" role="tab" aria-selected="false" data-tab="dashboard" id="tabBtnDashboard" aria-controls="tabPanelDashboard">Dashboard</button>' +
         '</nav>' +
         '<div class="settings-body">' +
           '<section class="settings-tabpanel is-active" id="tabPanelOrari" role="tabpanel" aria-labelledby="tabBtnOrari" tabindex="0"></section>' +
+          '<section class="settings-tabpanel" id="tabPanelFiltri" role="tabpanel" aria-labelledby="tabBtnFiltri" tabindex="0" hidden></section>' +
           '<section class="settings-tabpanel" id="tabPanelServizi" role="tabpanel" aria-labelledby="tabBtnServizi" tabindex="0" hidden></section>' +
           '<section class="settings-tabpanel" id="tabPanelDashboard" role="tabpanel" aria-labelledby="tabBtnDashboard" tabindex="0" hidden></section>' +
         '</div>' +
       '</div>';
     document.body.appendChild(overlay);
+
+    // Tab "Filtri": sposta (NON duplica) i controlli filtro già presenti in
+    // #filtersHost dentro il pannello. admin.js ha cablato i loro id al boot;
+    // spostando i nodi mantiene gli stessi handler/stato senza riassociazioni.
+    var filtersHost = $('filtersHost');
+    var filtriPanel = $('tabPanelFiltri');
+    if (filtersHost && filtriPanel) {
+      var intro = document.createElement('p');
+      intro.className = 'st-card-sub st-filters-intro';
+      intro.textContent = 'Filtra la lista appuntamenti per barbiere e stato.';
+      filtriPanel.appendChild(intro);
+      while (filtersHost.firstChild) { filtriPanel.appendChild(filtersHost.firstChild); }
+      filtersHost.parentNode && filtersHost.parentNode.removeChild(filtersHost);
+    }
 
     // Chiusura
     $('settingsClose').addEventListener('click', closeOverlay);
@@ -179,7 +195,7 @@
   }
 
   function switchTab(name) {
-    var map = { orari: 'Orari', servizi: 'Servizi', dashboard: 'Dashboard' };
+    var map = { orari: 'Orari', filtri: 'Filtri', servizi: 'Servizi', dashboard: 'Dashboard' };
     Object.keys(map).forEach(function (key) {
       var isActive = (key === name);
       var btn = $('tabBtn' + map[key]);

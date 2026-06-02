@@ -207,44 +207,19 @@
     sb.auth.signOut().then(function () { showAuthMode('login'); });
   });
 
-  // ── Modal filtri ────────────────────────────────────────────
-  var filterBtn     = document.getElementById('filterTriggerBtn');
-  var filterOverlay = document.getElementById('filterModalOverlay');
-  var filterDot     = document.getElementById('filterActiveDot');
+  // ── Filtri ──────────────────────────────────────────────────
+  // I controlli filtro (barbiere + status) vivono ora dentro l'hub
+  // Impostazioni (tab "Filtri", gestito da admin-settings.js). Qui restano
+  // SOLO lo stato e la logica di filtro: il cablaggio degli id #barberFilters /
+  // #statusFilters / #filterResetBtn è identico a prima — il markup è solo
+  // spostato dentro il pannello Impostazioni, non duplicato.
+  var filterDot = document.getElementById('filterActiveDot');
 
+  // Indicatore "filtri attivi" sul bottone Impostazioni in header.
   function updateFilterDot() {
     var active = activeBarber !== '' || activeStatus !== '';
-    filterDot.classList.toggle('is-visible', active);
+    if (filterDot) filterDot.classList.toggle('is-visible', active);
   }
-
-  function openFilterModal() {
-    filterOverlay.classList.add('is-open');
-    filterBtn.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeFilterModal() {
-    filterOverlay.classList.remove('is-open');
-    filterBtn.classList.remove('is-open');
-    document.body.style.overflow = '';
-  }
-
-  filterBtn.addEventListener('click', function () {
-    filterOverlay.classList.contains('is-open') ? closeFilterModal() : openFilterModal();
-  });
-
-  // Chiudi cliccando sul backdrop
-  filterOverlay.addEventListener('click', function (e) {
-    if (e.target === filterOverlay) closeFilterModal();
-  });
-
-  // Chiudi col pulsante X
-  document.getElementById('filterModalClose').addEventListener('click', closeFilterModal);
-
-  // Chiudi con ESC
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && filterOverlay.classList.contains('is-open')) closeFilterModal();
-  });
 
   // Reset filtri
   document.getElementById('filterResetBtn').addEventListener('click', function () {
@@ -259,7 +234,6 @@
     updateFilterDot();
     loadTodaySection();
     loadAppointments();
-    closeFilterModal();
   });
 
   // ── Filtri barbiere ─────────────────────────────────────────

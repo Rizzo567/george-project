@@ -83,6 +83,7 @@
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
           <span class="settings-trigger-label">Impostazioni</span>
+          <span class="filter-active-dot" id="filterActiveDot" aria-hidden="true"></span>
         </button>
         <button class="btn-logout" id="logoutBtn">Esci</button>
       </div>
@@ -173,17 +174,6 @@
       <div class="day-panel-body" id="dayPanelBody"></div>
     </div>
 
-    <!-- Filtri — bottone ingranaggio -->
-    <div class="filter-trigger-wrap" id="filterTriggerWrap">
-      <button class="filter-trigger-btn" id="filterTriggerBtn" aria-label="Apri filtri">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-        <span class="filter-active-dot" id="filterActiveDot"></span>
-      </button>
-    </div>
-
     <!-- ── SEZIONE OGGI ── -->
     <div id="todaySection" class="today-section is-hidden">
       <div class="today-hd">
@@ -212,40 +202,33 @@
 
 </div>
 
-<!-- ── FILTER MODAL ── -->
-<div id="filterModalOverlay" class="filter-modal-overlay" role="dialog" aria-modal="true" aria-label="Filtri">
-  <div class="filter-modal-card" id="filterModalCard">
-    <div class="filter-modal-topbar">
-      <div class="filter-modal-title">Filtri</div>
-      <button class="filter-modal-close" id="filterModalClose" aria-label="Chiudi">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </button>
+<!-- ── FILTRI (host nascosto) ──
+     I controlli filtro vivono ora dentro l'hub Impostazioni (tab "Filtri").
+     admin-settings.js sposta il contenuto di #filtersHost nel pannello tab al
+     primo build dell'overlay. admin.js continua a cablare gli stessi id
+     (#barberFilters / #statusFilters / #filterResetBtn) senza modifiche di logica. -->
+<div id="filtersHost" hidden>
+  <div class="filter-modal-body">
+    <div class="filter-modal-section">
+      <div class="filter-modal-section-title">Barbiere</div>
+      <div class="filter-modal-chips" id="barberFilters">
+        <button class="filter-chip is-active" data-barber="">Tutti</button>
+        <button class="filter-chip" data-barber="george">George</button>
+        <button class="filter-chip" data-barber="berlin">Berlin</button>
+      </div>
     </div>
 
-    <div class="filter-modal-body">
-      <div class="filter-modal-section">
-        <div class="filter-modal-section-title">Barbiere</div>
-        <div class="filter-modal-chips" id="barberFilters">
-          <button class="filter-chip is-active" data-barber="">Tutti</button>
-          <button class="filter-chip" data-barber="george">George</button>
-          <button class="filter-chip" data-barber="berlin">Berlin</button>
-        </div>
+    <div class="filter-modal-section">
+      <div class="filter-modal-section-title">Status</div>
+      <div class="filter-modal-chips" id="statusFilters">
+        <button class="filter-chip is-active" data-status="">Tutti</button>
+        <button class="filter-chip" data-status="confirmed">Confermati</button>
+        <button class="filter-chip" data-status="completed">Completati</button>
+        <button class="filter-chip" data-status="cancelled">Annullati</button>
       </div>
-
-      <div class="filter-modal-section">
-        <div class="filter-modal-section-title">Status</div>
-        <div class="filter-modal-chips" id="statusFilters">
-          <button class="filter-chip is-active" data-status="">Tutti</button>
-          <button class="filter-chip" data-status="confirmed">Confermati</button>
-          <button class="filter-chip" data-status="completed">Completati</button>
-          <button class="filter-chip" data-status="cancelled">Annullati</button>
-        </div>
-      </div>
-
-      <button class="filter-modal-reset-btn" id="filterResetBtn">Reset filtri</button>
     </div>
+
+    <button class="filter-modal-reset-btn" id="filterResetBtn">Reset filtri</button>
   </div>
 </div>
 
