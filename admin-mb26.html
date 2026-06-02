@@ -16,9 +16,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/admin-settings.css">
   <!-- SECURITY: pinning a versione esatta + crossorigin per SRI/error reporting -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- SortableJS: drag-and-drop riordino widget dashboard (unica dipendenza nuova, MASTER_PLAN §0.3) -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 <div class="admin-wrap">
@@ -73,7 +76,16 @@
   <section id="dashSection" class="is-hidden">
     <div class="dash-header">
       <h1 class="dash-title">Prenotazioni</h1>
-      <button class="btn-logout" id="logoutBtn">Esci</button>
+      <div class="dash-header-actions">
+        <button class="settings-trigger-btn" id="settingsTriggerBtn" type="button" aria-label="Apri impostazioni" aria-haspopup="dialog">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span class="settings-trigger-label">Impostazioni</span>
+        </button>
+        <button class="btn-logout" id="logoutBtn">Esci</button>
+      </div>
     </div>
 
     <!-- ── PROSSIMO APPUNTAMENTO ── -->
@@ -195,71 +207,7 @@
       <button class="storico-btn" id="storicoBtn">Visualizza storico</button>
     </div>
 
-    <!-- ── CHIUSURE / FESTIVITÀ ── -->
-    <div class="closures-section" id="closuresSection">
-      <div class="closures-hd">
-        <div>
-          <div class="closures-title">Chiusure &amp; Festività</div>
-          <div class="closures-sub">Giorni di chiusura, ponti e mezze giornate</div>
-        </div>
-        <button class="closures-add-btn" id="closuresAddBtn" type="button">+ Aggiungi</button>
-      </div>
-
-      <!-- Form (nascosto di default) -->
-      <form class="closures-form is-hidden" id="closuresForm">
-        <div class="cf-row">
-          <label class="cf-field">
-            <span class="cf-label">Per chi</span>
-            <select id="clScope" class="cf-input">
-              <option value="both">Entrambi</option>
-              <option value="george">Solo George</option>
-              <option value="berlin">Solo Berlin</option>
-            </select>
-          </label>
-          <label class="cf-field">
-            <span class="cf-label">Modalità</span>
-            <select id="clMode" class="cf-input">
-              <option value="full">Chiuso tutto il giorno</option>
-              <option value="morning_only">Aperti solo mattina</option>
-              <option value="afternoon_only">Aperti solo pomeriggio</option>
-              <option value="custom">Orario personalizzato</option>
-            </select>
-          </label>
-        </div>
-        <div class="cf-row">
-          <label class="cf-field">
-            <span class="cf-label">Dal giorno</span>
-            <input type="date" id="clStart" class="cf-input" required>
-          </label>
-          <label class="cf-field">
-            <span class="cf-label">Al giorno</span>
-            <input type="date" id="clEnd" class="cf-input" required>
-          </label>
-        </div>
-        <div class="cf-row cf-custom is-hidden" id="clCustomRow">
-          <label class="cf-field">
-            <span class="cf-label">Apre</span>
-            <input type="time" id="clCustomStart" class="cf-input">
-          </label>
-          <label class="cf-field">
-            <span class="cf-label">Chiude</span>
-            <input type="time" id="clCustomEnd" class="cf-input">
-          </label>
-        </div>
-        <label class="cf-field">
-          <span class="cf-label">Nota (opzionale)</span>
-          <input type="text" id="clNote" class="cf-input" maxlength="200" placeholder="Es. Ponte 2 giugno">
-        </label>
-        <div class="cf-msg" id="clMsg"></div>
-        <div class="cf-actions">
-          <button type="button" class="cf-btn cf-btn--ghost" id="clCancelBtn">Annulla</button>
-          <button type="submit" class="cf-btn cf-btn--save" id="clSaveBtn">Salva chiusura</button>
-        </div>
-      </form>
-
-      <div class="closures-list" id="closuresList"></div>
-      <p class="closures-empty is-hidden" id="closuresEmpty">Nessuna chiusura programmata.</p>
-    </div>
+    <!-- Le Chiusure/Festività sono state spostate sotto Impostazioni (icona ingranaggio in alto). -->
   </section>
 
 </div>
@@ -540,5 +488,6 @@
 
 <script src="assets/js/config.js"></script>
 <script src="assets/js/admin.js"></script>
+<script src="assets/js/admin-settings.js"></script>
 </body>
 </html>
