@@ -1233,8 +1233,19 @@
         function sendBooking(imgBase64, imgMime, imgName) {
 
           function doInsert(imgUrl) {
-            // .select('id').single() per ottenere l'ID riga appena inserita
+            // ID generato client-side: il ruolo anon NON ha SELECT su appointments
+            // (revocato per GDPR — i dati personali non sono leggibili con la anon
+            // key). Quindi NON possiamo usare .select('id') dopo l'insert: fallirebbe
+            // con 42501 permission denied e l'utente vedrebbe "Errore durante la
+            // prenotazione". Generiamo l'UUID qui e lo passiamo sia all'insert (colonna
+            // id) sia a /api/book come apptId.
+            var aptId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+              ? crypto.randomUUID()
+              : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
+                  return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
+                });
             sb.from('appointments').insert({
+              id:      aptId,
               barber:  state.barber,
               name:    nome,
               phone:   telefono,
@@ -1245,11 +1256,9 @@
               notes:   note || null,
               img_url: imgUrl || null,
               status:  'confirmed'
-            }).select('id').single()
+            })
             .then(function (res) {
               if (res.error) { doBookingError(); return; }
-
-              var aptId = res.data && res.data.id;
 
               var calBody = {
                 barber:   state.barber,
