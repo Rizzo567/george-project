@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getWorkRanges, getSlotMinutes, getClosure, closureWindow, pad } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getWorkRanges, getSlotMinutes, getClosure, closureWindow, pad, loadShopConfig, getAllowedBarbers, getWeeklyClosedDays } from './_google.js';
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: CORS lockdown (vedi book.js per dettagli)
@@ -28,16 +28,15 @@ function buildCorsHeaders(request) {
   };
 }
 
-const ALLOWED_BARBERS = ['george', 'berlin'];
-
 export async function onRequestGet({ request, env }) {
   const corsHeaders = buildCorsHeaders(request);
   const { searchParams } = new URL(request.url);
   const barber = searchParams.get('barber');
   const date   = searchParams.get('date');
 
-  // ── Validazione input ────────────────────────────────────────
-  if (!ALLOWED_BARBERS.includes(barber)) {
+  // ── Validazione input (barbieri ammessi DB-driven, fallback george/berlin) ──
+  const allowedBarbers = await getAllowedBarbers(env);
+  if (!allowedBarbers.includes(barber)) {
     return json({ error: 'Barbiere non valido' }, 400, corsHeaders);
   }
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -55,9 +54,13 @@ export async function onRequestGet({ request, env }) {
     return json({ slots: [] }, 200, corsHeaders);
   }
 
-  // Blocca domenica
+  // Blocca i giorni di chiusura settimanale (DB-driven; fallback [0]=domenica)
   const dayOfWeek = reqDate.getUTCDay();
-  if (dayOfWeek === 0) return json({ slots: [], closed: true, reason: 'Domenica' }, 200, corsHeaders);
+  const closedDays = await getWeeklyClosedDays(env);
+  if (closedDays.includes(dayOfWeek)) {
+    const reason = dayOfWeek === 0 ? 'Domenica' : 'Chiuso';
+    return json({ slots: [], closed: true, reason }, 200, corsHeaders);
+  }
 
   // ── Chiusure / festività ───────────────────────────────────
   // closureWin = null  → giorno completamente chiuso
@@ -68,7 +71,9 @@ export async function onRequestGet({ request, env }) {
     return json({ slots: [], closed: true, reason: 'Chiuso' }, 200, corsHeaders);
   }
 
-  const calendarId     = getCalendarId(barber, env);
+  // calendar_id: override DB (staff.calendar_id) se presente, altrimenti env CF.
+  const shopConfig     = await loadShopConfig(env);
+  const calendarId     = getCalendarId(barber, env, shopConfig);
   const serviceAccount = getServiceAccount(barber, env);
   if (!calendarId || !serviceAccount.email) {
     return json({ error: 'Barbiere non configurato' }, 400, corsHeaders);
@@ -94,8 +99,10 @@ export async function onRequestGet({ request, env }) {
     const busy   = fbData.calendars?.[calendarId]?.busy ?? [];
     const nowD   = new Date();
 
-    const slotMin    = getSlotMinutes(barber);
-    const workRanges = getWorkRanges(barber);
+    // slot pitch e orari lavorativi DB-driven (fallback hardcoded).
+    // getWorkRanges ora varia per giorno della settimana (business_hours).
+    const slotMin    = await getSlotMinutes(barber, env);
+    const workRanges = await getWorkRanges(barber, dayOfWeek, env);
 
     const slots = [];
     for (const range of workRanges) {
