@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getEventDuration, getClosure, closureWindow, pad, SUPABASE_URL_PUBLIC } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getEventDuration, getClosure, closureWindow, pad, SUPABASE_URL_PUBLIC, loadShopConfig, getAllowedServices, getAllowedBarbers } from './_google.js';
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: CORS lockdown
@@ -33,9 +33,11 @@ function buildCorsHeaders(request) {
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: input validation
+// NB: la lista servizi/barbieri ammessi è ora DB-driven (services/staff where
+// active) con fallback a queste liste fisse. Caricata a runtime per request via
+// getAllowedServices(env) / getAllowedBarbers(env). Le costanti restano come
+// riferimento del fallback hardcoded (comportamento identico a oggi col seed).
 // ────────────────────────────────────────────────────────────────────
-const ALLOWED_SERVICES = ['Cut', 'Fade', 'Beard', 'Razor', 'Full'];
-const ALLOWED_BARBERS  = ['george', 'berlin'];
 
 function isValidDate(s) {
   if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
@@ -186,8 +188,12 @@ export async function onRequestPost({ request, env }) {
 
   let { barber, nome, telefono, data, ora, servizio, note, imgUrl, email, apptId } = body;
 
+  // ── Liste ammesse DB-driven (con fallback hardcoded) ───────────
+  const allowedBarbers  = await getAllowedBarbers(env);
+  const allowedServices = await getAllowedServices(env);
+
   // ── Validazione ────────────────────────────────────────────────
-  if (!ALLOWED_BARBERS.includes(barber)) {
+  if (!allowedBarbers.includes(barber)) {
     return json({ error: 'Barbiere non valido' }, 400, corsHeaders);
   }
   nome = sanitizeText(nome, 100);
@@ -204,7 +210,7 @@ export async function onRequestPost({ request, env }) {
   if (!isValidTime(ora)) {
     return json({ error: 'Orario non valido' }, 400, corsHeaders);
   }
-  if (servizio && !ALLOWED_SERVICES.includes(servizio)) {
+  if (servizio && !allowedServices.includes(servizio)) {
     return json({ error: 'Servizio non valido' }, 400, corsHeaders);
   }
   if (note != null && note !== '') {
@@ -237,15 +243,17 @@ export async function onRequestPost({ request, env }) {
   }
 
   // ── Config Google ──────────────────────────────────────────────
-  const calendarId     = getCalendarId(barber, env);
+  // calendar_id: override DB (staff.calendar_id) se presente, altrimenti env CF.
+  const shopConfig     = await loadShopConfig(env);
+  const calendarId     = getCalendarId(barber, env, shopConfig);
   const serviceAccount = getServiceAccount(barber, env);
   if (!calendarId || !serviceAccount.email) {
     return json({ error: 'Barbiere non configurato' }, 400, corsHeaders);
   }
 
   const tz = romeOffset(data);
-  // Durata reale per barbiere: George 40min, Berlin 60min
-  const duration = getEventDuration(barber);
+  // Durata reale per barbiere (DB-driven): George 40min, Berlin 60min (fallback)
+  const duration = await getEventDuration(barber, env);
   const endTotal = startMin + duration;
   const endH = Math.floor(endTotal / 60);
   const endM = endTotal % 60;
