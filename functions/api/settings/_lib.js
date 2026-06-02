@@ -151,13 +151,41 @@ export function serviceClient(env) {
   };
 }
 
-// Guardia comune: valida auth + prepara client service_role.
+// ── AUTORIZZAZIONE ADMIN (SEC-001) ────────────────────────────────
+// La sola validazione del token (authenticate) prova solo che è UN utente
+// Supabase valido, non che sia un AMMINISTRATORE. Senza questo gate, con il
+// signup aperto, qualunque registrato potrebbe scrivere la config del negozio
+// (gli endpoint usano service_role che bypassa RLS). Allowlist di email admin
+// da env `ADMIN_EMAILS` (CSV); fallback agli admin noti se l'env non è settata.
+const ADMIN_EMAILS_FALLBACK = [
+  'georgevelozperez5@gmail.com',
+  'superberlin0204@gmail.com',
+];
+
+export function getAdminEmails(env) {
+  const raw = (env && env.ADMIN_EMAILS ? String(env.ADMIN_EMAILS) : '').trim();
+  if (!raw) return ADMIN_EMAILS_FALLBACK;
+  const list = raw.split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+  return list.length ? list : ADMIN_EMAILS_FALLBACK;
+}
+
+export function isAdmin(user, env) {
+  const email = (user && typeof user.email === 'string' ? user.email : '').toLowerCase();
+  if (!email) return false;
+  return getAdminEmails(env).includes(email);
+}
+
+// Guardia comune: valida auth + AUTORIZZAZIONE ADMIN + prepara client service_role.
 // Ritorna { ok, user, db, corsHeaders } oppure { ok:false, response }.
 export async function guard(request, env) {
   const corsHeaders = buildCorsHeaders(request);
   const user = await authenticate(request);
   if (!user) {
     return { ok: false, response: json({ error: 'Non autorizzato' }, 401, corsHeaders) };
+  }
+  // Gate admin: solo le email in allowlist possono operare sulle impostazioni.
+  if (!isAdmin(user, env)) {
+    return { ok: false, response: json({ error: 'Accesso riservato agli amministratori' }, 403, corsHeaders) };
   }
   const db = serviceClient(env);
   if (!db) {
