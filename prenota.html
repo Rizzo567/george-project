@@ -19,6 +19,8 @@
   <!-- SECURITY: pinning a versione esatta + crossorigin per SRI/error reporting -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="assets/js/config.js"></script>
+  <!-- Analitiche navigazione anonime (tempo pagina + time-to-book). Nessun PII. -->
+  <script src="assets/js/track.js"></script>
 
   <style>
     /* ─── PRENOTA PAGE ─── */
@@ -1357,6 +1359,11 @@
         btn.classList.add('is-success');
 
         // Email di conferma inviata server-side da /api/book (nessuna chiave esposta al client)
+
+        // Analitiche anonime: registra il tempo impiegato per completare la prenotazione
+        if (window.MBTrack && typeof window.MBTrack.markBooked === 'function') {
+          window.MBTrack.markBooked();
+        }
 
         sessionStorage.setItem('mbooking', JSON.stringify({
           barber: state.barber,

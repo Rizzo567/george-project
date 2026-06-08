@@ -85,6 +85,12 @@
           <span class="settings-trigger-label">Impostazioni</span>
           <span class="filter-active-dot" id="filterActiveDot" aria-hidden="true"></span>
         </button>
+        <button class="settings-trigger-btn" id="analyticsTriggerBtn" type="button" aria-label="Apri analitiche" aria-haspopup="dialog">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/>
+          </svg>
+          <span class="settings-trigger-label">Analitiche</span>
+        </button>
         <button class="btn-logout" id="logoutBtn">Esci</button>
       </div>
     </div>
@@ -199,6 +205,49 @@
 
     <!-- Le Chiusure/Festività sono state spostate sotto Impostazioni (icona ingranaggio in alto). -->
   </section>
+
+  <!-- ── ANALITICHE (overlay) ──────────────────────────────────────────────
+       Aggregati anonimi (tempo pagina + time-to-book) + clienti ricorrenti
+       derivati da appointments. Nessuna riga-evento, nessun nuovo PII.
+       Logica in assets/js/admin-analytics.js. -->
+  <div id="analyticsOverlay" class="mba-overlay is-hidden" role="dialog" aria-modal="true" aria-label="Analitiche">
+    <div class="mba-panel">
+      <div class="mba-hd">
+        <h2 class="mba-title">Analitiche</h2>
+        <button class="mba-close" id="analyticsCloseBtn" type="button" aria-label="Chiudi">✕</button>
+      </div>
+      <p class="mba-note">Dati aggregati e anonimi. Nessun tracciamento individuale, nessun cookie.</p>
+
+      <div class="mba-kpi-row">
+        <div class="mba-kpi"><div class="mba-kpi-label">Tempo medio · Home</div><div class="mba-kpi-val" id="mbaTimeIndex">—</div><div class="mba-kpi-sub" id="mbaCntIndex"></div></div>
+        <div class="mba-kpi"><div class="mba-kpi-label">Tempo medio · Prenota</div><div class="mba-kpi-val" id="mbaTimePrenota">—</div><div class="mba-kpi-sub" id="mbaCntPrenota"></div></div>
+        <div class="mba-kpi mba-kpi--accent"><div class="mba-kpi-label">Tempo medio per prenotare</div><div class="mba-kpi-val" id="mbaTtb">—</div><div class="mba-kpi-sub" id="mbaCntTtb"></div></div>
+      </div>
+
+      <div class="mba-kpi-row">
+        <div class="mba-kpi"><div class="mba-kpi-label">Clienti unici</div><div class="mba-kpi-val" id="mbaUnique">—</div></div>
+        <div class="mba-kpi"><div class="mba-kpi-label">Clienti ricorrenti</div><div class="mba-kpi-val" id="mbaReturning">—</div><div class="mba-kpi-sub">2+ visite</div></div>
+        <div class="mba-kpi"><div class="mba-kpi-label">Tasso di ritorno</div><div class="mba-kpi-val" id="mbaRepeatRate">—</div></div>
+      </div>
+
+      <div class="mba-card">
+        <div class="mba-card-title">Frequenza visite per cliente</div>
+        <div class="mba-chart-wrap"><canvas id="mbaChartVisits"></canvas></div>
+        <p class="mba-empty is-hidden" id="mbaVisitsEmpty">Nessuna prenotazione registrata.</p>
+      </div>
+
+      <div class="mba-card">
+        <div class="mba-card-title">Cerca cliente per telefono</div>
+        <div class="mba-lookup">
+          <input type="tel" id="mbaPhoneInput" class="mba-input" placeholder="Es. 333 1234567" autocomplete="off" />
+          <button class="mba-btn" id="mbaLookupBtn" type="button">Cerca</button>
+        </div>
+        <div class="mba-lookup-result" id="mbaLookupResult"></div>
+      </div>
+
+      <p class="mba-err is-hidden" id="mbaError"></p>
+    </div>
+  </div>
 
 </div>
 
@@ -467,10 +516,89 @@
     color: #E85A1F;
     background: rgba(232,90,31,0.05);
   }
+  /* ──────────────────────────────────────────────
+     ANALITICHE — overlay
+  ────────────────────────────────────────────── */
+  .mba-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(8,6,4,0.78); backdrop-filter: blur(6px);
+    display: flex; justify-content: center; align-items: flex-start;
+    overflow-y: auto; padding: 32px 16px;
+  }
+  .mba-overlay.is-hidden { display: none; }
+  .mba-panel {
+    width: 100%; max-width: 880px;
+    background: #14100c;
+    border: 1px solid rgba(229,225,216,0.1);
+    border-radius: 20px; padding: 28px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+  }
+  .mba-hd { display: flex; align-items: center; justify-content: space-between; }
+  .mba-title {
+    font-family: 'Anton', sans-serif; font-size: 28px; letter-spacing: 0.02em;
+    color: #E5E1D8; margin: 0; text-transform: uppercase;
+  }
+  .mba-close {
+    background: rgba(229,225,216,0.06); border: 1px solid rgba(229,225,216,0.12);
+    color: rgba(229,225,216,0.7); width: 38px; height: 38px; border-radius: 11px;
+    cursor: pointer; font-size: 15px; line-height: 1;
+  }
+  .mba-close:hover { color: #E5E1D8; background: rgba(229,225,216,0.12); }
+  .mba-note { color: rgba(229,225,216,0.45); font-size: 12px; margin: 6px 0 22px; }
+
+  .mba-kpi-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;
+  }
+  .mba-kpi {
+    background: rgba(26,20,16,0.9); border: 1px solid rgba(229,225,216,0.08);
+    border-radius: 14px; padding: 16px 18px;
+  }
+  .mba-kpi--accent { border-color: rgba(232,90,31,0.45); }
+  .mba-kpi-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(229,225,216,0.5); margin-bottom: 8px;
+  }
+  .mba-kpi-val {
+    font-family: 'Anton', sans-serif; font-size: 30px; color: #E5E1D8; line-height: 1;
+  }
+  .mba-kpi--accent .mba-kpi-val { color: #ff7a3c; }
+  .mba-kpi-sub { font-size: 11px; color: rgba(229,225,216,0.4); margin-top: 6px; }
+
+  .mba-card {
+    background: rgba(26,20,16,0.9); border: 1px solid rgba(229,225,216,0.08);
+    border-radius: 14px; padding: 20px; margin-top: 16px;
+  }
+  .mba-card-title {
+    font-size: 13px; font-weight: 600; color: #E5E1D8; margin-bottom: 16px;
+  }
+  .mba-chart-wrap { position: relative; height: 220px; }
+  .mba-empty { color: rgba(229,225,216,0.4); font-size: 13px; text-align: center; padding: 30px 0; margin: 0; }
+
+  .mba-lookup { display: flex; gap: 10px; }
+  .mba-input {
+    flex: 1; background: #0f0c08; border: 1px solid rgba(229,225,216,0.14);
+    border-radius: 11px; padding: 11px 14px; color: #E5E1D8; font-size: 14px;
+  }
+  .mba-input:focus { outline: none; border-color: rgba(232,90,31,0.6); }
+  .mba-btn {
+    background: #E85A1F; color: #fff; border: none; border-radius: 11px;
+    padding: 0 22px; font-weight: 600; font-size: 14px; cursor: pointer;
+  }
+  .mba-btn:hover { background: #ff7a3c; }
+  .mba-lookup-result { margin-top: 14px; color: #E5E1D8; font-size: 14px; min-height: 20px; }
+  .mba-lookup-result strong { color: #ff7a3c; font-family: 'Anton', sans-serif; font-size: 20px; }
+  .mba-err { color: #ff6b6b; font-size: 13px; margin-top: 16px; }
+  .mba-err.is-hidden, .mba-empty.is-hidden { display: none; }
+
+  @media (max-width: 640px) {
+    .mba-kpi-row { grid-template-columns: 1fr; }
+    .mba-panel { padding: 20px; }
+  }
 </style>
 
 <script src="assets/js/config.js"></script>
 <script src="assets/js/admin.js"></script>
 <script src="assets/js/admin-settings.js"></script>
+<script src="assets/js/admin-analytics.js"></script>
 </body>
 </html>
