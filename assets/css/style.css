@@ -883,6 +883,19 @@ img {
   color: var(--silver);
 }
 
+/* "Powered by aike" — identico a choir: P maiuscola, "aike" leggermente piu grande + logo gufo */
+.footer-powered {
+  display: inline-flex; align-items: center; gap: 6px;
+  text-transform: none; letter-spacing: normal; font-size: 13px;
+  font-weight: 400; color: rgba(255, 255, 255, 0.6);
+}
+.aike-word {
+  font-family: "Suisse Int'l", "Suisse Intl", "Inter", var(--font-body);
+  text-transform: lowercase; font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.82);
+}
+.aike-mark { height: 18px; width: auto; display: inline-block; }
+
 @media (max-width: 768px) {
   .footer {
     padding: var(--s-9) 20px var(--s-7);
