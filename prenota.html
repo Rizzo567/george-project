@@ -979,7 +979,7 @@
           var iso = y + '-' + pad(m + 1) + '-' + pad(d);
           btn.dataset.date = iso;
 
-          if (dayDate < today || dayDate.getDay() === 0 || iso > '2026-06-25') {
+          if (dayDate < today || dayDate.getDay() === 0 || (state.barber === 'george' && iso > '2026-06-25')) {
             btn.disabled = true;
           } else {
             if (dayDate.getTime() === today.getTime()) btn.classList.add('cal-day--today');

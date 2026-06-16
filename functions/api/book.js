@@ -39,7 +39,7 @@ function buildCorsHeaders(request) {
 // riferimento del fallback hardcoded (comportamento identico a oggi col seed).
 // ────────────────────────────────────────────────────────────────────
 
-function isValidDate(s) {
+function isValidDate(s, barber) {
   if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
   const d = new Date(s + 'T12:00:00Z');
   if (isNaN(d.getTime())) return false;
@@ -47,9 +47,11 @@ function isValidDate(s) {
   const now = new Date();
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const inOneYear = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+  if (d < yesterday || d > inOneYear) return false;
   // Trasferimento George in Australia: nessun appuntamento oltre il 25/06/2026.
-  const transferCutoff = new Date('2026-06-25T23:59:59Z');
-  return d >= yesterday && d <= inOneYear && d <= transferCutoff;
+  // Solo George: Berlin resta prenotabile normalmente.
+  if (barber === 'george' && d > new Date('2026-06-25T23:59:59Z')) return false;
+  return true;
 }
 
 function isValidTime(s) {
@@ -206,7 +208,7 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'Telefono non valido' }, 400, corsHeaders);
   }
   telefono = sanitizeText(telefono, 32);
-  if (!isValidDate(data)) {
+  if (!isValidDate(data, barber)) {
     return json({ error: 'Data non valida' }, 400, corsHeaders);
   }
   if (!isValidTime(ora)) {

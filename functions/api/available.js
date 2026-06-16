@@ -55,8 +55,9 @@ export async function onRequestGet({ request, env }) {
   }
 
   // Trasferimento George in Australia: nessun appuntamento oltre il 25/06/2026.
+  // Solo George: Berlin resta prenotabile normalmente.
   const TRANSFER_CUTOFF = new Date('2026-06-25T23:59:59Z');
-  if (reqDate > TRANSFER_CUTOFF) {
+  if (barber === 'george' && reqDate > TRANSFER_CUTOFF) {
     return json({ slots: [], closed: true, reason: 'Trasferimento' }, 200, corsHeaders);
   }
 
