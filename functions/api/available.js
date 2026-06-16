@@ -54,6 +54,12 @@ export async function onRequestGet({ request, env }) {
     return json({ slots: [] }, 200, corsHeaders);
   }
 
+  // Trasferimento George in Australia: nessun appuntamento oltre il 25/06/2026.
+  const TRANSFER_CUTOFF = new Date('2026-06-25T23:59:59Z');
+  if (reqDate > TRANSFER_CUTOFF) {
+    return json({ slots: [], closed: true, reason: 'Trasferimento' }, 200, corsHeaders);
+  }
+
   // Blocca i giorni di chiusura settimanale (DB-driven; fallback [0]=domenica)
   const dayOfWeek = reqDate.getUTCDay();
   const closedDays = await getWeeklyClosedDays(env);

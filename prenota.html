@@ -979,7 +979,7 @@
           var iso = y + '-' + pad(m + 1) + '-' + pad(d);
           btn.dataset.date = iso;
 
-          if (dayDate < today || dayDate.getDay() === 0) {
+          if (dayDate < today || dayDate.getDay() === 0 || iso > '2026-06-25') {
             btn.disabled = true;
           } else {
             if (dayDate.getTime() === today.getTime()) btn.classList.add('cal-day--today');
@@ -1103,9 +1103,13 @@
         var hint = document.getElementById('slotHint');
         var grid = document.getElementById('slotGrid');
         grid.innerHTML = '';
-        hint.textContent = reason
-          ? 'Chiuso in questa data (' + reason + '). Scegli un altro giorno.'
-          : 'Chiuso in questa data. Scegli un altro giorno.';
+        if (reason === 'Trasferimento') {
+          hint.textContent = 'Trasferimento, ci vediamo dall\'altra parte.';
+        } else {
+          hint.textContent = reason
+            ? 'Chiuso in questa data (' + reason + '). Scegli un altro giorno.'
+            : 'Chiuso in questa data. Scegli un altro giorno.';
+        }
       }
 
       function renderSlots(slots) {

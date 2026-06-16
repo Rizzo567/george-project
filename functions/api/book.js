@@ -47,7 +47,9 @@ function isValidDate(s) {
   const now = new Date();
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const inOneYear = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-  return d >= yesterday && d <= inOneYear;
+  // Trasferimento George in Australia: nessun appuntamento oltre il 25/06/2026.
+  const transferCutoff = new Date('2026-06-25T23:59:59Z');
+  return d >= yesterday && d <= inOneYear && d <= transferCutoff;
 }
 
 function isValidTime(s) {
