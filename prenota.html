@@ -634,7 +634,6 @@
       </h1>
       <p class="prenota-hero__sub">Scegli il tuo barbiere e il tuo orario</p>
       <div class="prenota-hero__chars" aria-hidden="true">
-        <img class="prenota-char prenota-char--george" src="assets/img/character/george-blocco-note.png" alt="">
         <img class="prenota-char prenota-char--berlin" src="assets/img/character/berlin-incazzato.png" alt="">
       </div>
     </section>
@@ -654,16 +653,6 @@
             <div class="barber-card__info">
               <p class="barber-card__name">Berlin</p>
               <p class="barber-card__sub">Il tocco preciso</p>
-            </div>
-          </div>
-
-          <div class="barber-card" data-barber="george" role="button" tabindex="0">
-            <div class="barber-card__img-wrap">
-              <img src="assets/img/character/george-fit1-removebg-preview.png" alt="George">
-            </div>
-            <div class="barber-card__info">
-              <p class="barber-card__name">George</p>
-              <p class="barber-card__sub">Il tocco creativo</p>
             </div>
           </div>
 
@@ -896,8 +885,8 @@
       function pickBarber(card, idx) {
         state.barber = card.dataset.barber;
         var cards = document.querySelectorAll('.barber-card');
-        cards[0].classList.add('card-exit-left');
-        cards[1].classList.add('card-exit-right');
+        if (cards[0]) cards[0].classList.add('card-exit-left');
+        if (cards[1]) cards[1].classList.add('card-exit-right');
 
         setTimeout(function () {
           stepBarber.classList.add('book-step--hidden');
