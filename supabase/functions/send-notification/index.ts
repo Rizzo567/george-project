@@ -18,6 +18,11 @@ const BARBER_EMAILS: Record<string, string> = {
   berlin: 'superberlin0204@gmail.com',
 };
 
+// Barbieri validi ma SENZA email (es. Gabriele, in attesa account Google).
+// Le loro prenotazioni vivono solo sulla dashboard admin: la notifica email viene
+// saltata senza errore (no 400), così il flusso di prenotazione resta verde.
+const NO_EMAIL_BARBERS = new Set(['gabriele']);
+
 const ALLOWED_ORIGINS = [
   'https://misterbarber.it',
   'https://www.misterbarber.it',
@@ -122,6 +127,12 @@ Deno.serve(async (req) => {
 
   // ── Validazione ──────────────────────────────────────────────
   const barber = body.barber;
+  // Barbiere noto ma senza email → salta la notifica senza errore.
+  if (barber && NO_EMAIL_BARBERS.has(barber)) {
+    return new Response(JSON.stringify({ sent: false, skipped: true }), {
+      status: 200, headers: { 'Content-Type': 'application/json', ...cors },
+    });
+  }
   if (!barber || !BARBER_EMAILS[barber]) {
     return new Response(JSON.stringify({ error: 'Barbiere non valido' }), {
       status: 400, headers: { 'Content-Type': 'application/json', ...cors },

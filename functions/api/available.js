@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getWorkRanges, getSlotMinutes, getClosure, closureWindow, pad, loadShopConfig, getAllowedBarbers, getWeeklyClosedDays } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getWorkRanges, getSlotMinutes, getEventDuration, getBookedBusy, getClosure, closureWindow, pad, loadShopConfig, getAllowedBarbers, getWeeklyClosedDays } from './_google.js';
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: CORS lockdown (vedi book.js per dettagli)
@@ -79,37 +79,43 @@ export async function onRequestGet({ request, env }) {
   }
 
   // calendar_id: override DB (staff.calendar_id) se presente, altrimenti env CF.
+  // hasCalendar=false → barbiere "calendar-less" (es. Gabriele): disponibilità
+  // calcolata dalle prenotazioni Supabase invece che dal freeBusy di Google.
   const shopConfig     = await loadShopConfig(env);
   const calendarId     = getCalendarId(barber, env, shopConfig);
   const serviceAccount = getServiceAccount(barber, env);
-  if (!calendarId || !serviceAccount.email) {
-    return json({ error: 'Barbiere non configurato' }, 400, corsHeaders);
-  }
+  const hasCalendar    = !!(calendarId && serviceAccount.email);
 
   const tz = romeOffset(date);
 
   try {
-    const token = await getAccessToken(serviceAccount);
-
-    const fbRes = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        timeMin: `${date}T09:00:00${tz}`,
-        timeMax: `${date}T20:00:00${tz}`,
-        timeZone: 'Europe/Rome',
-        items: [{ id: calendarId }],
-      }),
-    });
-
-    const fbData = await fbRes.json();
-    const busy   = fbData.calendars?.[calendarId]?.busy ?? [];
     const nowD   = new Date();
 
     // slot pitch e orari lavorativi DB-driven (fallback hardcoded).
     // getWorkRanges ora varia per giorno della settimana (business_hours).
     const slotMin    = await getSlotMinutes(barber, env);
     const workRanges = await getWorkRanges(barber, dayOfWeek, env);
+    const duration   = await getEventDuration(barber, env);
+
+    // Finestre occupate: Google Calendar (barbieri con calendario) oppure Supabase.
+    let busy = [];
+    if (hasCalendar) {
+      const token = await getAccessToken(serviceAccount);
+      const fbRes = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timeMin: `${date}T09:00:00${tz}`,
+          timeMax: `${date}T20:00:00${tz}`,
+          timeZone: 'Europe/Rome',
+          items: [{ id: calendarId }],
+        }),
+      });
+      const fbData = await fbRes.json();
+      busy = fbData.calendars?.[calendarId]?.busy ?? [];
+    } else {
+      busy = await getBookedBusy(env, barber, date, tz, duration);
+    }
 
     const slots = [];
     for (const range of workRanges) {

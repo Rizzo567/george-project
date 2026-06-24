@@ -294,13 +294,53 @@ export function getCalendarId(barber, env, config) {
       return s.calendar_id.trim();
     }
   }
-  return barber === 'george' ? env.GEORGE_CALENDAR_ID : env.BERLIN_CALENDAR_ID;
+  // Env fallback SOLO per barbieri con calendario Google configurato.
+  // Barbieri "calendar-less" (es. Gabriele, in attesa account Google) → null:
+  // niente fallback a Berlin, così book/available passano al path Supabase.
+  if (barber === 'george') return env.GEORGE_CALENDAR_ID || null;
+  if (barber === 'berlin') return env.BERLIN_CALENDAR_ID || null;
+  return null;
 }
 
 export function getServiceAccount(barber, env) {
-  return barber === 'george'
-    ? { email: env.GEORGE_SERVICE_ACCOUNT_EMAIL, key: env.GEORGE_PRIVATE_KEY }
-    : { email: env.BERLIN_SERVICE_ACCOUNT_EMAIL, key: env.BERLIN_PRIVATE_KEY };
+  if (barber === 'george') return { email: env.GEORGE_SERVICE_ACCOUNT_EMAIL, key: env.GEORGE_PRIVATE_KEY };
+  if (barber === 'berlin') return { email: env.BERLIN_SERVICE_ACCOUNT_EMAIL, key: env.BERLIN_PRIVATE_KEY };
+  return { email: null, key: null };
+}
+
+// Finestre occupate da Supabase per barbieri SENZA Google Calendar.
+// Legge gli slot già prenotati (appointment_slots = specchio delle prenotazioni
+// attive) e li trasforma in intervalli occupati [{start,end}] della durata
+// dell'appuntamento. Stessa forma dell'output freeBusy di Google → il loop slot
+// in available.js resta identico per entrambi i path.
+export async function getBookedBusy(env, barber, date, tz, durationMin) {
+  const url = SUPABASE_URL_PUBLIC;
+  const key = SUPABASE_ANON_PUBLIC;
+  const dur = Number.isFinite(durationMin) && durationMin > 0 ? durationMin : 60;
+  try {
+    const reqUrl = `${url}/rest/v1/appointment_slots`
+      + `?select=time`
+      + `&barber=eq.${encodeURIComponent(barber)}`
+      + `&date=eq.${encodeURIComponent(date)}`;
+    const r = await fetch(reqUrl, {
+      headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: 'application/json' },
+    });
+    if (!r.ok) return [];
+    const rows = await r.json();
+    if (!Array.isArray(rows)) return [];
+    return rows.map(row => {
+      const t = String(row.time || '').slice(0, 5); // HH:MM
+      if (!/^\d{2}:\d{2}$/.test(t)) return null;
+      const startMs = new Date(`${date}T${t}:00${tz}`).getTime();
+      if (Number.isNaN(startMs)) return null;
+      return {
+        start: new Date(startMs).toISOString(),
+        end:   new Date(startMs + dur * 60000).toISOString(),
+      };
+    }).filter(Boolean);
+  } catch {
+    return [];
+  }
 }
 
 export function romeOffset(dateStr) {

@@ -154,6 +154,26 @@
       object-position: bottom center;
       filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
     }
+    /* Placeholder iniziale quando manca la foto del barbiere */
+    .barber-card__img-wrap--ph { align-items: center; }
+    .barber-card__img-wrap--ph::after {
+      content: attr(data-ph);
+      font-family: var(--font-display);
+      font-size: clamp(90px, 14vw, 160px);
+      color: rgba(232,90,31,0.85);
+      line-height: 1;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+    }
+    .selected-pill__avatar--ph {
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(232,90,31,0.18);
+    }
+    .selected-pill__avatar--ph::after {
+      content: attr(data-ph);
+      font-family: var(--font-display);
+      color: var(--accent, #E85A1F);
+      font-size: 60%;
+    }
     .barber-card__info { text-align: center; margin-top: 16px; }
     .barber-card__name {
       font-family: var(--font-display);
@@ -656,6 +676,17 @@
             </div>
           </div>
 
+          <div class="barber-card" data-barber="gabriele" role="button" tabindex="0">
+            <div class="barber-card__img-wrap">
+              <img src="assets/img/character/gabriele.png" alt="Gabriele"
+                onerror="this.onerror=null;var w=this.parentNode;w.classList.add('barber-card__img-wrap--ph');w.setAttribute('data-ph','G');this.style.display='none';">
+            </div>
+            <div class="barber-card__info">
+              <p class="barber-card__name">Gabriele</p>
+              <p class="barber-card__sub">Il nuovo arrivo</p>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -908,11 +939,12 @@
       }
 
       function buildPill() {
-        var name = state.barber === 'george' ? 'George' : 'Berlin';
+        var name = state.barber.charAt(0).toUpperCase() + state.barber.slice(1);
         var img  = 'assets/img/' + state.barber + '-face.png';
+        var onerr = "this.onerror=null;var a=this.parentNode;a.classList.add('selected-pill__avatar--ph');a.setAttribute('data-ph','" + name.charAt(0) + "');this.style.display='none';";
         document.getElementById('selectedPill').innerHTML =
           '<div class="selected-pill">' +
-          '<div class="selected-pill__avatar"><img src="' + img + '" alt="' + name + '"></div>' +
+          '<div class="selected-pill__avatar"><img src="' + img + '" alt="' + name + '" onerror="' + onerr + '"></div>' +
           '<span class="selected-pill__name">' + name + '</span>' +
           '</div>';
       }

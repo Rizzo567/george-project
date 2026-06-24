@@ -391,7 +391,7 @@
       }
 
       rows.forEach(function (apt) {
-        var barberLabel = apt.barber === 'george' ? 'George' : 'Berlin';
+        var barberLabel = brbLabel(apt.barber);
         var timeStr     = (apt.time || '').slice(0, 5);
 
         var card = document.createElement('div');
@@ -463,7 +463,7 @@
       listEl.appendChild(sep);
 
       groups[dateStr].forEach(function (apt) {
-        var barberLabel = apt.barber === 'george' ? 'George' : 'Berlin';
+        var barberLabel = brbLabel(apt.barber);
         var timeStr     = (apt.time || '').slice(0, 5);
 
         var row = document.createElement('div');
@@ -498,6 +498,12 @@
       .replace(/"/g, '&quot;');
   }
 
+  // Etichetta barbiere generica (slug → Capitalizzato). Copre george/berlin/gabriele
+  // e qualsiasi nuovo slug senza dover toccare ogni punto di rendering.
+  function brbLabel(slug) {
+    return slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : '—';
+  }
+
   function statusBadge(status) {
     return '<span class="status-badge status-badge--' + esc(status) + '">' + esc(status) + '</span>';
   }
@@ -507,7 +513,7 @@
     var overlay = document.getElementById('aptDetailOverlay');
     var content = document.getElementById('aptDetailContent');
 
-    var barberLabel = apt.barber === 'george' ? 'George' : 'Berlin';
+    var barberLabel = brbLabel(apt.barber);
     var dateObj     = new Date(apt.date + 'T12:00:00');
     var dateStr     = dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: '2-digit', month: 'long' });
     var timeStr     = (apt.time || '').slice(0, 5);
@@ -871,6 +877,18 @@
               pointBackgroundColor: '#E5E1D8',
               pointBorderColor: '#1A1A1A',
               pointBorderWidth: 1.5
+            },
+            {
+              label: 'Gabriele',
+              data: [],
+              borderColor: '#4FA3C7',
+              backgroundColor: 'rgba(79,163,199,0.07)',
+              fill: true,
+              tension: 0.35,
+              pointRadius: 3,
+              pointBackgroundColor: '#4FA3C7',
+              pointBorderColor: '#1A1A1A',
+              pointBorderWidth: 1.5
             }
           ]
         },
@@ -925,13 +943,15 @@
     // KPI counts
     var total       = rows.length;
     var todayCount  = rows.filter(function(r) { return r.date === todayStr; }).length;
-    var georgeCount = rows.filter(function(r) { return r.barber === 'george'; }).length;
-    var berlinCount = rows.filter(function(r) { return r.barber === 'berlin'; }).length;
+    var georgeCount   = rows.filter(function(r) { return r.barber === 'george'; }).length;
+    var berlinCount   = rows.filter(function(r) { return r.barber === 'berlin'; }).length;
+    var gabrieleCount = rows.filter(function(r) { return r.barber === 'gabriele'; }).length;
 
-    animateCount(document.getElementById('kpiTotal'),  total);
-    animateCount(document.getElementById('kpiToday'),  todayCount);
-    animateCount(document.getElementById('kpiGeorge'), georgeCount);
-    animateCount(document.getElementById('kpiBerlin'), berlinCount);
+    animateCount(document.getElementById('kpiTotal'),    total);
+    animateCount(document.getElementById('kpiToday'),    todayCount);
+    animateCount(document.getElementById('kpiGeorge'),   georgeCount);
+    animateCount(document.getElementById('kpiBerlin'),   berlinCount);
+    animateCount(document.getElementById('kpiGabriele'), gabrieleCount);
 
     // "Giornata libera" empty state
     var todaySub = document.getElementById('kpiTodaySub');
@@ -975,8 +995,11 @@
     var gPrev = rows.filter(function(r) { return r.barber==='george' && inRange(r.date, w1, wEnd); }).length;
     var bCurr = rows.filter(function(r) { return r.barber==='berlin' && inRange(r.date, w0, now); }).length;
     var bPrev = rows.filter(function(r) { return r.barber==='berlin' && inRange(r.date, w1, wEnd); }).length;
+    var gaCurr = rows.filter(function(r) { return r.barber==='gabriele' && inRange(r.date, w0, now); }).length;
+    var gaPrev = rows.filter(function(r) { return r.barber==='gabriele' && inRange(r.date, w1, wEnd); }).length;
     renderTrend('trendGeorge', gCurr, gPrev);
     renderTrend('trendBerlin', bCurr, bPrev);
+    renderTrend('trendGabriele', gaCurr, gaPrev);
 
     // Prossimo appuntamento
     var upcoming = rows.filter(function(r) {
@@ -1003,7 +1026,7 @@
                       isTomorrow ? 'Domani' :
                       nextDate.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit' });
         var whenCls = isToday ? 'prossimo-when prossimo-when--today' : 'prossimo-when';
-        var barberLabel = next.barber === 'george' ? 'George' : 'Berlin';
+        var barberLabel = brbLabel(next.barber);
         prossimoBody.innerHTML =
           '<div class="prossimo-time">' + (next.time||'').slice(0,5) + '</div>' +
           '<div class="prossimo-info">' +
@@ -1058,6 +1081,9 @@
       });
       chartBarbers.data.datasets[1].data = dates14.map(function(ds) {
         return rows.filter(function(r) { return r.date===ds && r.barber==='berlin'; }).length;
+      });
+      chartBarbers.data.datasets[2].data = dates14.map(function(ds) {
+        return rows.filter(function(r) { return r.date===ds && r.barber==='gabriele'; }).length;
       });
       chartBarbers.update();
     }
@@ -1148,7 +1174,7 @@
         return (a.time || '') < (b.time || '') ? -1 : 1;
       });
       body.innerHTML = sorted.map(function(apt) {
-        var barberLabel = apt.barber === 'george' ? 'George' : 'Berlin';
+        var barberLabel = brbLabel(apt.barber);
         var sCls   = 'dpt-status dpt-status--' + esc(apt.status);
         var sLabel = apt.status === 'confirmed' ? '◎ Confermato' :
                      apt.status === 'completed' ? '✓ Completato' :

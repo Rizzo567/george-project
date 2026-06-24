@@ -246,14 +246,14 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'Il barbiere è chiuso in questo giorno/orario.' }, 409, corsHeaders);
   }
 
-  // ── Config Google ──────────────────────────────────────────────
+  // ── Config Google (può mancare per barbieri "calendar-less") ───
   // calendar_id: override DB (staff.calendar_id) se presente, altrimenti env CF.
+  // hasCalendar=false → barbiere senza account Google (es. Gabriele): la
+  // prenotazione vive solo su Supabase / dashboard admin, nessun evento Calendar.
   const shopConfig     = await loadShopConfig(env);
   const calendarId     = getCalendarId(barber, env, shopConfig);
   const serviceAccount = getServiceAccount(barber, env);
-  if (!calendarId || !serviceAccount.email) {
-    return json({ error: 'Barbiere non configurato' }, 400, corsHeaders);
-  }
+  const hasCalendar    = !!(calendarId && serviceAccount.email);
 
   const tz = romeOffset(data);
   // Durata reale per barbiere (DB-driven): George 40min, Berlin 60min (fallback)
@@ -263,77 +263,84 @@ export async function onRequestPost({ request, env }) {
   const endM = endTotal % 60;
 
   try {
-    // ── Guard autoritativo: il calendario è occupato su questa finestra? ──
-    // Chiude l'overbooking quando i barbieri bloccano i giorni creando eventi
-    // direttamente su Google Calendar (non presenti in Supabase).
-    const token = await getAccessToken(serviceAccount);
+    let eventId = null;
 
-    const startIso = `${data}T${pad(startH)}:${pad(startM)}:00${tz}`;
-    const endIso   = `${data}T${pad(endH)}:${pad(endM)}:00${tz}`;
-    const fbRes = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        timeMin: startIso,
-        timeMax: endIso,
-        timeZone: 'Europe/Rome',
-        items: [{ id: calendarId }],
-      }),
-    });
-    if (fbRes.ok) {
-      const fbData = await fbRes.json();
-      const busy   = fbData.calendars?.[calendarId]?.busy ?? [];
-      const sD = new Date(startIso);
-      const eD = new Date(endIso);
-      const overlaps = busy.some(({ start, end }) => sD < new Date(end) && eD > new Date(start));
-      if (overlaps) {
-        return json({ error: 'Slot non più disponibile. Scegli un altro orario.' }, 409, corsHeaders);
+    if (hasCalendar) {
+      // ── Guard autoritativo: il calendario è occupato su questa finestra? ──
+      // Chiude l'overbooking quando i barbieri bloccano i giorni creando eventi
+      // direttamente su Google Calendar (non presenti in Supabase).
+      const token = await getAccessToken(serviceAccount);
+
+      const startIso = `${data}T${pad(startH)}:${pad(startM)}:00${tz}`;
+      const endIso   = `${data}T${pad(endH)}:${pad(endM)}:00${tz}`;
+      const fbRes = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timeMin: startIso,
+          timeMax: endIso,
+          timeZone: 'Europe/Rome',
+          items: [{ id: calendarId }],
+        }),
+      });
+      if (fbRes.ok) {
+        const fbData = await fbRes.json();
+        const busy   = fbData.calendars?.[calendarId]?.busy ?? [];
+        const sD = new Date(startIso);
+        const eD = new Date(endIso);
+        const overlaps = busy.some(({ start, end }) => sD < new Date(end) && eD > new Date(start));
+        if (overlaps) {
+          return json({ error: 'Slot non più disponibile. Scegli un altro orario.' }, 409, corsHeaders);
+        }
+      }
+      // Se la verifica freeBusy fallisce (fbRes non ok), si procede: la dedup
+      // Supabase resta come rete di sicurezza, non blocchiamo per un errore transitorio.
+      // Componi description in modo safe (nessun input grezzo nelle linee strutturate)
+      const description = [
+        `Tel: ${telefono}`,
+        note ? `Note: ${note}` : null,
+        safeImgUrl ? `Immagine riferimento: ${safeImgUrl}` : null,
+      ].filter(Boolean).join('\n');
+
+      const event = {
+        summary:     servizio ? `${servizio} — ${nome}` : `Prenotazione — ${nome}`,
+        description,
+        start: { dateTime: `${data}T${pad(startH)}:${pad(startM)}:00${tz}`, timeZone: 'Europe/Rome' },
+        end:   { dateTime: `${data}T${pad(endH)}:${pad(endM)}:00${tz}`,   timeZone: 'Europe/Rome' },
+      };
+
+      const calUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
+
+      const res = await fetch(calUrl, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(event),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error?.message ?? 'Errore Google Calendar');
+      }
+
+      const createdEvent = await res.json();
+      eventId = createdEvent.id ?? null;
+
+      // Collega l'evento Calendar alla riga DB (server-side, service_role).
+      // Senza questo la cancellazione admin non può eliminare l'evento Calendar
+      // → con Calendar autoritativo lo slot resterebbe bloccato dopo un annullamento.
+      if (eventId && apptId) {
+        await persistEventId(env, apptId, eventId);
       }
     }
-    // Se la verifica freeBusy fallisce (fbRes non ok), si procede: la dedup
-    // Supabase resta come rete di sicurezza, non blocchiamo per un errore transitorio.
-    // Componi description in modo safe (nessun input grezzo nelle linee strutturate)
-    const description = [
-      `Tel: ${telefono}`,
-      note ? `Note: ${note}` : null,
-      safeImgUrl ? `Immagine riferimento: ${safeImgUrl}` : null,
-    ].filter(Boolean).join('\n');
+    // Barbieri calendar-less (es. Gabriele): la riga appointments è già stata
+    // inserita dal client e compare nella dashboard admin. Dedup + chiusure sono
+    // già validati sopra. Nessun evento Calendar da creare.
 
-    const event = {
-      summary:     servizio ? `${servizio} — ${nome}` : `Prenotazione — ${nome}`,
-      description,
-      start: { dateTime: `${data}T${pad(startH)}:${pad(startM)}:00${tz}`, timeZone: 'Europe/Rome' },
-      end:   { dateTime: `${data}T${pad(endH)}:${pad(endM)}:00${tz}`,   timeZone: 'Europe/Rome' },
-    };
-
-    const calUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
-
-    const res = await fetch(calUrl, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(event),
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error?.message ?? 'Errore Google Calendar');
-    }
-
-    const createdEvent = await res.json();
-    const eventId = createdEvent.id ?? null;
-
-    // Collega l'evento Calendar alla riga DB (server-side, service_role).
-    // Senza questo la cancellazione admin non può eliminare l'evento Calendar
-    // → con Calendar autoritativo lo slot resterebbe bloccato dopo un annullamento.
-    if (eventId && apptId) {
-      await persistEventId(env, apptId, eventId);
-    }
-
-    // ── Email di conferma al cliente (server-side via Resend) ──
+    // ── Email di conferma al cliente (server-side via Resend) — entrambi i path ──
     if (email && env.RESEND_API_KEY) {
       const emailSanitized = sanitizeText(email, 254);
       if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailSanitized)) {
-        const barberLabel = barber === 'george' ? 'George' : 'Berlin';
+        const barberLabel = barber.charAt(0).toUpperCase() + barber.slice(1);
         const [yyyy, mm, dd] = data.split('-');
         const dateObj = new Date(`${data}T12:00:00Z`);
         const DAYS   = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
