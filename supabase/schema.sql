@@ -16,7 +16,7 @@ create table if not exists public.appointments (
   id          uuid        default gen_random_uuid() primary key,
   name        text        not null check (char_length(name) between 1 and 100),
   phone       text        not null check (char_length(phone) between 5 and 32),
-  barber      text        not null check (barber in ('george', 'berlin')),
+  barber      text        not null check (barber in ('george', 'berlin', 'gabriele')),
   service     text        not null check (service in ('Cut','Fade','Beard','Razor','Full')),
   date        date        not null,
   time        time        not null,
@@ -53,7 +53,7 @@ create policy "anon_insert_only"
     -- difensiva: vincoli replicati anche in policy
     char_length(name)  between 1 and 100
     and char_length(phone) between 5 and 32
-    and barber in ('george','berlin')
+    and barber in ('george','berlin','gabriele')
     and service in ('Cut','Fade','Beard','Razor','Full')
     and (notes is null or char_length(notes) <= 500)
     and status in ('pending','confirmed')  -- anon non può creare prenotazioni già completed/cancelled
@@ -187,7 +187,7 @@ revoke all on function public.gdpr_delete_by_phone(text) from public, anon, auth
 -- ============================================================================
 create table if not exists public.closures (
   id           uuid        default gen_random_uuid() primary key,
-  scope        text        not null check (scope in ('both','george','berlin')),
+  scope        text        not null check (scope in ('both','george','berlin','gabriele')),
   start_date   date        not null,
   end_date     date        not null check (end_date >= start_date),
   mode         text        not null check (mode in ('full','morning_only','afternoon_only','custom')),
@@ -222,7 +222,7 @@ create policy "closures_auth_all"
   on public.closures for all
   to authenticated
   using (true)
-  with check (scope in ('both','george','berlin'));
+  with check (scope in ('both','george','berlin','gabriele'));
 
 grant select on public.closures to anon;
 grant select, insert, update, delete on public.closures to authenticated;
