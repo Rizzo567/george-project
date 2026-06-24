@@ -109,12 +109,20 @@ img {
 }
 
 .nav__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-display);
   font-size: 26px;
   letter-spacing: 0.06em;
   color: var(--canvas);
   text-transform: uppercase;
   line-height: 1;
+}
+.nav__logo-img {
+  height: 38px;
+  width: auto;
+  display: block;
 }
 
 .nav__links {
