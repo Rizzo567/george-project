@@ -377,7 +377,7 @@ Sezioni che compongono il sito (in ordine):
 6. **CHAPTER IV · DROP** — sezione collezione cap/merch, ottica streetwear
 7. **PRENOTA** — form essenziale, 4 campi, button accent
 8. **FOOTER** — asphalt full-width, logo grande, social testuali,
-   indirizzo, P.IVA, copyright
+   indirizzo, copyright
 
 ---
 
