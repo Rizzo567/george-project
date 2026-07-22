@@ -34,7 +34,7 @@ export async function onRequestGet({ request, env }) {
   const barber = searchParams.get('barber');
   const date   = searchParams.get('date');
 
-  // ── Validazione input (barbieri ammessi DB-driven, fallback george/berlin) ──
+  // ── Validazione input (barbieri ammessi DB-driven, fallback berlin) ──
   const allowedBarbers = await getAllowedBarbers(env);
   if (!allowedBarbers.includes(barber)) {
     return json({ error: 'Barbiere non valido' }, 400, corsHeaders);
@@ -52,13 +52,6 @@ export async function onRequestGet({ request, env }) {
   const maxDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
   if (reqDate < minDate || reqDate > maxDate) {
     return json({ slots: [] }, 200, corsHeaders);
-  }
-
-  // Trasferimento George in Australia: nessun appuntamento oltre il 25/06/2026.
-  // Solo George: Berlin resta prenotabile normalmente.
-  const TRANSFER_CUTOFF = new Date('2026-06-25T23:59:59Z');
-  if (barber === 'george' && reqDate > TRANSFER_CUTOFF) {
-    return json({ slots: [], closed: true, reason: 'Trasferimento' }, 200, corsHeaders);
   }
 
   // Blocca i giorni di chiusura settimanale (DB-driven; fallback [0]=domenica)
@@ -79,8 +72,8 @@ export async function onRequestGet({ request, env }) {
   }
 
   // calendar_id: override DB (staff.calendar_id) se presente, altrimenti env CF.
-  // hasCalendar=false → barbiere "calendar-less" (es. Gabriele): disponibilità
-  // calcolata dalle prenotazioni Supabase invece che dal freeBusy di Google.
+  // hasCalendar=false → nessuna config Google: disponibilità calcolata dalle
+  // prenotazioni Supabase invece che dal freeBusy di Google.
   const shopConfig     = await loadShopConfig(env);
   const calendarId     = getCalendarId(barber, env, shopConfig);
   const serviceAccount = getServiceAccount(barber, env);

@@ -498,8 +498,8 @@
       .replace(/"/g, '&quot;');
   }
 
-  // Etichetta barbiere generica (slug → Capitalizzato). Copre george/berlin/gabriele
-  // e qualsiasi nuovo slug senza dover toccare ogni punto di rendering.
+  // Etichetta barbiere generica (slug → Capitalizzato). Copre qualsiasi slug
+  // (oggi solo berlin) senza dover toccare ogni punto di rendering.
   function brbLabel(slug) {
     return slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : '—';
   }
@@ -641,10 +641,10 @@
   }
 
   // ── Auto-complete appuntamenti scaduti ─────────────────────
-  // George = 45 min/slot · Berlin = 60 min/slot
-  // Completa automaticamente 1 min dopo la fine dello slot
+  // Berlin = appuntamento da 30 min.
+  // Completa automaticamente 1 min dopo la fine dell'appuntamento.
   function slotDurationMin(barber) {
-    return barber === 'george' ? 45 : 60;
+    return 30;
   }
 
   function checkAutoComplete() {
@@ -846,7 +846,7 @@
       });
     }
 
-    // ── Line chart: George vs Berlin ────────────────────────
+    // ── Line chart: andamento prenotazioni Berlin ───────────
     var ctxBrb = document.getElementById('chartBarbers');
     if (ctxBrb) {
       chartBarbers = new Chart(ctxBrb.getContext('2d'), {
@@ -855,7 +855,7 @@
           labels: [],
           datasets: [
             {
-              label: 'George',
+              label: 'Berlin',
               data: [],
               borderColor: '#E85A1F',
               backgroundColor: 'rgba(232,90,31,0.07)',
@@ -863,30 +863,6 @@
               tension: 0.35,
               pointRadius: 3,
               pointBackgroundColor: '#E85A1F',
-              pointBorderColor: '#1A1A1A',
-              pointBorderWidth: 1.5
-            },
-            {
-              label: 'Berlin',
-              data: [],
-              borderColor: 'rgba(229,225,216,0.65)',
-              backgroundColor: 'rgba(229,225,216,0.04)',
-              fill: true,
-              tension: 0.35,
-              pointRadius: 3,
-              pointBackgroundColor: '#E5E1D8',
-              pointBorderColor: '#1A1A1A',
-              pointBorderWidth: 1.5
-            },
-            {
-              label: 'Gabriele',
-              data: [],
-              borderColor: '#4FA3C7',
-              backgroundColor: 'rgba(79,163,199,0.07)',
-              fill: true,
-              tension: 0.35,
-              pointRadius: 3,
-              pointBackgroundColor: '#4FA3C7',
               pointBorderColor: '#1A1A1A',
               pointBorderWidth: 1.5
             }
@@ -943,15 +919,11 @@
     // KPI counts
     var total       = rows.length;
     var todayCount  = rows.filter(function(r) { return r.date === todayStr; }).length;
-    var georgeCount   = rows.filter(function(r) { return r.barber === 'george'; }).length;
     var berlinCount   = rows.filter(function(r) { return r.barber === 'berlin'; }).length;
-    var gabrieleCount = rows.filter(function(r) { return r.barber === 'gabriele'; }).length;
 
     animateCount(document.getElementById('kpiTotal'),    total);
     animateCount(document.getElementById('kpiToday'),    todayCount);
-    animateCount(document.getElementById('kpiGeorge'),   georgeCount);
     animateCount(document.getElementById('kpiBerlin'),   berlinCount);
-    animateCount(document.getElementById('kpiGabriele'), gabrieleCount);
 
     // "Giornata libera" empty state
     var todaySub = document.getElementById('kpiTodaySub');
@@ -991,15 +963,9 @@
       }
     }
 
-    var gCurr = rows.filter(function(r) { return r.barber==='george' && inRange(r.date, w0, now); }).length;
-    var gPrev = rows.filter(function(r) { return r.barber==='george' && inRange(r.date, w1, wEnd); }).length;
     var bCurr = rows.filter(function(r) { return r.barber==='berlin' && inRange(r.date, w0, now); }).length;
     var bPrev = rows.filter(function(r) { return r.barber==='berlin' && inRange(r.date, w1, wEnd); }).length;
-    var gaCurr = rows.filter(function(r) { return r.barber==='gabriele' && inRange(r.date, w0, now); }).length;
-    var gaPrev = rows.filter(function(r) { return r.barber==='gabriele' && inRange(r.date, w1, wEnd); }).length;
-    renderTrend('trendGeorge', gCurr, gPrev);
     renderTrend('trendBerlin', bCurr, bPrev);
-    renderTrend('trendGabriele', gaCurr, gaPrev);
 
     // Prossimo appuntamento
     var upcoming = rows.filter(function(r) {
@@ -1073,17 +1039,11 @@
       chartServizi.update();
     }
 
-    // George vs Berlin
+    // Andamento prenotazioni Berlin
     if (chartBarbers) {
       chartBarbers.data.labels = labels14;
       chartBarbers.data.datasets[0].data = dates14.map(function(ds) {
-        return rows.filter(function(r) { return r.date===ds && r.barber==='george'; }).length;
-      });
-      chartBarbers.data.datasets[1].data = dates14.map(function(ds) {
         return rows.filter(function(r) { return r.date===ds && r.barber==='berlin'; }).length;
-      });
-      chartBarbers.data.datasets[2].data = dates14.map(function(ds) {
-        return rows.filter(function(r) { return r.date===ds && r.barber==='gabriele'; }).length;
       });
       chartBarbers.update();
     }

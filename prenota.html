@@ -589,11 +589,6 @@
       object-fit: contain;
       filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
     }
-    .prenota-char--george {
-      height: 630px;
-      transform: translateX(-600px);
-      transform-origin: bottom center;
-    }
     .prenota-char--berlin {
       height: 594px;
       transform: translateX(-200px);
@@ -606,7 +601,6 @@
         padding: calc(var(--nav-height) + 48px) 20px 48px;
       }
       .prenota-hero__chars { right: 0; bottom: 60px; }
-      .prenota-char--george { height: 264px; transform: translateX(0); }
       .prenota-char--berlin { height: 240px; transform: translateX(0); }
       .prenota-hero__title .word-outline {
         -webkit-text-stroke: 1.5px var(--canvas);
@@ -673,17 +667,6 @@
             <div class="barber-card__info">
               <p class="barber-card__name">Berlin</p>
               <p class="barber-card__sub">Il tocco preciso</p>
-            </div>
-          </div>
-
-          <div class="barber-card" data-barber="gabriele" role="button" tabindex="0">
-            <div class="barber-card__img-wrap">
-              <img src="assets/img/character/gabrieleprenota.png" alt="Gabriele"
-                onerror="this.onerror=null;var w=this.parentNode;w.classList.add('barber-card__img-wrap--ph');w.setAttribute('data-ph','G');this.style.display='none';">
-            </div>
-            <div class="barber-card__info">
-              <p class="barber-card__name">Gabriele</p>
-              <p class="barber-card__sub">Il nuovo arrivo</p>
             </div>
           </div>
 
@@ -1089,10 +1072,9 @@
       }
 
       function fallbackSlots(barber) {
-        // George: 40min servizio + 5min pausa = slot ogni 45min
-        // Berlin: 60min servizio, nessuna pausa = slot ogni 60min
-        // Pausa pranzo 12:00-13:00 per entrambi: mattina si ferma, pomeriggio riparte da 13:00
-        var step     = barber === 'george' ? 45 : 60;
+        // Berlin: appuntamento 30min + 10min di pausa = slot ogni 40min.
+        // Pausa pranzo 12:00-13:00: mattina si ferma, pomeriggio riparte da 13:00.
+        var step     = 40;
         var breakStart = 12 * 60; // 12:00
         var breakEnd   = 13 * 60; // 13:00
         var endMin     = 18 * 60; // ultimo slot max 18:00
@@ -1112,9 +1094,7 @@
           slots.push((ph < 10 ? '0' : '') + ph + ':' + (pm < 10 ? '0' : '') + pm);
         }
 
-
-        if (barber === 'berlin') slots.push('18:45');
-        if (barber === 'george') slots.push('18:15');
+        slots.push('18:45');
 
         return slots.map(function (t) { return { time: t, available: true }; });
       }
@@ -1123,13 +1103,9 @@
         var hint = document.getElementById('slotHint');
         var grid = document.getElementById('slotGrid');
         grid.innerHTML = '';
-        if (reason === 'Trasferimento') {
-          hint.textContent = 'Trasferimento, ci vediamo dall\'altra parte.';
-        } else {
-          hint.textContent = reason
-            ? 'Chiuso in questa data (' + reason + '). Scegli un altro giorno.'
-            : 'Chiuso in questa data. Scegli un altro giorno.';
-        }
+        hint.textContent = reason
+          ? 'Chiuso in questa data (' + reason + '). Scegli un altro giorno.'
+          : 'Chiuso in questa data. Scegli un altro giorno.';
       }
 
       function renderSlots(slots) {
@@ -1177,7 +1153,7 @@
       });
 
       function buildRecap() {
-        var name    = state.barber === 'george' ? 'George' : 'Berlin';
+        var name    = 'Berlin';
         var dateObj = new Date(state.date + 'T12:00:00');
         var dateStr = DAYS[dateObj.getDay()] + ' ' +
                       dateObj.getDate() + ' ' + MONTHS[dateObj.getMonth()];

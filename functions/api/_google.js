@@ -109,9 +109,9 @@ export async function getAllowedServices(env) {
 }
 
 // Lista barbieri ammessi (book.js / available.js): staff.slug where active.
-// Fallback: ['george','berlin'].
+// Fallback: ['berlin'] (unico barbiere attivo).
 export async function getAllowedBarbers(env) {
-  const fallback = ['george', 'berlin'];
+  const fallback = ['berlin'];
   const config = await loadShopConfig(env);
   if (config && Array.isArray(config.staff)) {
     const slugs = config.staff
@@ -137,27 +137,28 @@ export async function getWeeklyClosedDays(env) {
   return fallback;
 }
 
-// Per-barber slot duration (pitch della griglia: George 45, Berlin 60).
-// DB-driven: staff.slot_pitch_min; fallback hardcoded george=45 / berlin=60.
+// Per-barber slot duration (pitch della griglia).
+// Berlin: 40min = 30 di appuntamento + 10 di pausa fra un cliente e l'altro.
+// DB-driven: staff.slot_pitch_min; fallback hardcoded berlin=40.
 export async function getSlotMinutes(barber, env) {
   const config = await loadShopConfig(env);
   const s = _findStaff(config, barber);
   if (s && Number.isFinite(s.slot_pitch_min) && s.slot_pitch_min > 0) {
     return s.slot_pitch_min;
   }
-  return barber === 'george' ? 45 : 60;
+  return 40;
 }
 
 // Per-barber EVENT duration (durata reale dell'appuntamento sul calendario).
-// George: 40min di servizio (+5 di pausa lasciati liberi). Berlin: 60min pieni.
-// DB-driven: staff.event_duration_min; fallback hardcoded george=40 / berlin=60.
+// Berlin: 30min pieni (la pausa da 10min è il gap fra slot, non un evento).
+// DB-driven: staff.event_duration_min; fallback hardcoded berlin=30.
 export async function getEventDuration(barber, env) {
   const config = await loadShopConfig(env);
   const s = _findStaff(config, barber);
   if (s && Number.isFinite(s.event_duration_min) && s.event_duration_min > 0) {
     return s.event_duration_min;
   }
-  return barber === 'george' ? 40 : 60;
+  return 30;
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -225,17 +226,10 @@ function hhmmToMin(t) {
 // giorno feriale). Usati quando il DB non è disponibile o non ha una riga
 // business_hours per (barbiere, giorno).
 function _fallbackWorkRanges(barber) {
-  if (barber === 'george') {
-    return [
-      { start: 9 * 60,        end: 12 * 60       }, // 09:00–11:15
-      { start: 13 * 60,       end: 18 * 60        }, // 13:00–17:30
-      { start: 18 * 60 + 15,  end: 18 * 60 + 16  }, // 18:15 extra
-    ];
-  }
-  // berlin
+  // Unico barbiere: Berlin.
   return [
-    { start: 9 * 60,        end: 12 * 60       }, // 09:00–11:00
-    { start: 13 * 60,       end: 19 * 60       }, // 13:00–18:00
+    { start: 9 * 60,        end: 12 * 60       }, // mattina 09:00–12:00
+    { start: 13 * 60,       end: 19 * 60       }, // pomeriggio 13:00–19:00
     { start: 18 * 60 + 45,  end: 18 * 60 + 46 }, // 18:45 extra
   ];
 }
@@ -294,16 +288,12 @@ export function getCalendarId(barber, env, config) {
       return s.calendar_id.trim();
     }
   }
-  // Env fallback SOLO per barbieri con calendario Google configurato.
-  // Barbieri "calendar-less" (es. Gabriele, in attesa account Google) → null:
-  // niente fallback a Berlin, così book/available passano al path Supabase.
-  if (barber === 'george') return env.GEORGE_CALENDAR_ID || null;
+  // Env fallback SOLO per Berlin (unico barbiere, con calendario Google).
   if (barber === 'berlin') return env.BERLIN_CALENDAR_ID || null;
   return null;
 }
 
 export function getServiceAccount(barber, env) {
-  if (barber === 'george') return { email: env.GEORGE_SERVICE_ACCOUNT_EMAIL, key: env.GEORGE_PRIVATE_KEY };
   if (barber === 'berlin') return { email: env.BERLIN_SERVICE_ACCOUNT_EMAIL, key: env.BERLIN_PRIVATE_KEY };
   return { email: null, key: null };
 }

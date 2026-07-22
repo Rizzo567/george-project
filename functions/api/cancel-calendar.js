@@ -34,7 +34,7 @@ export async function onRequestPost({ request, env }) {
 
   const { barber, eventId } = body;
 
-  if (!['george', 'berlin'].includes(barber)) {
+  if (!['berlin'].includes(barber)) {
     return json({ error: 'Barbiere non valido' }, 400, corsHeaders);
   }
   if (!eventId || typeof eventId !== 'string' || eventId.length > 1024) {

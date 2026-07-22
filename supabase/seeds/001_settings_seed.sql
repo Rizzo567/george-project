@@ -39,9 +39,11 @@ on conflict (name) do nothing;
 -- berlin: event_duration_min=60, slot_pitch_min=60
 -- calendar_id null => default resta env CF (GEORGE_CALENDAR_ID / BERLIN_CALENDAR_ID).
 -- ----------------------------------------------------------------------------
+-- Aggiornato (migration 006): unico barbiere attivo = Berlin, 30min appuntamento
+-- + 10min pausa (event_duration_min=30, slot_pitch_min=40). George disattivato.
 insert into public.staff (slug, display_name, calendar_id, event_duration_min, slot_pitch_min, active, sort_order) values
-  ('george', 'George', null, 40, 45, true, 1),
-  ('berlin', 'Berlin', null, 60, 60, true, 2)
+  ('george', 'George', null, 40, 45, false, 2),
+  ('berlin', 'Berlin', null, 30, 40, true, 1)
 on conflict (slug) do nothing;
 
 -- ----------------------------------------------------------------------------

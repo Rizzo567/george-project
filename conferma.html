@@ -251,14 +251,14 @@
       try {
         b = raw ? JSON.parse(raw) : null;
         if (b && typeof b === 'object') {
-          validBarber = b.barber === 'george' || b.barber === 'berlin';
+          validBarber = b.barber === 'berlin';
           validDate   = typeof b.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(b.date);
           validTime   = typeof b.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(b.time);
         }
       } catch (e) { b = null; }
 
       if (b && validBarber && validDate && validTime) {
-        var name = b.barber === 'george' ? 'George' : 'Berlin';
+        var name = 'Berlin';
         var d    = new Date(b.date + 'T12:00:00');
         var dateStr = DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
 
@@ -276,7 +276,6 @@
         detail.appendChild(strong2);
 
         var thumbMap = {
-          george: 'assets/img/character/george-fit1_3_-removebg-preview.png',
           berlin: 'assets/img/berlin-thumb.png'
         };
         document.getElementById('confThumb').src = thumbMap[b.barber];

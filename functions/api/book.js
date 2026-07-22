@@ -39,7 +39,7 @@ function buildCorsHeaders(request) {
 // riferimento del fallback hardcoded (comportamento identico a oggi col seed).
 // ────────────────────────────────────────────────────────────────────
 
-function isValidDate(s, barber) {
+function isValidDate(s) {
   if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
   const d = new Date(s + 'T12:00:00Z');
   if (isNaN(d.getTime())) return false;
@@ -48,9 +48,6 @@ function isValidDate(s, barber) {
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const inOneYear = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
   if (d < yesterday || d > inOneYear) return false;
-  // Trasferimento George in Australia: nessun appuntamento oltre il 25/06/2026.
-  // Solo George: Berlin resta prenotabile normalmente.
-  if (barber === 'george' && d > new Date('2026-06-25T23:59:59Z')) return false;
   return true;
 }
 
@@ -208,7 +205,7 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'Telefono non valido' }, 400, corsHeaders);
   }
   telefono = sanitizeText(telefono, 32);
-  if (!isValidDate(data, barber)) {
+  if (!isValidDate(data)) {
     return json({ error: 'Data non valida' }, 400, corsHeaders);
   }
   if (!isValidTime(ora)) {
@@ -246,17 +243,17 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'Il barbiere è chiuso in questo giorno/orario.' }, 409, corsHeaders);
   }
 
-  // ── Config Google (può mancare per barbieri "calendar-less") ───
+  // ── Config Google ───
   // calendar_id: override DB (staff.calendar_id) se presente, altrimenti env CF.
-  // hasCalendar=false → barbiere senza account Google (es. Gabriele): la
-  // prenotazione vive solo su Supabase / dashboard admin, nessun evento Calendar.
+  // Berlin ha calendario Google → l'evento viene creato lì. Se mancasse la
+  // config (hasCalendar=false) la prenotazione vive solo su Supabase/dashboard.
   const shopConfig     = await loadShopConfig(env);
   const calendarId     = getCalendarId(barber, env, shopConfig);
   const serviceAccount = getServiceAccount(barber, env);
   const hasCalendar    = !!(calendarId && serviceAccount.email);
 
   const tz = romeOffset(data);
-  // Durata reale per barbiere (DB-driven): George 40min, Berlin 60min (fallback)
+  // Durata reale dell'appuntamento (DB-driven): Berlin 30min (fallback)
   const duration = await getEventDuration(barber, env);
   const endTotal = startMin + duration;
   const endH = Math.floor(endTotal / 60);
@@ -332,9 +329,9 @@ export async function onRequestPost({ request, env }) {
         await persistEventId(env, apptId, eventId);
       }
     }
-    // Barbieri calendar-less (es. Gabriele): la riga appointments è già stata
-    // inserita dal client e compare nella dashboard admin. Dedup + chiusure sono
-    // già validati sopra. Nessun evento Calendar da creare.
+    // Path calendar-less (config Google assente): la riga appointments è già
+    // stata inserita dal client e compare nella dashboard admin. Dedup + chiusure
+    // sono già validati sopra. Nessun evento Calendar da creare.
 
     // ── Email di conferma al cliente (server-side via Resend) — entrambi i path ──
     if (email && env.RESEND_API_KEY) {

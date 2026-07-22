@@ -14,14 +14,12 @@ const ADMIN_URL = Deno.env.get('ADMIN_URL') ?? '';
 const BOOKING_SHARED_SECRET = Deno.env.get('BOOKING_SHARED_SECRET') ?? '';
 
 const BARBER_EMAILS: Record<string, string> = {
-  george: 'georgevelozperez5@gmail.com',
   berlin: 'superberlin0204@gmail.com',
 };
 
-// Barbieri validi ma SENZA email (es. Gabriele, in attesa account Google).
-// Le loro prenotazioni vivono solo sulla dashboard admin: la notifica email viene
-// saltata senza errore (no 400), così il flusso di prenotazione resta verde.
-const NO_EMAIL_BARBERS = new Set(['gabriele']);
+// Barbieri validi ma SENZA email configurata: la notifica email viene saltata
+// senza errore (no 400), così il flusso di prenotazione resta verde.
+const NO_EMAIL_BARBERS = new Set<string>([]);
 
 const ALLOWED_ORIGINS = [
   'https://misterbarber.it',
@@ -171,7 +169,7 @@ Deno.serve(async (req) => {
   const notes = body.notes ? sanitizeText(body.notes, 500) : '';
 
   const emailTo = BARBER_EMAILS[barber];
-  const barberName = barber === 'george' ? 'George' : 'Berlin';
+  const barberName = barber.charAt(0).toUpperCase() + barber.slice(1);
 
   const emailBody = [
     `Nuova prenotazione — Mister Barber`,
