@@ -1459,6 +1459,14 @@ img {
   transform: translateY(-70px);
   position: relative;
 }
+/* Barbiere singolo (Berlin): una sola colonna, centrata, stessa taglia di prima */
+.duo--solo {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+.duo--solo .barber--berlin {
+  width: 50%;
+}
 
 .s01-shader {
   position: absolute;
@@ -1773,6 +1781,9 @@ img {
   .barber-name { font-size: 25px; }
   /* Berlin: -40px */
   .barber--berlin { transform: translateX(-40px); }
+  /* Barbiere singolo su mobile: Berlin centrato, senza shift a sinistra */
+  .duo--solo .barber--berlin { width: 300px; transform: none; }
+  .duo--solo .barber--berlin .barber-meta { left: auto; right: 8px; }
   /* George: -40px */
   .barber--george { transform: translateX(-40px); overflow: visible; }
   /* George name */
