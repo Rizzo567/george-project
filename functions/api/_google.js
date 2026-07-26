@@ -138,19 +138,19 @@ export async function getWeeklyClosedDays(env) {
 }
 
 // Per-barber slot duration (pitch della griglia).
-// Berlin: 40min = 30 di appuntamento + 10 di pausa fra un cliente e l'altro.
-// DB-driven: staff.slot_pitch_min; fallback hardcoded berlin=40.
+// Berlin: 30min = appuntamento back-to-back, nessuna pausa fra un cliente e l'altro.
+// DB-driven: staff.slot_pitch_min; fallback hardcoded berlin=30.
 export async function getSlotMinutes(barber, env) {
   const config = await loadShopConfig(env);
   const s = _findStaff(config, barber);
   if (s && Number.isFinite(s.slot_pitch_min) && s.slot_pitch_min > 0) {
     return s.slot_pitch_min;
   }
-  return 40;
+  return 30;
 }
 
 // Per-barber EVENT duration (durata reale dell'appuntamento sul calendario).
-// Berlin: 30min pieni (la pausa da 10min è il gap fra slot, non un evento).
+// Berlin: 30min pieni, uguale al pitch (slot consecutivi senza gap).
 // DB-driven: staff.event_duration_min; fallback hardcoded berlin=30.
 export async function getEventDuration(barber, env) {
   const config = await loadShopConfig(env);
@@ -226,11 +226,11 @@ function hhmmToMin(t) {
 // giorno feriale). Usati quando il DB non è disponibile o non ha una riga
 // business_hours per (barbiere, giorno).
 function _fallbackWorkRanges(barber) {
-  // Unico barbiere: Berlin.
+  // Unico barbiere: Berlin. Con pitch 30 la griglia copre i range esatti
+  // (ultimo slot pomeridiano 18:30–19:00): nessuno slot extra necessario.
   return [
-    { start: 9 * 60,        end: 12 * 60       }, // mattina 09:00–12:00
-    { start: 13 * 60,       end: 19 * 60       }, // pomeriggio 13:00–19:00
-    { start: 18 * 60 + 45,  end: 18 * 60 + 46 }, // 18:45 extra
+    { start: 9 * 60,   end: 12 * 60 }, // mattina 09:00–12:00
+    { start: 13 * 60,  end: 19 * 60 }, // pomeriggio 13:00–19:00
   ];
 }
 

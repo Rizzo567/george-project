@@ -12,6 +12,10 @@
 
   <title>PRENOTA — MISTER BARBER</title>
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/img/mister-barber-logo.png">
+  <link rel="apple-touch-icon" href="assets/img/mister-barber-logo.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -625,7 +629,7 @@
 
   <!-- NAVBAR -->
   <nav class="nav" id="nav">
-    <a href="/" class="nav__logo">Mister Barber</a>
+    <a href="/" class="nav__logo"><img class="nav__logo-img" src="assets/img/mister-barber-logo.png" alt="">Mister Barber</a>
     <ul class="nav__links" id="navLinks">
       <li><a href="/#servizi">Servizi</a></li>
       <li><a href="/#barbieri">Barbieri</a></li>
@@ -1072,12 +1076,12 @@
       }
 
       function fallbackSlots(barber) {
-        // Berlin: appuntamento 30min + 10min di pausa = slot ogni 40min.
+        // Berlin: appuntamento 30min senza pausa = slot ogni 30min.
         // Pausa pranzo 12:00-13:00: mattina si ferma, pomeriggio riparte da 13:00.
-        var step     = 40;
+        var step     = 30;
         var breakStart = 12 * 60; // 12:00
         var breakEnd   = 13 * 60; // 13:00
-        var endMin     = 18 * 60; // ultimo slot max 18:00
+        var endMin     = 18 * 60 + 30; // ultimo slot 18:30 (finisce alle 19:00)
         var slots = [];
 
         // Mattina: da 09:00 fino a prima della pausa
@@ -1093,8 +1097,6 @@
           var pm = p % 60;
           slots.push((ph < 10 ? '0' : '') + ph + ':' + (pm < 10 ? '0' : '') + pm);
         }
-
-        slots.push('18:45');
 
         return slots.map(function (t) { return { time: t, available: true }; });
       }

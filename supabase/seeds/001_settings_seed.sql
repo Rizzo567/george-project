@@ -39,11 +39,12 @@ on conflict (name) do nothing;
 -- berlin: event_duration_min=60, slot_pitch_min=60
 -- calendar_id null => default resta env CF (GEORGE_CALENDAR_ID / BERLIN_CALENDAR_ID).
 -- ----------------------------------------------------------------------------
--- Aggiornato (migration 006): unico barbiere attivo = Berlin, 30min appuntamento
--- + 10min pausa (event_duration_min=30, slot_pitch_min=40). George disattivato.
+-- Aggiornato (migration 007): unico barbiere attivo = Berlin, appuntamenti da
+-- 30min consecutivi, nessuna pausa (event_duration_min=30, slot_pitch_min=30).
+-- George disattivato.
 insert into public.staff (slug, display_name, calendar_id, event_duration_min, slot_pitch_min, active, sort_order) values
   ('george', 'George', null, 40, 45, false, 2),
-  ('berlin', 'Berlin', null, 30, 40, true, 1)
+  ('berlin', 'Berlin', null, 30, 30, true, 1)
 on conflict (slug) do nothing;
 
 -- ----------------------------------------------------------------------------
@@ -53,10 +54,10 @@ on conflict (slug) do nothing;
 --   {540,720}   -> 09:00-12:00
 --   {780,1080}  -> 13:00-18:00
 --   {1095,1096} -> 18:15-18:16  (slot extra singolo 18:15)
--- BERLIN:
+-- BERLIN (aggiornato migration 007: niente slot extra 18:45, il pitch da 30
+-- copre esattamente i range fino alle 19:00):
 --   {540,720}   -> 09:00-12:00
 --   {780,1140}  -> 13:00-19:00
---   {1125,1126} -> 18:45-18:46  (slot extra singolo 18:45)
 --
 -- Applicati a weekday 1..6 (lun-sab). Weekday 0 (domenica): NESSUNA riga
 -- (chiuso via shop_settings.weekly_closed_days = '{0}').
@@ -70,7 +71,7 @@ on conflict (staff_slug, weekday) do nothing;
 
 insert into public.business_hours (staff_slug, weekday, ranges)
 select 'berlin', wd,
-       '[{"start":"09:00","end":"12:00"},{"start":"13:00","end":"19:00"},{"start":"18:45","end":"18:46"}]'::jsonb
+       '[{"start":"09:00","end":"12:00"},{"start":"13:00","end":"19:00"}]'::jsonb
 from generate_series(1, 6) as wd
 on conflict (staff_slug, weekday) do nothing;
 
