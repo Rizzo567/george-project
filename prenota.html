@@ -1075,6 +1075,20 @@
         });
       }
 
+      // Causa a monte dell'incidente 30/07/2026: la griglia slot si carica una
+      // volta sola. Il cliente aveva la pagina aperta da prima che le 13:30
+      // venissero occupate (74 secondi di scarto fra le due prenotazioni) e
+      // vedeva ancora l'orario libero. Al ritorno sulla scheda ricarichiamo la
+      // disponibilità — ma solo se sta ancora scegliendo l'orario, per non
+      // resettare chi è già dentro al form.
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) return;
+        if (!state.barber || !state.date) return;
+        if (!stepForm.classList.contains('book-step--hidden')) return;
+        state.time = null; // la selezione precedente potrebbe non essere più libera
+        loadSlots(state.barber, state.date);
+      });
+
       function fallbackSlots(barber) {
         // Berlin: appuntamento 30min senza pausa = slot ogni 30min.
         // Pausa pranzo 12:00-13:00: mattina si ferma, pomeriggio riparte da 13:00.
@@ -1237,75 +1251,79 @@
 
         function sendBooking(imgBase64, imgMime, imgName) {
 
-          function doInsert(imgUrl) {
-            // ID generato client-side: il ruolo anon NON ha SELECT su appointments
-            // (revocato per GDPR — i dati personali non sono leggibili con la anon
-            // key). Quindi NON possiamo usare .select('id') dopo l'insert: fallirebbe
-            // con 42501 permission denied e l'utente vedrebbe "Errore durante la
-            // prenotazione". Generiamo l'UUID qui e lo passiamo sia all'insert (colonna
-            // id) sia a /api/book come apptId.
+          // ── Prenotazione: UNA sola chiamata, /api/book ──────────────────
+          // Il client NON inserisce più la riga appointments. Prima lo faceva
+          // PRIMA della validazione server: quando /api/book rispondeva 409
+          // (slot già preso) la riga restava a DB come "confirmed" — anon non ha
+          // DELETE sotto RLS, quindi nessun rollback era possibile — e il
+          // gestionale mostrava due clienti sullo stesso orario (incidente
+          // 30/07/2026, berlin 13:30). Ora la riga la crea /api/book con la
+          // service_role DOPO dedup + chiusure + freeBusy: se il server dice no,
+          // a DB non resta nulla.
+          function doBook(imgUrl) {
+            // apptId generato qui = chiave di idempotenza: se la rete va in
+            // timeout e la richiesta viene ritentata, il server riconosce lo
+            // stesso id e non crea un doppione.
             var aptId = (typeof crypto !== 'undefined' && crypto.randomUUID)
               ? crypto.randomUUID()
               : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
                   return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
                 });
-            sb.from('appointments').insert({
-              id:      aptId,
-              barber:  state.barber,
-              name:    nome,
-              phone:   telefono,
-              email:   email || null,
-              service: servizio,
-              date:    state.date,
-              time:    state.time,
-              notes:   note || null,
-              img_url: imgUrl || null,
-              status:  'confirmed'
+
+            var calBody = {
+              barber:   state.barber,
+              nome:     nome,
+              email:    email || null,
+              telefono: telefono,
+              servizio: servizio,
+              data:     state.date,
+              ora:      state.time,
+              notes:    note || null,
+              apptId:   aptId
+            };
+            if (imgUrl) { calBody.imgUrl = imgUrl; }
+
+            fetch('/api/book', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(calBody)
             })
-            .then(function (res) {
-              if (res.error) { doBookingError(); return; }
-
-              var calBody = {
-                barber:   state.barber,
-                nome:     nome,
-                email:    email || null,
-                telefono: telefono,
-                servizio: servizio,
-                data:     state.date,
-                ora:      state.time,
-                notes:    note || null,
-                apptId:   aptId || null   // book.js scrive calendar_event_id su questa riga (server-side, service_role)
-              };
-              if (imgUrl) { calBody.imgUrl = imgUrl; }
-
-              // Chiama /api/book, salva eventId su Supabase, poi notifica
-              return fetch('/api/book', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(calBody)
-              })
-              .then(function(r) { return r.ok ? r.json() : {}; })
-              .then(function() {
-                // calendar_event_id viene scritto server-side da /api/book (service_role):
-                // l'UPDATE lato client falliva sempre (anon non ha policy UPDATE sotto RLS).
-                // Qui resta solo la notifica email ai barbieri.
-                return fetch(window.MB_CONFIG.EDGE_FN_URL, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    barber:  state.barber,
-                    name:    nome,
-                    phone:   telefono,
-                    service: servizio,
-                    date:    state.date,
-                    time:    state.time,
-                    notes:   note || null
-                  })
-                });
+            .then(function (r) {
+              // Leggi SEMPRE la risposta: il 409 non è più silenziato.
+              return r.text().then(function (txt) {
+                var data = {};
+                try { data = txt ? JSON.parse(txt) : {}; } catch (e) { data = {}; }
+                return { ok: r.ok, status: r.status, data: data };
               });
             })
-            .then(function () { doSuccess(); })
-            .catch(function () { doSuccess(); });
+            .then(function (res) {
+              if (!res.ok) {
+                if (res.status === 409) { doSlotTaken(res.data.error); }
+                else                    { doBookingError(res.data.error); }
+                return null;
+              }
+              // Prenotazione confermata a DB (+ Google Calendar). La notifica ai
+              // barbieri è best-effort: se fallisce, la prenotazione resta valida.
+              return fetch(window.MB_CONFIG.EDGE_FN_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  barber:  state.barber,
+                  name:    nome,
+                  phone:   telefono,
+                  service: servizio,
+                  date:    state.date,
+                  time:    state.time,
+                  notes:   note || null
+                })
+              })
+              .catch(function () { /* notifica non critica */ })
+              .then(function () { doSuccess(); });
+            })
+            .catch(function () {
+              // Rete caduta o server irraggiungibile: NON mostrare successo.
+              doBookingError();
+            });
           }
 
           if (imgBase64 && imgMime && imgName) {
@@ -1319,13 +1337,13 @@
             var blob = base64ToBlob(imgBase64, imgMime);
             sb.storage.from('bookings').upload(path, blob, { contentType: imgMime, upsert: false })
               .then(function (res) {
-                if (res.error) { doInsert(null); return; }
+                if (res.error) { doBook(null); return; }
                 var urlData = sb.storage.from('bookings').getPublicUrl(path);
-                doInsert(urlData.data ? urlData.data.publicUrl : null);
+                doBook(urlData.data ? urlData.data.publicUrl : null);
               })
-              .catch(function () { doInsert(null); });
+              .catch(function () { doBook(null); });
           } else {
-            doInsert(null);
+            doBook(null);
           }
         }
 
@@ -1336,11 +1354,27 @@
           return new Blob([arr], { type: mime });
         }
 
-        function doBookingError() {
+        function doBookingError(msg) {
           var btn = document.getElementById('submitBtn');
           btn.disabled = false;
           btn.classList.remove('is-loading');
-          alert('Errore durante la prenotazione. Riprova tra qualche minuto.');
+          alert(msg || 'Errore durante la prenotazione. Riprova tra qualche minuto.');
+        }
+
+        // Slot occupato mentre il cliente compilava il form (griglia stantìa o
+        // corsa con un altro cliente): niente successo finto — si torna al
+        // calendario con la disponibilità ricaricata da zero.
+        function doSlotTaken(msg) {
+          var btn = document.getElementById('submitBtn');
+          btn.disabled = false;
+          btn.classList.remove('is-loading');
+          btn.classList.remove('is-success');
+          state.time = null;
+          alert(msg || 'Questo orario è stato appena prenotato da un altro cliente. Scegli un altro orario.');
+          if (state.barber && state.date) { loadSlots(state.barber, state.date); }
+          if (!stepForm.classList.contains('book-step--hidden')) {
+            hideStep(stepForm, function () { showStep(stepCalendar, 'anim-pop'); });
+          }
         }
 
         if (file) {

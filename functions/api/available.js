@@ -90,8 +90,14 @@ export async function onRequestGet({ request, env }) {
     const workRanges = await getWorkRanges(barber, dayOfWeek, env);
     const duration   = await getEventDuration(barber, env);
 
-    // Finestre occupate: Google Calendar (barbieri con calendario) oppure Supabase.
-    let busy = [];
+    // Finestre occupate: UNIONE di Google Calendar e prenotazioni Supabase.
+    // Prima, con hasCalendar, si guardava SOLO il freeBusy di Google: una
+    // prenotazione presente a DB ma senza evento Calendar (creazione evento
+    // fallita, o riga scritta fuori dal flusso normale) lasciava lo slot
+    // mostrato come LIBERO dall'API. Ora le due fonti si sommano: basta che una
+    // delle due dica "occupato" perché lo slot sia chiuso.
+    const dbBusy = await getBookedBusy(env, barber, date, tz, duration);
+    let busy = dbBusy;
     if (hasCalendar) {
       const token = await getAccessToken(serviceAccount);
       const fbRes = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
@@ -105,9 +111,7 @@ export async function onRequestGet({ request, env }) {
         }),
       });
       const fbData = await fbRes.json();
-      busy = fbData.calendars?.[calendarId]?.busy ?? [];
-    } else {
-      busy = await getBookedBusy(env, barber, date, tz, duration);
+      busy = dbBusy.concat(fbData.calendars?.[calendarId]?.busy ?? []);
     }
 
     const slots = [];

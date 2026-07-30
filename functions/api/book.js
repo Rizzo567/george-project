@@ -113,10 +113,11 @@ async function isSlotAlreadyBooked(env, barber, date, time, apptId) {
   try {
     // Time può arrivare come HH:MM ma in DB è HH:MM:SS
     const timeFull = time.length === 5 ? time + ':00' : time;
-    // ESCLUDI la prenotazione corrente: il client inserisce la riga appointments
-    // PRIMA di chiamare /api/book (gli serve l'apptId), e appointment_slots la
-    // rispecchia subito (stesso id). Senza questo filtro il dedup troverebbe la
-    // prenotazione stessa → 409 su OGNI booking. Cerchiamo solo righe di ALTRI.
+    // ESCLUDI la prenotazione corrente. Dal fix del 30/07/2026 la riga la scrive
+    // il server DOPO questo controllo, quindi normalmente non esiste ancora — ma
+    // il filtro serve ancora in due casi: retry della stessa request (stesso
+    // apptId già inserito) e client vecchi in cache che inseriscono da sé.
+    // Senza questo, quei casi vedrebbero la propria riga → 409 su ogni booking.
     const excludeSelf = apptId && UUID_RE.test(apptId)
       ? `&id=neq.${encodeURIComponent(apptId)}`
       : '';
@@ -148,6 +149,78 @@ async function isSlotAlreadyBooked(env, barber, date, time, apptId) {
 // qui non deve far fallire la prenotazione (l'evento Calendar è già creato).
 // ────────────────────────────────────────────────────────────────────
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// ────────────────────────────────────────────────────────────────────
+// CLAIM DELLO SLOT: insert server-side con service_role.
+// Prima il client inseriva la riga appointments PRIMA di chiamare /api/book:
+// se qui il controllo diceva 409 la riga restava lì (anon non ha DELETE sotto
+// RLS) e il gestionale mostrava due prenotazioni confermate sullo stesso orario
+// (incidente 30/07/2026, berlin 13:30). Ora la riga nasce SOLO qui, dopo dedup,
+// chiusure e freeBusy, protetta dall'indice uniq_appointments_active_slot
+// (migrazione 008) che rende il claim atomico anche fra due request simultanee.
+//
+// Ritorna:
+//   { ok: true }                  → riga inserita
+//   { ok: true, idempotent: true} → PK già esistente: stesso apptId reinviato
+//                                   (retry di rete o client vecchio in cache che
+//                                   ha già scritto la riga) → non è un doppione
+//   { ok: false, reason: 'slot_taken' } → indice slot violato: qualcun altro ha
+//                                        preso lo slot in mezzo ai controlli
+//   { ok: false, reason: 'config'|'db' } → errore da segnalare, mai "successo"
+// ────────────────────────────────────────────────────────────────────
+async function insertAppointment(env, row) {
+  const url = SUPABASE_URL_PUBLIC;
+  const key = (env.SUPABASE_SERVICE_ROLE_KEY || '').replace(/\s/g, '');
+  if (!url || !key) return { ok: false, reason: 'config' };
+
+  try {
+    const r = await fetch(`${url}/rest/v1/appointments`, {
+      method: 'POST',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify(row),
+    });
+    if (r.ok) return { ok: true };
+
+    const text = await r.text();
+    // 23505 = unique_violation. Distinguere QUALE indice ha scattato:
+    // appointments_pkey → stesso id, inserimento idempotente.
+    // uniq_appointments_active_slot (o qualsiasi altro) → slot occupato.
+    if (r.status === 409 || /23505|duplicate key/i.test(text)) {
+      if (/appointments_pkey/i.test(text)) return { ok: true, idempotent: true };
+      return { ok: false, reason: 'slot_taken' };
+    }
+    return { ok: false, reason: 'db', detail: text.slice(0, 300) };
+  } catch (e) {
+    return { ok: false, reason: 'db', detail: e.message };
+  }
+}
+
+// Rollback del claim: usato solo quando l'inserimento è nostro e la creazione
+// dell'evento Google Calendar fallisce. Senza questo lo slot resterebbe occupato
+// da una prenotazione che il barbiere non vede sul calendario.
+async function deleteAppointment(env, apptId) {
+  const url = SUPABASE_URL_PUBLIC;
+  const key = (env.SUPABASE_SERVICE_ROLE_KEY || '').replace(/\s/g, '');
+  if (!url || !key || !UUID_RE.test(apptId || '')) return false;
+  try {
+    const r = await fetch(`${url}/rest/v1/appointments?id=eq.${encodeURIComponent(apptId)}`, {
+      method: 'DELETE',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        Prefer: 'return=minimal',
+      },
+    });
+    return r.ok;
+  } catch {
+    return false;
+  }
+}
 
 async function persistEventId(env, apptId, eventId) {
   // URL pubblico da costante. service_role è segreta → solo da env, ma sanifichiamo
@@ -188,6 +261,11 @@ export async function onRequestPost({ request, env }) {
   catch { return json({ error: 'Body non valido' }, 400, corsHeaders); }
 
   let { barber, nome, telefono, data, ora, servizio, note, imgUrl, email, apptId } = body;
+  // Il client manda il campo come `notes`; accettiamo entrambi i nomi.
+  // (Prima le note finivano solo nella riga inserita dal client e sparivano
+  // dalla description dell'evento Calendar. Ora la riga la scrive il server:
+  // senza questo fallback le note del cliente andrebbero perse.)
+  if (note == null) note = body.notes;
 
   // ── Liste ammesse DB-driven (con fallback hardcoded) ───────────
   const allowedBarbers  = await getAllowedBarbers(env);
@@ -259,14 +337,18 @@ export async function onRequestPost({ request, env }) {
   const endH = Math.floor(endTotal / 60);
   const endM = endTotal % 60;
 
+  // id della prenotazione: quello del client (idempotenza sui retry) o nuovo.
+  const rowId = apptId && UUID_RE.test(apptId) ? apptId : crypto.randomUUID();
+
   try {
     let eventId = null;
+    let token   = null;
 
     if (hasCalendar) {
       // ── Guard autoritativo: il calendario è occupato su questa finestra? ──
       // Chiude l'overbooking quando i barbieri bloccano i giorni creando eventi
       // direttamente su Google Calendar (non presenti in Supabase).
-      const token = await getAccessToken(serviceAccount);
+      token = await getAccessToken(serviceAccount);
 
       const startIso = `${data}T${pad(startH)}:${pad(startM)}:00${tz}`;
       const endIso   = `${data}T${pad(endH)}:${pad(endM)}:00${tz}`;
@@ -292,6 +374,40 @@ export async function onRequestPost({ request, env }) {
       }
       // Se la verifica freeBusy fallisce (fbRes non ok), si procede: la dedup
       // Supabase resta come rete di sicurezza, non blocchiamo per un errore transitorio.
+    }
+
+    // ── CLAIM ATOMICO DELLO SLOT ────────────────────────────────
+    // Tutti i controlli sono passati: solo ORA la prenotazione esiste. L'ordine
+    // è deliberato — prima il claim, poi l'evento Calendar — così due request
+    // simultanee non possono entrambe superare i controlli: l'indice
+    // uniq_appointments_active_slot ne fa passare esattamente una.
+    const ins = await insertAppointment(env, {
+      id:      rowId,
+      barber,
+      name:    nome,
+      phone:   telefono,
+      email:   email || null,
+      service: servizio,
+      date:    data,
+      time:    ora,
+      notes:   note || null,
+      img_url: safeImgUrl,
+      status:  'confirmed',
+    });
+    if (!ins.ok) {
+      if (ins.reason === 'slot_taken') {
+        return json({ error: 'Slot già prenotato. Scegli un altro orario.' }, 409, corsHeaders);
+      }
+      // config mancante o errore DB: fallire RUMOROSAMENTE. Mai rispondere ok
+      // senza la riga a DB, o il cliente si presenta senza prenotazione.
+      console.error('book.js insert failed:', ins.reason, ins.detail || '');
+      return json({ error: 'Errore interno. Riprova.' }, 500, corsHeaders);
+    }
+    // idempotent = la riga esisteva già con questo id (retry, o client vecchio in
+    // cache che ha inserito da sé): non è nostra, non la cancelliamo in rollback.
+    const insertedByUs = !ins.idempotent;
+
+    if (hasCalendar) {
       // Componi description in modo safe (nessun input grezzo nelle linee strutturate)
       const description = [
         `Tel: ${telefono}`,
@@ -315,8 +431,14 @@ export async function onRequestPost({ request, env }) {
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error?.message ?? 'Errore Google Calendar');
+        // ROLLBACK del claim: senza l'evento Calendar il barbiere non vedrebbe
+        // l'appuntamento sul telefono, e lo slot resterebbe bloccato per gli
+        // altri clienti. Meglio liberarlo e far ritentare.
+        let detail = 'Errore Google Calendar';
+        try { detail = (await res.json())?.error?.message ?? detail; } catch { /* body non JSON */ }
+        console.error('book.js calendar create failed:', detail);
+        if (insertedByUs) await deleteAppointment(env, rowId);
+        return json({ error: 'Prenotazione non confermata. Riprova.' }, 502, corsHeaders);
       }
 
       const createdEvent = await res.json();
@@ -325,13 +447,13 @@ export async function onRequestPost({ request, env }) {
       // Collega l'evento Calendar alla riga DB (server-side, service_role).
       // Senza questo la cancellazione admin non può eliminare l'evento Calendar
       // → con Calendar autoritativo lo slot resterebbe bloccato dopo un annullamento.
-      if (eventId && apptId) {
-        await persistEventId(env, apptId, eventId);
+      if (eventId) {
+        await persistEventId(env, rowId, eventId);
       }
     }
-    // Path calendar-less (config Google assente): la riga appointments è già
-    // stata inserita dal client e compare nella dashboard admin. Dedup + chiusure
-    // sono già validati sopra. Nessun evento Calendar da creare.
+    // Path calendar-less (config Google assente): la prenotazione vive solo su
+    // Supabase e compare nella dashboard admin. Dedup + chiusure sono già
+    // validati sopra. Nessun evento Calendar da creare.
 
     // ── Email di conferma al cliente (server-side via Resend) — entrambi i path ──
     if (email && env.RESEND_API_KEY) {
@@ -444,7 +566,7 @@ export async function onRequestPost({ request, env }) {
       }
     }
 
-    return json({ ok: true, eventId }, 200, corsHeaders);
+    return json({ ok: true, apptId: rowId, eventId }, 200, corsHeaders);
   } catch (err) {
     // Non esporre dettagli interni al client
     console.error('book.js error:', err.message);
