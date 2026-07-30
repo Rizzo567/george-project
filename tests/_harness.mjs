@@ -96,7 +96,13 @@ export function installFetchMock(opts = {}) {
     if (url.includes('/rest/v1/closures'))       return jsonRes(opts.closures ?? []);
 
     // ── Dedup slot ──
-    if (url.includes('/rest/v1/appointment_slots')) return jsonRes(opts.slotRows ?? []);
+    // slotRowsAfterInsert simula la corsa: lo slot risulta libero al controllo
+    // iniziale e occupato alla rilettura dopo l'INSERT.
+    if (url.includes('/rest/v1/appointment_slots')) {
+      const inserted = calls.some(c => c.method === 'POST' && c.url.includes('/rest/v1/appointments'));
+      if (inserted && opts.slotRowsAfterInsert) return jsonRes(opts.slotRowsAfterInsert);
+      return jsonRes(opts.slotRows ?? []);
+    }
 
     // ── Tabella appointments ──
     if (url.includes('/rest/v1/appointments')) {

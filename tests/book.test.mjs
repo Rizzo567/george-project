@@ -65,6 +65,19 @@ test('dedup passa ma indice unique scatta → 409 senza evento Calendar', async 
   assertEq(mock.deletes().length, 0, 'niente da cancellare');
 });
 
+// ── 3b. Corsa persa SENZA indice unique (finché la 008 non è applicata) ──
+test('altra riga comparsa fra dedup e insert → cediamo: 409 + riga cancellata', async () => {
+  const { res, body, mock } = await call(validPayload(), {
+    slotRows: [],                                                     // libero al controllo
+    slotRowsAfterInsert: [{ id: '44444444-4444-4444-8444-444444444444' }], // occupato dopo
+  });
+  assertEq(res.status, 409, 'status');
+  assert(/già prenotato/i.test(body.error), 'messaggio slot occupato');
+  assertEq(mock.inserts().length, 1, 'la riga era stata scritta');
+  assertEq(mock.deletes().length, 1, 'e poi rimossa: nessuna riga orfana');
+  assertEq(mock.calEvents().length, 0, 'nessun evento Calendar');
+});
+
 // ── 4. Retry / client vecchio in cache: idempotenza sulla PK ────────
 test('conflitto su appointments_pkey (stesso apptId) → 200, non è un doppione', async () => {
   const apptId = '22222222-2222-4222-8222-222222222222';

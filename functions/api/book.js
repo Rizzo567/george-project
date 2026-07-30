@@ -407,6 +407,21 @@ export async function onRequestPost({ request, env }) {
     // cache che ha inserito da sé): non è nostra, non la cancelliamo in rollback.
     const insertedByUs = !ins.idempotent;
 
+    // ── RETE DI SICUREZZA senza DDL: verifica dopo la scrittura ──
+    // Finché la migrazione 008 (indice unique) non è applicata, fra la dedup e
+    // l'INSERT resta una finestra di qualche centinaio di ms in cui due request
+    // possono passare entrambe. Qui rileggiamo lo slot DOPO aver scritto: se
+    // compare un'altra riga attiva, cediamo sempre noi (cancelliamo la nostra e
+    // rispondiamo 409). Regola volutamente asimmetrica: nel caso limite di due
+    // request davvero simultanee possono cedere entrambe — il cliente ritenta e
+    // prenota — ma non si arriva MAI a due prenotazioni sullo stesso orario, che
+    // è l'unico esito inaccettabile. Con la 008 attiva questo controllo diventa
+    // ridondante (l'INSERT stesso fallisce) e resta come seconda rete.
+    if (insertedByUs && await isSlotAlreadyBooked(env, barber, data, ora, rowId)) {
+      await deleteAppointment(env, rowId);
+      return json({ error: 'Slot già prenotato. Scegli un altro orario.' }, 409, corsHeaders);
+    }
+
     if (hasCalendar) {
       // Componi description in modo safe (nessun input grezzo nelle linee strutturate)
       const description = [
