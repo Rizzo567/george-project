@@ -16,6 +16,13 @@
 (function () {
   'use strict';
 
+  // Data locale (Europe/Rome) YYYY-MM-DD — toISOString() darebbe UTC (ieri prima delle 02:00)
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function dateStrLocal(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+
   // ── Costanti dominio ───────────────────────────────────────
   var WEEKDAYS = [
     { n: 1, label: 'Lunedì',    short: 'Lun' },
@@ -502,7 +509,7 @@
       if (clEditMode) {
         clForm.classList.remove('is-hidden');
         clAddBtn.textContent = '− Chiudi';
-        var today = new Date().toISOString().slice(0, 10);
+        var today = dateStrLocal();
         $('clStart').value = today;
         $('clEnd').value = today;
         clShowMsg('', '');
@@ -560,7 +567,7 @@
     var emptyEl = $('closuresEmpty');
     if (!listEl) return;
     listEl.innerHTML = '<div class="st-cl-loading">Caricamento…</div>';
-    var todayStr = new Date().toISOString().slice(0, 10);
+    var todayStr = dateStrLocal();
     A.sb.from('closures').select('*').gte('end_date', todayStr).order('start_date', { ascending: true }).then(function (res) {
       listEl.innerHTML = '';
       if (res.error) { emptyEl.classList.add('is-hidden'); listEl.innerHTML = errorBlock('Errore caricamento chiusure.', loadClosures); return; }

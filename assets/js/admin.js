@@ -32,6 +32,14 @@
 
   function clearMsg(el) { el.innerHTML = ''; }
 
+  // Data locale (Europe/Rome) in formato YYYY-MM-DD.
+  // NON usare toISOString(): converte in UTC e prima delle 02:00 restituisce ieri.
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function dateStrLocal(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+
   function hide(el) { el.classList.add('is-hidden'); }
   function show(el) { el.classList.remove('is-hidden'); }
 
@@ -275,7 +283,7 @@
     var listEl    = document.getElementById('aptList');
     var empty     = document.getElementById('dashEmpty');
     var hdEl      = document.getElementById('listSectionHd');
-    var todayStr  = new Date().toISOString().slice(0, 10);
+    var todayStr  = dateStrLocal();
     listEl.innerHTML = '<div class="apt-list-loading">Caricamento…</div>';
     empty.classList.add('is-hidden');
 
@@ -295,7 +303,7 @@
       futureLimit.setDate(futureLimit.getDate() + 14);
       query = query
         .gt('date', todayStr)
-        .lte('date', futureLimit.toISOString().slice(0, 10))
+        .lte('date', dateStrLocal(futureLimit))
         .order('date', { ascending: true })
         .order('time', { ascending: true });
     } else {
@@ -341,7 +349,7 @@
 
   // ── Sezione Oggi ───────────────────────────────────────────
   function loadTodaySection() {
-    var todayStr  = new Date().toISOString().slice(0, 10);
+    var todayStr  = dateStrLocal();
     var sectionEl = document.getElementById('todaySection');
     var listEl    = document.getElementById('todayList');
     var emptyEl   = document.getElementById('todayEmpty');
@@ -440,9 +448,9 @@
       groups[d].push(apt);
     });
 
-    var todayStr     = new Date().toISOString().slice(0, 10);
+    var todayStr     = dateStrLocal();
     var yesterdayObj = new Date(); yesterdayObj.setDate(yesterdayObj.getDate() - 1);
-    var yesterdayStr = yesterdayObj.toISOString().slice(0, 10);
+    var yesterdayStr = dateStrLocal(yesterdayObj);
 
     groupOrder.forEach(function (dateStr) {
       var dayLabel;
@@ -649,7 +657,7 @@
 
   function checkAutoComplete() {
     var now      = new Date();
-    var todayStr = now.toISOString().slice(0, 10);
+    var todayStr = dateStrLocal(now);
 
     sb.from('appointments')
       .select('id, date, time, barber')
@@ -897,23 +905,47 @@
   }
 
   // ── Carica dati per stats (senza filtri) ───────────────────
+  // PostgREST tronca a 1000 righe per risposta: senza paginazione le stats
+  // si fermavano alla millesima riga (KPI "Oggi" a 0 e grafici piatti).
   function loadStatsData() {
-    sb.from('appointments')
-      .select('*')
-      .order('date', { ascending: true })
-      .order('time', { ascending: true })
-      .then(function(res) {
-        if (!res.error) {
-          allAppointments = res.data || [];
-          updateStats(allAppointments);
-        }
-      });
+    var PAGE      = 1000;
+    var MAX_ROWS  = 50000; // exit di sicurezza: mai loop infinito
+    var acc       = [];
+
+    function done() {
+      allAppointments = acc;
+      updateStats(acc);
+    }
+
+    function fetchPage(from) {
+      sb.from('appointments')
+        .select('*')
+        .order('date', { ascending: true })
+        .order('time', { ascending: true })
+        .range(from, from + PAGE - 1)
+        .then(function(res) {
+          if (res.error) {
+            // Fallback: usa quello che si è riusciti a caricare
+            if (acc.length) done();
+            return;
+          }
+          var rows = res.data || [];
+          acc = acc.concat(rows);
+          if (rows.length === PAGE && acc.length < MAX_ROWS) {
+            fetchPage(from + PAGE);
+          } else {
+            done();
+          }
+        });
+    }
+
+    fetchPage(0);
   }
 
   // ── Update stats ───────────────────────────────────────────
   function updateStats(rows) {
     var now      = new Date();
-    var todayStr = now.toISOString().slice(0, 10);
+    var todayStr = dateStrLocal(now);
     var nowTime  = now.toTimeString().slice(0, 5);
 
     // KPI counts
@@ -1008,7 +1040,7 @@
     for (var d = 13; d >= 0; d--) {
       var day = new Date(now);
       day.setDate(day.getDate() - d);
-      dates14.push(day.toISOString().slice(0, 10));
+      dates14.push(dateStrLocal(day));
       labels14.push(day.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit' }));
     }
     lastDates14 = dates14;
