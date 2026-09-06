@@ -1,712 +1,850 @@
 <!DOCTYPE html>
-<html lang="it">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="Mister Barber — Via Torino 38, Pavia. Due barbieri. Un taglio.">
-
-  <!-- Security headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-
-  <title>MISTER BARBER</title>
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="assets/img/mister-barber-logo.png">
-  <link rel="apple-touch-icon" href="assets/img/mister-barber-logo.png">
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="assets/css/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>window.__resources={"https://unpkg.com/react@18.3.1/umd/react.production.min.js":"assets/vendor/react.production.min.js","https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js":"assets/vendor/react-dom.production.min.js"};</script>
+<script src="./support.js"></script>
 </head>
 <body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mister Barber — Barbiere a Pavia, Via Torino 38</title>
+<meta name="description" content="Mister Barber — Via Torino 38, Pavia. Taglio, fade e barba con Berlin. Prenota online in 30 secondi.">
+<meta property="og:title" content="Mister Barber — Barbiere a Pavia">
+<meta property="og:description" content="Via Torino 38, Pavia. Taglio, fade e barba con Berlin. Prenota online.">
+<meta property="og:image" content="https://george-project.pages.dev/assets/img/logo.png">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="apple-touch-icon" href="assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #242627; }
+  a { color: #EA6934; text-decoration: none; }
+  a:hover { color: #F79364; }
+  img, video { display: block; }
+  ::selection { background: #EA6934; color: #0B0B0B; }
+  @keyframes mb-pole { to { background-position: 0 -120px; } }
+  @keyframes mb-swayL { 0%,100% { transform: rotate(-15deg); } 50% { transform: rotate(-7deg); } }
+  @keyframes mb-swayR { 0%,100% { transform: rotate(13deg); } 50% { transform: rotate(5deg); } }
+  @keyframes mb-marquee { to { transform: translateX(-50%); } }
+  @keyframes mb-glow { 0%,100% { opacity: .5; } 50% { opacity: .85; } }
+  @keyframes mb-vmarq { to { transform: translateY(calc(-50% - 8px)); } }
+  @keyframes mb-blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+</style>
+</helmet>
 
-  <!-- NAVBAR -->
-  <nav class="nav" id="nav">
-    <a href="/" class="nav__logo"><img class="nav__logo-img" src="assets/img/mister-barber-logo.png" alt="">Mister Barber</a>
-    <ul class="nav__links" id="navLinks">
-      <li><a href="#servizi">Servizi</a></li>
-      <li><a href="#barbieri">Barbieri</a></li>
-      <li><a href="#posto">Il Posto</a></li>
-      <li><a href="#drop">Drop</a></li>
-    </ul>
-    <a href="prenota.html" class="nav__cta">Prenota</a>
-    <button class="nav__hamburger" id="hamburger" aria-label="Menu">
+  <x-import component-from-global-scope="star-field" from="./star-field.js" layer="back" seed="7" density="1.3" spin="0.05" props="assets/img/cap-1.png,assets/img/cap-2.png,assets/img/cap-3.png,assets/img/cap-4.png,assets/img/cap-5.png,assets/img/bracciale-1.png,assets/img/bracciale-2.png" hint-size="100%,100%" style="position:fixed;inset:0;z-index:0;pointer-events:none;width:100%;height:100%"></x-import>
+  <x-import component-from-global-scope="star-field" from="./star-field.js" layer="front" seed="7" density="1.3" spin="0.05" props="assets/img/cap-1.png,assets/img/cap-2.png,assets/img/cap-3.png,assets/img/cap-4.png,assets/img/cap-5.png,assets/img/bracciale-1.png,assets/img/bracciale-2.png" hint-size="100%,100%" style="position:fixed;inset:0;z-index:90;pointer-events:none;width:100%;height:100%"></x-import>
+<div ref="{{ rootRef }}" style="background:#242627;color:#D4D0CA;font-family:Barlow,system-ui,sans-serif;overflow-x:hidden;min-height:100vh">
+
+
+  <div ref="{{ scrimRef }}" onClick="{{ closeNav }}" style="position:fixed;inset:0;z-index:70;background:rgba(11,11,11,.62);opacity:0;pointer-events:none;transition:opacity .34s ease"></div>
+  <aside ref="{{ panelRef }}" style="position:fixed;top:0;right:0;bottom:0;z-index:80;width:min(86vw,350px);background:#1a1c1d;border-left:1px solid rgba(212,208,202,.12);padding:0 26px 34px;display:flex;flex-direction:column;gap:22px;transform:translateX(105%);transition:transform .38s cubic-bezier(.2,.7,.3,1);box-shadow:-24px 0 60px rgba(0,0,0,.5)">
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin:0 -26px;padding:0 24px">
       <span></span>
+      <img src="assets/img/logo.png" alt="Mister Barber" style="display:block;justify-self:center;height:clamp(150px,15vw,190px);width:auto;margin:-32px 0 -24px" />
+      <button onClick="{{ closeNav }}" aria-label="Chiudi il menu" style="justify-self:end;background:transparent;border:0;cursor:pointer;padding:8px;font-family:system-ui,sans-serif;font-size:26px;line-height:1;color:#D4D0CA">&times;</button>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:16px">
+        <a href="#barbiere" onClick="{{ closeNav }}" data-en="The barber" style="font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:.04em;color:#D4D0CA;padding:6px 0;transition:color .2s ease" style-hover="color:#EA6934">Il barbiere</a>
+        <a href="#servizi" onClick="{{ closeNav }}" data-en="Services" style="font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:.04em;color:#D4D0CA;padding:6px 0;transition:color .2s ease" style-hover="color:#EA6934">Servizi</a>
+        <a href="#video" onClick="{{ closeNav }}" data-en="Videos" style="font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:.04em;color:#D4D0CA;padding:6px 0;transition:color .2s ease" style-hover="color:#EA6934">Video</a>
+        <a href="#recensioni" onClick="{{ closeNav }}" data-en="Reviews" style="font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:.04em;color:#D4D0CA;padding:6px 0;transition:color .2s ease" style-hover="color:#EA6934">Recensioni</a>
+        <a href="#contatti" onClick="{{ closeNav }}" data-en="Contact" style="font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:.04em;color:#D4D0CA;padding:6px 0;transition:color .2s ease" style-hover="color:#EA6934">Contatti</a>
+    </nav>
+    <div style="margin-top:8px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;border:1px solid rgba(212,208,202,.22);border-radius:99px;overflow:hidden;font-size:11px;font-weight:700;letter-spacing:.12em;align-self:flex-start">
+        <button ref="{{ itBtn }}" onClick="{{ setIt }}" style="border:0;cursor:pointer;padding:8px 14px;background:#EA6934;color:#0B0B0B;font:inherit">IT</button>
+        <button ref="{{ enBtn }}" onClick="{{ setEn }}" style="border:0;cursor:pointer;padding:8px 14px;background:transparent;color:#D4D0CA;font:inherit">EN</button>
+      </div>
+      <a href="prenota.html" onClick="{{ closeNav }}" data-en="Book now" style="background:#EA6934;color:#0B0B0B;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:14px 20px;border-radius:99px;text-align:center" style-hover="color:#0B0B0B">Prenota ora</a>
+    </div>
+  </aside>
+
+  <section id="top" style="position:relative;z-index:1;position:relative;min-height:clamp(560px,92vh,920px);display:flex;flex-direction:column;overflow:hidden">
+    <video src="assets/video/hero.mp4" autoPlay="{{ true }}" muted="{{ true }}" loop="{{ true }}" disablePictureInPicture="{{ true }}" controls="{{ false }}" playsInline="{{ true }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6;mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.35) 8%,#000 26%,#000 74%,rgba(0,0,0,.35) 92%,transparent 100%),linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.4) 7%,#000 24%,#000 76%,rgba(0,0,0,.35) 93%,transparent 100%);mask-composite:intersect;-webkit-mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.35) 8%,#000 26%,#000 74%,rgba(0,0,0,.35) 92%,transparent 100%),linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.4) 7%,#000 24%,#000 76%,rgba(0,0,0,.35) 93%,transparent 100%);-webkit-mask-composite:source-in" volume="{{ 0 }}"></video>
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(36,38,39,.75) 0%,rgba(36,38,39,.12) 45%,rgba(11,11,11,.4) 100%)"></div>
+    <header style="position:sticky;top:0;z-index:60;background:transparent">
+      <div style="max-width:1240px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center">
       <span></span>
-      <span></span>
-    </button>
-  </nav>
-
-  <!-- MAIN -->
-  <main id="main">
-
-    <!-- HERO -->
-    <section class="hero" id="hero">
-      <div class="hero__media">
-        <video class="hero__video" autoplay muted loop playsinline>
-          <source src="assets/videos/hero-video-h264.mp4" type="video/mp4">
-        </video>
-        <div class="hero__overlay"></div>
+      <a href="#top" style="justify-self:center" style-hover="color:#D4D0CA">
+        <img src="assets/img/logo.png" alt="Mister Barber" style="display:block;height:clamp(150px,15vw,190px);width:auto;margin:-32px 0 -24px" />
+      </a>
+      <div style="justify-self:end;display:flex;align-items:center;gap:16px">
+        <a ref="{{ ctaRef }}" href="prenota.html" data-en="Book now" style="background:#EA6934;color:#0B0B0B;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:12px 22px;border-radius:99px;transition:transform .25s ease,box-shadow .25s ease" style-hover="color:#0B0B0B;transform:translateY(-2px);box-shadow:0 10px 24px rgba(234,105,52,.35)">Prenota ora</a>
+        <button onClick="{{ openNav }}" aria-label="Apri il menu" style="display:flex;flex-direction:column;gap:5px;background:transparent;border:0;cursor:pointer;padding:10px">
+        <span style="display:block;width:22px;height:2px;background:#D4D0CA;border-radius:2px"></span>
+        <span style="display:block;width:22px;height:2px;background:#D4D0CA;border-radius:2px"></span>
+          <span style="display:block;width:22px;height:2px;background:#D4D0CA;border-radius:2px"></span>
+        </button>
       </div>
-    </section>
-
-    <div class="section-fade section-fade--hero"></div>
-
-    <!-- CHI SIAMO -->
-    <section class="s01" id="barbieri" data-screen-label="01 Chi Siamo">
-
-      <div class="s01-shader" aria-hidden="true"></div>
-      <img class="brand-necklace" src="assets/img/ch%20necklace%202.png" alt="" aria-hidden="true">
-      <div class="glow"></div>
-
-      <img class="cap cap-2" src="assets/img/cap-angel.png" alt="" />
-
-      <div class="s01-grid">
-
-        <!-- LEFT — big brand mark + cta -->
-        <div class="brand">
-          <div class="brand-mark">
-            Mister<span class="second">Barber</span>
-          </div>
-          <div class="btn-prenota-wrap">
-            <button class="btn-prenota-ora" type="button" onclick="location.href='prenota.html'">Prenota ora</button>
-            <img class="brand-necklace brand-necklace--mobile" src="assets/img/ch%20necklace%202.png" alt="" aria-hidden="true">
-            <img class="s01-bracelet" src="assets/img/necklace%203.png" alt="" aria-hidden="true">
-          </div>
-        </div>
-
-        <!-- RIGHT — chi siamo + duo -->
-        <div class="chi">
-          <div class="chi-title-wrap">
-            <h2 class="chi-title">Chi <span class="ember">siamo?</span></h2>
-          </div>
-
-          <!-- single barber: Berlin -->
-          <div class="duo duo--solo">
-            <figure class="barber barber--berlin">
-              <div class="barber-img-wrap">
-                <img src="assets/img/character/berlin-canotta-pose1.png" alt="Berlin" class="berlin" />
-              </div>
-              <figcaption class="barber-meta">
-                <span class="barber-name">BERLIN</span>
-              </figcaption>
-            </figure>
-          </div>
-        </div>
-
       </div>
-    </section>
-
-    <div class="section-fade section-fade--s1s2"></div>
-
-    <!-- VIDEO CARDS -->
-    <section class="s02" id="drop">
-      <div class="cards-row">
-
-        <div class="card-wrap card-wrap--left" data-glow>
-          <div class="card-inner">
-            <div class="card-glow-inner" data-glow></div>
-            <video class="card-video" muted loop playsinline preload="none">
-              <source src="assets/videos/tiktok-left.mp4" type="video/mp4">
-            </video>
-          </div>
-          <img class="card-cap" src="assets/img/cap-ne.png" alt="" aria-hidden="true">
-        </div>
-
-        <div class="card-wrap card-wrap--center" data-glow>
-          <div class="card-inner">
-            <div class="card-glow-inner" data-glow></div>
-            <video class="card-video" muted loop playsinline preload="none">
-              <source src="assets/videos/tiktok-center-h264.mp4" type="video/mp4">
-            </video>
-          </div>
-          <img class="card-cap" src="assets/img/cap-ne.png" alt="" aria-hidden="true">
-        </div>
-
-        <div class="card-wrap card-wrap--right" data-glow>
-          <div class="card-inner">
-            <div class="card-glow-inner" data-glow></div>
-            <video class="card-video" muted loop playsinline preload="none">
-              <source src="assets/videos/tiktok-right.mp4" type="video/mp4">
-            </video>
-          </div>
-          <img class="card-cap" src="assets/img/cap-ne.png" alt="" aria-hidden="true">
-        </div>
-
-        <div class="card-wrap card-wrap--berlin" data-glow>
-          <div class="card-inner">
-            <div class="card-glow-inner" data-glow></div>
-            <video class="card-video" muted loop playsinline preload="none">
-              <source src="assets/videos/mambo-berlin.mp4" type="video/mp4">
-            </video>
-          </div>
-          <img class="card-cap" src="assets/img/cap-ne.png" alt="" aria-hidden="true">
-        </div>
-
-        <div class="card-wrap card-wrap--cut" data-glow>
-          <div class="card-inner">
-            <div class="card-glow-inner" data-glow></div>
-            <video class="card-video" muted loop playsinline preload="none">
-              <source src="assets/videos/berlin-cut1.mp4" type="video/mp4">
-            </video>
-          </div>
-          <img class="card-cap" src="assets/img/cap-ne.png" alt="" aria-hidden="true">
-        </div>
-
-        <div class="card-wrap card-wrap--car" data-glow>
-          <div class="card-inner">
-            <div class="card-glow-inner" data-glow></div>
-            <img class="card-img" src="assets/img/berlin-car.jpeg" alt="Berlin in car">
-          </div>
-          <img class="card-cap" src="assets/img/cap-ne.png" alt="" aria-hidden="true">
-        </div>
-
+    </header>
+    <div style="position:relative;flex:1;width:100%;max-width:1240px;margin:0 auto;padding:0 24px clamp(56px,8vh,96px);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:22px">
+      <div ref="{{ heroCtaRef }}" data-reveal="1" style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-self:center">
+        <a href="prenota.html" data-en="Book now" style="background:#EA6934;color:#0B0B0B;font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:16px 30px;border-radius:99px;transition:transform .25s ease,box-shadow .25s ease" style-hover="color:#0B0B0B;transform:translateY(-3px);box-shadow:0 14px 30px rgba(234,105,52,.4)">Prenota ora</a>
+        <a href="#video" data-en="Watch the videos" style="border:1px solid rgba(212,208,202,.34);color:#D4D0CA;font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:16px 30px;border-radius:99px;transition:border-color .25s ease,background .25s ease" style-hover="color:#D4D0CA;border-color:#D4D0CA;background:rgba(212,208,202,.08)">Guarda i video</a>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <div class="section-fade section-fade--s2s3"></div>
+  <section id="barbiere" style="position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:clamp(30px,4.5vw,64px) 24px clamp(64px,9vw,120px)">
+    <div style="display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:clamp(14px,3vw,44px);align-items:start">
+      <div data-reveal="1" style="position:relative;display:flex;justify-content:center;padding:clamp(6px,1.4vw,18px);padding-left:clamp(6px,8vw,130px)">
+        <div style="position:relative;width:clamp(132px,34vw,420px);max-height:46vh;display:flex;justify-content:center">
+          <div style="position:absolute;inset:0;background:#242627;mask-image:url(assets/img/berlin.png);mask-size:contain;mask-position:center;mask-repeat:no-repeat;-webkit-mask-image:url(assets/img/berlin.png);-webkit-mask-size:contain;-webkit-mask-position:center;-webkit-mask-repeat:no-repeat"></div>
+          <img src="assets/img/berlin.png" alt="Berlin" style="position:relative;display:block;width:auto;max-width:100%;max-height:46vh;filter:drop-shadow(0 20px 32px rgba(0,0,0,.5))" />
+        </div>
+      </div>
+      <div data-reveal="right" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px;padding-right:clamp(0px,5vw,80px)">
+        <h2 style="margin:0;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(46px,7vw,92px);line-height:.9;letter-spacing:.02em;background:linear-gradient(178deg,#f4f2ef 0%,#cfcbc4 26%,#8f8c86 46%,#ffffff 54%,#b9b5ae 68%,#6f6c67 88%,#e6e3de 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 1px rgba(0,0,0,.55))">BERLIN</h2>
+        <a href="prenota.html" data-en="Book with Berlin" style="background:#EA6934;color:#0B0B0B;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:14px 26px;border-radius:99px;transition:transform .25s ease,box-shadow .25s ease" style-hover="color:#0B0B0B;transform:translateY(-2px);box-shadow:0 12px 26px rgba(234,105,52,.35)">Prenota con Berlin</a>
+      </div>
+    </div>
+  </section>
 
-    <!-- DOVE CI TROVATE -->
-    <section class="s03" id="posto">
-      <div class="s03-inner">
-
-        <div class="s03-left">
-          <h2 class="s03-heading">DOVE CI<br><span class="s03-heading--ember">TROVATE</span></h2>
-          <div class="s03-address">
-            <p class="s03-address-line">Via Torino 38</p>
-            <p class="s03-address-line">Pavia, Italia</p>
-            <p class="s03-coords">45.1848° N, 9.1573° E</p>
+  <section id="servizi" style="position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 24px clamp(64px,9vw,120px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:clamp(16px,3vw,32px)">
+      <div data-reveal="1" style="position:relative">
+        <img src="assets/img/cap-5.png" alt="" style="position:absolute;top:-28px;right:-14px;width:clamp(78px,9.5vw,150px);transform-origin:20% 14%;animation:mb-swayR 6.9s ease-in-out infinite;filter:drop-shadow(0 12px 20px rgba(0,0,0,.6));z-index:4;pointer-events:none" />
+        <div style="display:flex;flex-direction:column;gap:20px;height:100%;transition:transform .3s ease" style-hover="transform:translateY(-5px)">
+          <div style="border-radius:28px;overflow:hidden;aspect-ratio:16/10;background:#1a1c1d">
+            <video src="assets/video/tiktok-1.mp4" autoPlay="{{ true }}" muted="{{ true }}" loop="{{ true }}" disablePictureInPicture="{{ true }}" controls="{{ false }}" playsInline="{{ true }}" style="width:100%;height:100%;object-fit:cover" volume="{{ 0 }}"></video>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <h3 style="margin:0;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(34px,4vw,52px);line-height:.95;letter-spacing:.03em;color:#EA6934">CUT</h3>
+            <p data-en="Fade, line-up, scissor work. Shape studied on your head, finished with the razor." style="margin:0;font-size:15px;line-height:1.65;color:rgba(212,208,202,.82);text-wrap:pretty">Fade, contorni, lavoro a forbice. Forma studiata sulla tua testa e finitura a rasoio.</p>
           </div>
         </div>
-
-        <div class="s03-right">
-          <div class="s03-scene">
-          <div class="expand-map" id="expandMap">
-
-            <!-- top bar -->
-            <div class="expand-map__top">
-<span class="expand-map__live"><span class="expand-map__dot"></span>Live</span>
-            </div>
-
-            <!-- mobile address label -->
-            <div class="expand-map__mobile-address" aria-hidden="false">Via Torino 38, Pavia</div>
-
-            <!-- collapsed: basketball backboard -->
-            <div class="expand-map__backboard" aria-hidden="true"></div>
-            <img class="expand-map__hoop-img" src="assets/img/basket-net.png" alt="" aria-hidden="true">
-
-            <!-- collapsed: grid pattern -->
-            <div class="expand-map__grid-bg" aria-hidden="true">
-              <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(229,225,216,0.07)" stroke-width="1"/>
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)"/>
-              </svg>
-            </div>
-
-            <!-- expanded: pseudo-map SVG -->
-            <div class="expand-map__map-wrap" aria-hidden="true">
-              <svg class="expand-map__roads" viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg">
-                <!-- main horizontal roads -->
-                <line class="road road--main" x1="0" y1="140" x2="360" y2="140" stroke="rgba(229,225,216,0.25)" stroke-width="3"/>
-                <line class="road road--main" x1="0" y1="90"  x2="360" y2="90"  stroke="rgba(229,225,216,0.15)" stroke-width="2"/>
-                <line class="road road--main" x1="0" y1="200" x2="360" y2="200" stroke="rgba(229,225,216,0.15)" stroke-width="2"/>
-                <!-- secondary horizontal -->
-                <line class="road road--sec" x1="0" y1="50"  x2="360" y2="50"  stroke="rgba(229,225,216,0.07)" stroke-width="1"/>
-                <line class="road road--sec" x1="0" y1="240" x2="360" y2="240" stroke="rgba(229,225,216,0.07)" stroke-width="1"/>
-                <!-- main vertical roads -->
-                <line class="road road--main" x1="180" y1="0" x2="180" y2="280" stroke="rgba(229,225,216,0.25)" stroke-width="3"/>
-                <line class="road road--main" x1="100" y1="0" x2="100" y2="280" stroke="rgba(229,225,216,0.15)" stroke-width="2"/>
-                <line class="road road--main" x1="270" y1="0" x2="270" y2="280" stroke="rgba(229,225,216,0.15)" stroke-width="2"/>
-                <!-- secondary vertical -->
-                <line class="road road--sec" x1="50"  y1="0" x2="50"  y2="280" stroke="rgba(229,225,216,0.07)" stroke-width="1"/>
-                <line class="road road--sec" x1="320" y1="0" x2="320" y2="280" stroke="rgba(229,225,216,0.07)" stroke-width="1"/>
-                <!-- buildings -->
-                <rect class="building" x="108" y="97"  width="64" height="35" rx="3" fill="rgba(229,225,216,0.07)"/>
-                <rect class="building" x="108" y="148" width="64" height="44" rx="3" fill="rgba(229,225,216,0.09)"/>
-                <rect class="building" x="188" y="97"  width="74" height="35" rx="3" fill="rgba(229,225,216,0.06)"/>
-                <rect class="building" x="188" y="148" width="74" height="44" rx="3" fill="rgba(229,225,216,0.07)"/>
-                <rect class="building" x="18"  y="97"  width="74" height="35" rx="3" fill="rgba(229,225,216,0.05)"/>
-                <rect class="building" x="18"  y="148" width="74" height="44" rx="3" fill="rgba(229,225,216,0.05)"/>
-                <rect class="building" x="108" y="56"  width="64" height="26" rx="3" fill="rgba(229,225,216,0.05)"/>
-                <rect class="building" x="188" y="56"  width="74" height="26" rx="3" fill="rgba(229,225,216,0.04)"/>
-                <!-- pin glow -->
-                <circle class="pin-glow" cx="180" cy="140" r="18" fill="rgba(74,222,128,0.12)"/>
-                <circle class="pin-glow" cx="180" cy="140" r="10" fill="rgba(74,222,128,0.2)"/>
-                <!-- pin -->
-                <circle class="pin" cx="180" cy="140" r="5" fill="#4ade80"/>
-                <circle class="pin-ring" cx="180" cy="140" r="9" fill="none" stroke="#4ade80" stroke-width="1.5" opacity="0.5"/>
-              </svg>
-            </div>
-
-            <!-- bottom -->
-            <div class="expand-map__bottom">
-              <span class="expand-map__label">Pavia, Via Torino 38</span>
-              <div class="expand-map__underline"></div>
-            </div>
-
-            <div class="expand-map__hint">Clicca per espandere</div>
-
-            <img class="expand-map__cap" src="assets/img/caps/2.png" alt="" aria-hidden="true">
+      </div>
+      <div data-reveal="1" style="position:relative">
+        <img src="assets/img/cap-2.png" alt="" style="position:absolute;top:-30px;left:-14px;width:clamp(78px,9.5vw,150px);transform-origin:80% 14%;animation:mb-swayL 8.4s ease-in-out infinite;filter:drop-shadow(0 12px 20px rgba(0,0,0,.6));z-index:4;pointer-events:none" />
+        <div style="display:flex;flex-direction:column;gap:20px;height:100%;transition:transform .3s ease" style-hover="transform:translateY(-5px)">
+          <div style="border-radius:28px;overflow:hidden;aspect-ratio:16/10;background:#1a1c1d">
+            <video src="assets/video/berlin-cut.mp4" autoPlay="{{ true }}" muted="{{ true }}" loop="{{ true }}" disablePictureInPicture="{{ true }}" controls="{{ false }}" playsInline="{{ true }}" style="width:100%;height:100%;object-fit:cover" volume="{{ 0 }}"></video>
           </div>
-
-          <!-- basketball scene characters -->
-          <img class="s03-berlin" src="assets/img/character/berlin-difende.png" alt="" aria-hidden="true">
-          <img class="s03-george" src="assets/img/character/george-tira.png"    alt="" aria-hidden="true">
-          <img class="s03-ball"   src="assets/img/balls/molten-ball.png"        alt="" aria-hidden="true">
-
-          </div><!-- /s03-scene -->
-        </div>
-
-      </div>
-
-    </section>
-
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer__logo"><span class="footer__logo-mister">Mister</span><br><span class="footer__logo-barber">Barber</span></div>
-
-    <div class="footer__grid">
-      <div>
-        <p class="footer__col-label">Dove</p>
-        <p class="footer__col-value">Via Torino 38<br>Pavia</p>
-      </div>
-      <div>
-        <p class="footer__col-label">Contatti</p>
-        <p class="footer__col-value">
-          <a href="tel:+393311672461">+39 331 167 2461</a><br>
-          <a href="mailto:berlinbarberinfo@gmail.com">berlinbarberinfo@gmail.com</a>
-        </p>
-      </div>
-      <div>
-        <p class="footer__col-label">Social</p>
-        <div class="footer__social">
-          <a href="https://www.instagram.com/_mister__barber_?igsh=MW1ucXRqbXZ2cWdoZQ==" target="_blank" rel="noopener">Instagram</a>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <h3 style="margin:0;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(34px,4vw,52px);line-height:.95;letter-spacing:.03em;color:#EA6934">BARBA</h3>
+            <p data-en="Trim, sculpting, hot towel and razor finish. Beard built around your face, not a template." style="margin:0;font-size:15px;line-height:1.65;color:rgba(212,208,202,.82);text-wrap:pretty">Rifinitura, scultura, panno caldo e rasoio. Barba costruita sul tuo viso, non su uno schema.</p>
+          </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <div class="footer__bottom">
-      <span>© 2026 Mister Barber</span>
-      <span class="footer-powered">Powered by <span class="aike-word">aike</span><img class="aike-mark" src="assets/img/aike-owl.png" alt="aike"></span>
+  <section id="video" style="position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 24px clamp(64px,9vw,120px)">
+    <div data-reveal="1" style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2 data-en="LIVE FROM THE CHAIR" style="margin:0;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(38px,5.5vw,74px);line-height:.92;letter-spacing:.02em;color:#D4D0CA">DALLA SEDIA, IN DIRETTA</h2>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(46%,220px),1fr));gap:clamp(10px,2.4vw,26px)">
+      <div style="position:relative;border-radius:28px;overflow:hidden;aspect-ratio:9/16;background:#16181a;transition:transform .3s ease" style-hover="transform:translateY(-5px)">
+        <video src="assets/video/tiktok-1.mp4" autoPlay="{{ true }}" muted="{{ true }}" loop="{{ true }}" disablePictureInPicture="{{ true }}" controls="{{ false }}" playsInline="{{ true }}" style="width:100%;height:100%;object-fit:cover" volume="{{ 0 }}"></video>
+      </div>
+      <div style="position:relative;border-radius:28px;overflow:hidden;aspect-ratio:9/16;background:#16181a;transition:transform .3s ease" style-hover="transform:translateY(-5px)">
+        <video src="assets/video/tiktok-2.mp4" autoPlay="{{ true }}" muted="{{ true }}" loop="{{ true }}" disablePictureInPicture="{{ true }}" controls="{{ false }}" playsInline="{{ true }}" style="width:100%;height:100%;object-fit:cover" volume="{{ 0 }}"></video>
+      </div>
+      <div style="position:relative">
+        <img ref="{{ necklace2Ref }}" src="assets/img/collana-2.png" alt="" style="position:absolute;bottom:-200px;right:calc(100% - 120px);width:150%;max-width:none;transform-origin:50% 5%;animation:mb-swayL 11.2s ease-in-out infinite;filter:drop-shadow(0 14px 18px rgba(0,0,0,.55));z-index:-1;pointer-events:none" />
+        <div style="position:relative;z-index:1;border-radius:28px;overflow:hidden;aspect-ratio:9/16;background:#16181a;transition:transform .3s ease" style-hover="transform:translateY(-5px)">
+        <video src="assets/video/tiktok-3.mp4" autoPlay="{{ true }}" muted="{{ true }}" loop="{{ true }}" disablePictureInPicture="{{ true }}" controls="{{ false }}" playsInline="{{ true }}" style="width:100%;height:100%;object-fit:cover" volume="{{ 0 }}"></video>
+        </div>
+      </div>
+      <div style="position:relative;border-radius:28px;overflow:hidden;aspect-ratio:9/16;background:#16181a;transition:transform .3s ease" style-hover="transform:translateY(-5px)">
+        <video src="assets/video/hero.mp4" autoPlay="{{ true }}" muted="{{ true }}" loop="{{ true }}" disablePictureInPicture="{{ true }}" controls="{{ false }}" playsInline="{{ true }}" style="width:100%;height:100%;object-fit:cover" volume="{{ 0 }}"></video>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="recensioni" style="position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 24px clamp(64px,9vw,120px)">
+    <h2 data-en="REVIEWS" style="margin:0 0 18px;text-align:center;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(44px,5vw,72px);line-height:1;letter-spacing:.04em;color:#D4D0CA">RECENSIONI</h2>
+    <div data-reveal="1" style="position:relative;height:clamp(320px,52vh,600px);overflow:hidden;display:flex;justify-content:center;perspective:320px">
+      <div ref="{{ wallRef }}" style="display:flex;gap:16px;transform:translateX(-20px) translateZ(-40px) rotateX(15deg) rotateY(-8deg) rotateZ(15deg)">
+          <div style="display:flex;flex-direction:column;gap:16px;animation:mb-vmarq 22s linear infinite" style-hover="animation-play-state:paused">
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Fade perfetto, mai una sbavatura.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Leo B.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Entri e capisce subito che taglio ti serve.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Matteo R.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">L’unico che mi fa i contorni come voglio.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Simo</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Barba sistemata a rasoio, top.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Andrea T.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Lavoro pulito e prezzo giusto.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Gabri</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Vado da lui da mesi, sempre lo stesso livello.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Kevin M.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Fade perfetto, mai una sbavatura.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Leo B.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Entri e capisce subito che taglio ti serve.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Matteo R.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">L’unico che mi fa i contorni come voglio.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Simo</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Barba sistemata a rasoio, top.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Andrea T.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Lavoro pulito e prezzo giusto.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Gabri</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Vado da lui da mesi, sempre lo stesso livello.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Kevin M.</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;animation-direction:reverse;animation:mb-vmarq 26s linear infinite" style-hover="animation-play-state:paused">
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Mi ha salvato dopo un taglio fatto male altrove.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Luca F.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Puntuale, zero attese.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Samu</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Il mid fade migliore che ho provato.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Nico D.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Musica giusta, si sta bene.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Ale P.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Ti consiglia il taglio in base alla forma della testa.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Davide C.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Precisione assurda sulla nuca.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Fede</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Mi ha salvato dopo un taglio fatto male altrove.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Luca F.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Puntuale, zero attese.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Samu</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Il mid fade migliore che ho provato.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Nico D.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Musica giusta, si sta bene.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Ale P.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Ti consiglia il taglio in base alla forma della testa.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Davide C.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Precisione assurda sulla nuca.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Fede</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;animation:mb-vmarq 20s linear infinite" style-hover="animation-play-state:paused">
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Sfumatura pulitissima, dura due settimane.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Riccardo B.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Ci porto anche mio fratello più piccolo.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Manuel S.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Sa lavorare i ricci, cosa rara.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Yassine E.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Taglio più barba e si esce nuovi.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Tommy</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Ti spiega come mantenerlo a casa.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Christian V.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Mai avuto un taglio sbagliato qui.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Lorenzo M.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Sfumatura pulitissima, dura due settimane.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Riccardo B.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Ci porto anche mio fratello più piccolo.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Manuel S.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Sa lavorare i ricci, cosa rara.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Yassine E.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Taglio più barba e si esce nuovi.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Tommy</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Ti spiega come mantenerlo a casa.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Christian V.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Mai avuto un taglio sbagliato qui.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Lorenzo M.</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;animation-direction:reverse;animation:mb-vmarq 24s linear infinite" style-hover="animation-play-state:paused">
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Ambiente tranquillo, niente casino.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Emanuele G.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Line up al millimetro.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Jacopo R.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Prenoto sempre il sabato, vale l’attesa.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Marco D.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Non ti mette fretta, lavora con calma.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Alessio B.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Il taper è un’altra cosa rispetto a prima.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Daniel N.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Consigliato a tutti i miei amici.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Filippo C.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Ambiente tranquillo, niente casino.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Emanuele G.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Line up al millimetro.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Jacopo R.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Prenoto sempre il sabato, vale l’attesa.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Marco D.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Non ti mette fretta, lavora con calma.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Alessio B.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Il taper è un’altra cosa rispetto a prima.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Daniel N.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Consigliato a tutti i miei amici.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Filippo C.</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;animation:mb-vmarq 27s linear infinite" style-hover="animation-play-state:paused">
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Sono uscito con la testa a posto e il morale su.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Stefano P.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Nessuno mi aveva mai fatto la barba così.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Omar K.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Il mio taglio di sempre, ma fatto bene.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Giulio A.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Attenzione ai dettagli fuori scala.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Elia M.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Ci vado anche solo per sistemare i bordi.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Pietro S.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Capisce al volo le foto che gli mostri.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Sasha V.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Sono uscito con la testa a posto e il morale su.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Stefano P.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Nessuno mi aveva mai fatto la barba così.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Omar K.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Il mio taglio di sempre, ma fatto bene.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Giulio A.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Attenzione ai dettagli fuori scala.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Elia M.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Ci vado anche solo per sistemare i bordi.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Pietro S.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Capisce al volo le foto che gli mostri.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Sasha V.</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;animation-direction:reverse;animation:mb-vmarq 21s linear infinite" style-hover="animation-play-state:paused">
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Fade alto senza scalini, finalmente.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Denis L.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Mai una volta uscito insoddisfatto.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Cristian B.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Taglia i ricci senza rovinare la forma.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Mirko T.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Il posto dove porto tutti i miei amici.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Enea F.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Barba e contorni, sempre perfetti.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Karim S.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Un’ora ben spesa, ogni volta.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Vale R.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Fade alto senza scalini, finalmente.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Denis L.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Mai una volta uscito insoddisfatto.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Cristian B.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Taglia i ricci senza rovinare la forma.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Mirko T.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Il posto dove porto tutti i miei amici.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Enea F.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Barba e contorni, sempre perfetti.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Karim S.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Un’ora ben spesa, ogni volta.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Vale R.</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;animation:mb-vmarq 25s linear infinite" style-hover="animation-play-state:paused">
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Precisione da manuale sulle basette.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Thomas G.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Consiglia sempre la cosa giusta.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Zeno C.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Da quando vengo qui non cambio più.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Ivan D.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Pulito, veloce, sempre puntuale.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Bruno M.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">La sfumatura resta bella anche dopo settimane.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Raffaele O.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Il migliore in città, senza esagerare.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Ludovico N.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Precisione da manuale sulle basette.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Thomas G.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Consiglia sempre la cosa giusta.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Zeno C.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Da quando vengo qui non cambio più.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Ivan D.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Pulito, veloce, sempre puntuale.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Bruno M.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">La sfumatura resta bella anche dopo settimane.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Raffaele O.</p>
+            </div>
+            <div style="width:228px;flex:0 0 auto;background:#2c2e30;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="color:#EA6934;font-size:12px;letter-spacing:.18em">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#D4D0CA;text-wrap:pretty">Il migliore in città, senza esagerare.</p>
+              <p style="margin:0;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(212,208,202,.5)">Ludovico N.</p>
+            </div>
+          </div>
+      </div>
+      <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,#242627 0%,rgba(36,38,39,0) 26%,rgba(36,38,39,0) 74%,#242627 100%)"></div>
+      <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(to right,#242627 0%,rgba(36,38,39,0) 22%,rgba(36,38,39,0) 78%,#242627 100%)"></div>
+    </div>
+  </section>
+
+  <section id="prenota" style="position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 24px clamp(64px,9vw,120px)">
+    <div data-reveal="1" style="position:relative">
+      <img ref="{{ necklaceRef }}" src="assets/img/collana-1.png" alt="" style="position:absolute;top:24px;right:clamp(-60px,calc(6vw - 80px),10px);width:clamp(150px,33vw,466px);transform-origin:50% 4%;animation:mb-swayR 9.6s ease-in-out infinite;filter:drop-shadow(0 14px 18px rgba(0,0,0,.55));z-index:0;pointer-events:none" />
+      <img ref="{{ cap1Ref }}" src="assets/img/cap-1.png" alt="" style="position:absolute;top:-52px;left:clamp(-34px,calc(3.4vw - 50px),-4px);width:clamp(116px,13.5vw,220px);transform-origin:26% 90%;animation:mb-swayL 7.5s ease-in-out infinite;filter:drop-shadow(0 12px 20px rgba(0,0,0,.55));z-index:4;pointer-events:none" />
+      <div ref="{{ bookPanelRef }}" style="position:relative;z-index:1;border-radius:36px;background:#EA6934;color:#0B0B0B;padding:clamp(12px,1.2vw,14px) clamp(28px,4vw,56px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:clamp(10px,1.2vw,14px);overflow:hidden">
+        <h2 data-en="BOOK YOUR SEAT" style="margin:0;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(44px,7.6vw,112px);line-height:.86;letter-spacing:.02em">PRENOTA IL TUO POSTO</h2>
+        <p data-en="Via Torino 38, Pavia &mdash; Tue to Sat, 09:00 to 19:00. Booking link and phone number still to come." style="margin:0;font-size:clamp(16px,1.6vw,22px);line-height:1.6;max-width:44ch;font-weight:500;text-wrap:pretty">Via Torino 38, Pavia &mdash; da marted&igrave; a sabato, 09:00&ndash;19:00. Link prenotazione e numero di telefono ancora da inserire.</p>
+        <div style="width:100%;display:flex;align-items:flex-start;justify-content:center;gap:clamp(14px,2vw,28px);flex-wrap:wrap">
+          <div ref="{{ bookBtnsRef }}" style="display:flex;flex-direction:column;gap:12px;align-items:stretch">
+            <a href="prenota.html" data-en="Book online" style="background:#0B0B0B;color:#D4D0CA;font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:13px 28px;border-radius:99px;transition:transform .25s ease;text-align:center" style-hover="color:#D4D0CA;transform:translateY(-3px)">Prenota online</a>
+            <a href="#" style="border:1.5px solid #0B0B0B;color:#0B0B0B;font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:13px 28px;border-radius:99px;transition:background .25s ease;text-align:center" style-hover="color:#0B0B0B;background:rgba(11,11,11,.1)">WhatsApp</a>
+          </div>
+          <img ref="{{ puntaRef }}" src="assets/img/berlin-punta.png" alt="Berlin" style="width:clamp(104px,17vw,236px);height:auto;margin-bottom:-70px;filter:drop-shadow(0 16px 24px rgba(11,11,11,.35))" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contatti" style="position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 24px clamp(64px,9vw,110px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:clamp(16px,3vw,32px);align-items:stretch">
+      <div data-reveal="1" style="display:flex;flex-direction:column;gap:26px;padding-top:2px">
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <span data-en="Where" style="font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#EA6934">Dove</span>
+          <span style="font-size:17px;line-height:1.45;color:#D4D0CA">Via Torino 38<br />Pavia</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <span data-en="Opening hours" style="font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#EA6934">Orari</span>
+          <span data-en="Tue &ndash; Sat<br />09:00 &ndash; 19:00" style="font-size:17px;line-height:1.45;color:#D4D0CA">Mar &ndash; Sab<br />09:00 &ndash; 19:00</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span data-en="Social" style="font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#EA6934">Social</span>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a href="#" style="border:1px solid rgba(212,208,202,.22);color:#D4D0CA;border-radius:99px;padding:9px 18px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase" style-hover="color:#0B0B0B;background:#EA6934;border-color:#EA6934">Instagram</a>
+            <a href="#" style="border:1px solid rgba(212,208,202,.22);color:#D4D0CA;border-radius:99px;padding:9px 18px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase" style-hover="color:#0B0B0B;background:#EA6934;border-color:#EA6934">TikTok</a>
+          </div>
+        </div>
+      </div>
+      <div data-reveal="1" style="position:relative">
+        <img src="assets/img/cap-3.png" alt="" style="position:absolute;top:-26px;right:-12px;width:clamp(76px,9.5vw,148px);transform-origin:20% 14%;animation:mb-swayR 8.2s ease-in-out infinite;filter:drop-shadow(0 12px 20px rgba(0,0,0,.6));z-index:4;pointer-events:none" />
+        <a href="https://www.openstreetmap.org/?mlat=45.1855&amp;mlon=9.1560#map=17/45.1855/9.1560" target="_blank" rel="noopener" style="display:block;border-radius:32px;overflow:hidden;min-height:320px;height:100%;background:#1a1c1d">
+          <iframe title="Mappa Via Torino 38, Pavia" src="https://www.openstreetmap.org/export/embed.html?bbox=9.1470%2C45.1805%2C9.1650%2C45.1905&amp;layer=mapnik&amp;marker=45.1855%2C9.1560" style="width:100%;height:100%;min-height:320px;border:0;filter:grayscale(.85) invert(.9) hue-rotate(180deg) contrast(.92)"></iframe>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer style="position:relative;z-index:1;border-top:1px solid rgba(212,208,202,.1)">
+    <div style="max-width:1240px;margin:0 auto;padding:10px 24px 28px;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <img src="assets/img/logo.png" alt="Mister Barber" style="display:block;height:clamp(190px,26vw,420px);width:auto;margin:-46px 0 -34px" />
+      <span style="font-size:12px;letter-spacing:.1em;color:rgba(212,208,202,.42)">&copy; 2026 Mister Barber</span>
     </div>
   </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = { lang: 'it' };
 
-  <script>
-    document.addEventListener('pointermove', (e) => {
-      document.querySelectorAll('[data-glow]').forEach(el => {
-        el.style.setProperty('--x', e.clientX.toFixed(2));
-        el.style.setProperty('--xp', (e.clientX / window.innerWidth).toFixed(2));
-        el.style.setProperty('--y', e.clientY.toFixed(2));
-        el.style.setProperty('--yp', (e.clientY / window.innerHeight).toFixed(2));
-      });
-    });
-  </script>
-
-  <script>
-    const nav = document.getElementById('nav');
-    const hamburger = document.getElementById('hamburger');
-    const navLinks = document.getElementById('navLinks');
-
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('nav--scrolled', window.scrollY > 80);
-    });
-
-    hamburger.addEventListener('click', () => {
-      nav.classList.toggle('nav--open');
-    });
-
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => nav.classList.remove('nav--open'));
-    });
-  </script>
-
-  <script>
-    (function() {
-      var section = document.querySelector('.s03');
-      var card    = document.getElementById('expandMap');
-      var berlin  = document.querySelector('.s03-berlin');
-      var george  = document.querySelector('.s03-george');
-      var ball    = document.querySelector('.s03-ball');
-      var triggered = false;
-      if (!section || !card) return;
-
-      var obs = new IntersectionObserver(function(entries) {
-        if (entries[0].isIntersecting && !triggered) {
-          triggered = true;
-          obs.disconnect();
-          setTimeout(function() {
-            if (ball)   ball.classList.add('is-exiting');
-            if (berlin) berlin.classList.add('is-exiting');
-            if (george) george.classList.add('is-exiting');
-            setTimeout(function() {
-              card.classList.add('is-expanded');
-              }, 220);
-          }, 3000);
-        }
-      }, { threshold: 0.3 });
-      obs.observe(section);
-    })();
-  </script>
-
-  <script>
-    // Expand map: click to expand, 3D tilt on hover
-    (function() {
-      var card = document.getElementById('expandMap');
-      if (!card) return;
-
-      card.addEventListener('click', function() {
-        var expanding = !card.classList.contains('is-expanded');
-        card.classList.toggle('is-expanded');
-
-        var berlin = document.querySelector('.s03-berlin');
-        var george = document.querySelector('.s03-george');
-        var ball   = document.querySelector('.s03-ball');
-
-        if (!expanding) {
-          // collapsing → riporta i personaggi basket
-          [berlin, george, ball].forEach(function(el) {
-            if (!el) return;
-            el.classList.remove('is-exiting', 'is-entering');
-            void el.offsetWidth;
-            el.classList.add('is-entering');
-            el.addEventListener('animationend', function handler() {
-              el.classList.remove('is-entering');
-              el.removeEventListener('animationend', handler);
-            });
-          });
+  componentDidMount() {
+    this.reveal();
+    this.paintLang();
+    this.kickVideos();
+    this.fitHeader = () => {
+      const cw = this.measureEl ? this.measureEl.clientWidth : 0;
+      const measured = cw > 200 ? cw + 48 : 0;
+      const narrow = (measured || document.documentElement.clientWidth || window.innerWidth) < 640;
+      if (this.ctaEl) this.ctaEl.style.display = narrow ? 'none' : '';
+      if (this.necklaceEl) {
+        this.necklaceEl.style.width = narrow ? 'min(300px,76vw)' : 'clamp(150px,33vw,466px)';
+        this.necklaceEl.style.top = narrow ? '374px' : '-150px';
+        this.necklaceEl.style.right = narrow ? '' : 'clamp(40px,9vw,140px)';
+      }
+      if (this.necklace2El) {
+        this.necklace2El.style.bottom = narrow ? '-150px' : '-200px';
+        this.necklace2El.style.width = narrow ? '172%' : '150%';
+        this.necklace2El.style.right = narrow ? 'calc(100% - 310px)' : 'calc(100% - 120px)';
+      }
+      if (this.cap1El) {
+        this.cap1El.style.width = narrow ? '168px' : 'clamp(116px,13.5vw,220px)';
+        this.cap1El.style.top = narrow ? '-32px' : '-52px';
+        this.cap1El.style.left = narrow ? '-20px' : 'clamp(-34px,calc(3.4vw - 50px),-4px)';
+      }
+      if (this.bookBtnsEl) {
+        this.bookBtnsEl.style.transform = narrow ? 'translateX(-30px)' : '';
+        this.bookBtnsEl.style.marginBottom = '';
+      }
+      if (this.bookPanelEl) this.bookPanelEl.style.paddingTop = narrow ? '42px' : 'clamp(26px,3vw,44px)';
+      if (this.puntaEl) {
+        this.puntaEl.style.position = narrow ? 'relative' : '';
+        this.puntaEl.style.zIndex = narrow ? '2' : '';
+        this.puntaEl.style.transform = narrow ? 'translate(66px,-160px)' : '';
+        this.puntaEl.style.marginBottom = narrow ? '-112px' : '-70px';
+      }
+      if (this.heroCtaEl) {
+        this.heroCtaEl.style.flexDirection = narrow ? 'column' : 'row';
+        this.heroCtaEl.style.alignItems = narrow ? 'stretch' : 'center';
+      }
+      if (this.panelEl) {
+        const p = this.panelEl.style;
+        this.narrowNav = narrow;
+        if (narrow) {
+          p.top = '0'; p.left = '0'; p.right = '0'; p.bottom = 'auto';
+          p.width = '100%'; p.height = 'auto';
+          p.borderLeft = '0';
+          p.borderBottom = '1px solid rgba(212,208,202,.12)';
+          p.borderRadius = '0 0 28px 28px';
+          p.boxShadow = '0 26px 60px rgba(0,0,0,.5)';
+          p.paddingBottom = '26px';
+          p.transition = 'transform .38s cubic-bezier(.2,.7,.3,1)';
         } else {
-          // expanding → manda via i personaggi basket
-          [berlin, george, ball].forEach(function(el) {
-            if (!el) return;
-            el.classList.remove('is-exiting', 'is-entering');
-            void el.offsetWidth;
-            el.classList.add('is-exiting');
-          });
+          p.top = '0'; p.left = 'auto'; p.right = '0'; p.bottom = '0';
+          p.width = 'min(86vw,350px)'; p.height = '';
+          p.borderLeft = '1px solid rgba(212,208,202,.12)';
+          p.borderBottom = '0';
+          p.borderRadius = '0';
+          p.boxShadow = '-24px 0 60px rgba(0,0,0,.5)';
+          p.paddingBottom = '34px';
         }
-      });
-
-      card.addEventListener('mousemove', function(e) {
-        var rect = card.getBoundingClientRect();
-        var cx = rect.left + rect.width / 2;
-        var cy = rect.top + rect.height / 2;
-        var dx = (e.clientX - cx) / (rect.width / 2);
-        var dy = (e.clientY - cy) / (rect.height / 2);
-        card.style.transform = 'perspective(600px) rotateY(' + (dx * 8) + 'deg) rotateX(' + (-dy * 8) + 'deg)';
-      });
-
-      card.addEventListener('mouseleave', function() {
-        card.style.transform = 'perspective(600px) rotateY(0deg) rotateX(0deg)';
-      });
-    })();
-  </script>
-
-  <script>
-    (function() {
-      // Play/pause card videos based on section visibility
-      var section = document.querySelector('.s02');
-      var cardVideos = section ? Array.from(section.querySelectorAll('.card-video')) : [];
-
-      if (cardVideos.length && 'IntersectionObserver' in window) {
-        var sectionObserver = new IntersectionObserver(function(entries) {
-          entries.forEach(function(entry) {
-            cardVideos.forEach(function(v) {
-              if (entry.isIntersecting) {
-                v.play().catch(function() {});
-              } else {
-                v.pause();
-              }
-            });
-          });
-        }, { threshold: 0.15 });
-        sectionObserver.observe(section);
+        this.setNav(this.navOpen === true);
       }
-    })();
-  </script>
+      if (this.wallEl) {
+        const base = 'translateX(-20px) translateZ(-40px) rotateX(15deg) rotateY(-8deg) rotateZ(15deg)';
+        this.wallEl.style.transform = narrow ? base + ' scale(.62)' : base;
+      }
+    };
+    window.addEventListener('resize', this.fitHeader);
+    this.fitHeader();
+    requestAnimationFrame(() => this.fitHeader());
+    setTimeout(() => this.fitHeader(), 60);
+    setTimeout(() => this.fitHeader(), 400);
+    if (!this.fitRO) this.fitRO = new ResizeObserver(() => { if (this.fitHeader) this.fitHeader(); });
+    this.fitRO.observe(document.documentElement);
+    if (this.measureEl) this.fitRO.observe(this.measureEl);
+  }
 
-  <script>
-    (function() {
-      var row = document.querySelector('.cards-row');
-      if (!row) return;
-      if (window.innerWidth > 768) return;
+  componentWillUnmount() {
+    if (this.fitHeader) window.removeEventListener('resize', this.fitHeader);
+    if (this.fitRO) this.fitRO.disconnect();
+  }
 
-      var cards = Array.from(row.querySelectorAll('.card-wrap'));
-      var total = cards.length;
-      var current = 0;
-      var animating = false;
-      var timer = null;
+  componentDidUpdate() { this.paintLang(); }
 
-      // Show first card
-      cards[current].classList.add('is-active');
+  kickVideos() {
+    const root = this.rootEl;
+    if (!root) return;
+    root.querySelectorAll('video').forEach(v => {
+      v.muted = true;
+      v.defaultMuted = true;
+      v.volume = 0;
+      v.removeAttribute('controls');
+      v.loop = true;
+      const go = () => v.play().catch(() => {});
+      go();
+      v.addEventListener('canplay', go, { once: true });
+    });
+  }
 
-      // Play first card's video explicitly
-      var firstVid = cards[current].querySelector('video');
-      if (firstVid) { firstVid.muted = true; firstVid.play().catch(function() {}); }
+  setNav(open) {
+    this.navOpen = open;
+    const closed = this.narrowNav ? 'translateY(-105%)' : 'translateX(105%)';
+    if (this.panelEl) this.panelEl.style.transform = open ? 'translate(0,0)' : closed;
+    if (this.scrimEl) {
+      this.scrimEl.style.opacity = open ? '1' : '0';
+      this.scrimEl.style.pointerEvents = open ? 'auto' : 'none';
+    }
+  }
 
-      // Ensure all videos muted
-      cards.forEach(function(card) {
-        var v = card.querySelector('video');
-        if (v) { v.muted = true; }
+  reveal() {
+    const root = this.rootEl;
+    if (!root || typeof IntersectionObserver === 'undefined') return;
+    const els = [...root.querySelectorAll('[data-reveal]')];
+    els.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = el.dataset.reveal === 'right' ? 'translateX(44px)' : 'translateY(16px)';
+      el.style.transition = 'opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1)';
+    });
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'none';
+        io.unobserve(e.target);
       });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    els.forEach(el => io.observe(el));
+  }
 
-      function advance() {
-        if (animating) return;
-        animating = true;
+  paintLang() {
+    const root = this.rootEl;
+    if (!root) return;
+    const en = this.state.lang === 'en';
+    root.querySelectorAll('[data-en]').forEach(el => {
+      if (!el.dataset.it) el.dataset.it = el.innerHTML;
+      el.innerHTML = en ? el.dataset.en : el.dataset.it;
+    });
+    if (this.itEl && this.enEl) {
+      this.itEl.style.background = en ? 'transparent' : '#EA6934';
+      this.itEl.style.color = en ? '#D4D0CA' : '#0B0B0B';
+      this.enEl.style.background = en ? '#EA6934' : 'transparent';
+      this.enEl.style.color = en ? '#0B0B0B' : '#D4D0CA';
+    }
+    root.setAttribute('lang', en ? 'en' : 'it');
+  }
 
-        var prev = current;
-        current = (current + 1) % total;
-
-        var leaving = cards[prev];
-        var entering = cards[current];
-
-        entering.classList.add('is-active', 'anim-enter');
-        leaving.classList.add('anim-exit');
-
-        // Play entering card's video
-        var enterVid = entering.querySelector('video');
-        if (enterVid) { enterVid.play().catch(function() {}); }
-
-        setTimeout(function() {
-          leaving.classList.remove('is-active', 'anim-exit');
-          entering.classList.remove('anim-enter');
-          animating = false;
-        }, 360);
-      }
-
-      function startTimer() {
-        clearInterval(timer);
-        timer = setInterval(advance, 3000);
-      }
-
-      startTimer();
-    })();
-  </script>
-
-  <script>
-    (function() {
-      var STAGGER = 0.05;
-
-      // Split text nodes into individual .brand-char spans, preserving child elements
-      function splitText(el, baseDelay) {
-        var idx = 0;
-        function processNode(node) {
-          if (node.nodeType === 3) {
-            var text = node.textContent;
-            var frag = document.createDocumentFragment();
-            for (var i = 0; i < text.length; i++) {
-              var ch = text[i];
-              if (ch === ' ' || ch === '\n' || ch === '\r') {
-                frag.appendChild(document.createTextNode(ch));
-              } else {
-                var span = document.createElement('span');
-                span.className = 'brand-char';
-                span.style.animationDelay = (baseDelay + idx * STAGGER).toFixed(2) + 's';
-                span.textContent = ch;
-                idx++;
-                frag.appendChild(span);
-              }
-            }
-            return frag;
-          }
-          if (node.nodeType === 1) {
-            if (node.tagName === 'BR') return node.cloneNode(true);
-            var clone = node.cloneNode(false);
-            Array.from(node.childNodes).forEach(function(c) {
-              clone.appendChild(processNode(c));
-            });
-            return clone;
-          }
-          return node.cloneNode(true);
+  renderVals() {
+    return {
+      rootRef: el => { this.rootEl = el; },
+      headerRef: el => { this.headerEl = el; },
+      panelRef: el => { this.panelEl = el; },
+      ctaRef: el => { this.ctaEl = el; if (this.fitHeader) this.fitHeader(); },
+      wallRef: el => { this.wallEl = el; if (this.fitHeader) this.fitHeader(); },
+      heroCtaRef: el => { this.heroCtaEl = el; if (this.fitHeader) this.fitHeader(); },
+      necklaceRef: el => {
+        this.necklaceEl = el;
+        this.measureEl = el && el.parentElement;
+        if (this.measureEl) {
+          if (!this.fitRO) this.fitRO = new ResizeObserver(() => { if (this.fitHeader) this.fitHeader(); });
+          this.fitRO.observe(this.measureEl);
         }
-        var children = Array.from(el.childNodes);
-        while (el.firstChild) el.removeChild(el.firstChild);
-        children.forEach(function(c) { el.appendChild(processNode(c)); });
-      }
-
-      function animateChars(el) {
-        el.querySelectorAll('.brand-char').forEach(function(c) { c.classList.add('animate'); });
-      }
-
-      // Brand mark: Mister 0.5s, Barber 0.85s (cascata continua — gap 0.1s dopo fine Mister)
-      var mark = document.querySelector('.brand-mark');
-      if (mark) {
-        function wrapChars(text, baseDelay) {
-          return text.split('').map(function(ch, i) {
-            return '<span class="brand-char" style="animation-delay:' + (baseDelay + i * STAGGER).toFixed(2) + 's">' + ch + '</span>';
-          }).join('');
-        }
-        mark.innerHTML = wrapChars('Mister', 0.5) + '<span class="second">' + wrapChars('Barber', 0.85) + '</span>';
-      }
-
-      // Text elements: split into chars, trigger on scroll
-      var textEls = document.querySelectorAll('.chi-title, .barber-name, .s03-heading, .s03-address-line, .s03-coords, .footer__logo');
-      textEls.forEach(function(el) {
-        splitText(el, 0);
-        el.setAttribute('data-text-reveal', '');
-      });
-
-      // Reveal elements: fade-up on scroll
-      var revealGroups = [
-        { sel: '.barber-img-wrap', stagger: 0.12 },
-        { sel: '.btn-prenota-wrap' },
-        { sel: '.cards-row' },
-        { sel: '.expand-map' },
-        { sel: '.footer__grid' },
-        { sel: '.footer__bottom', baseDelay: 0.15 },
-      ];
-      revealGroups.forEach(function(group) {
-        document.querySelectorAll(group.sel).forEach(function(el, i) {
-          el.classList.add('reveal-el');
-          var delay = (group.baseDelay || 0) + i * (group.stagger || 0);
-          if (delay > 0) el.style.transitionDelay = delay.toFixed(2) + 's';
-        });
-      });
-
-      var capEl = document.querySelector('.s01 .cap-2');
-
-      // Single IntersectionObserver for everything
-      var io = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (!entry.isIntersecting) return;
-          var el = entry.target;
-          if (el === mark) {
-            animateChars(mark);
-            if (capEl) capEl.classList.add('cap-animate');
-          } else if (el.hasAttribute('data-text-reveal')) {
-            animateChars(el);
-          } else if (el.classList.contains('reveal-el')) {
-            el.classList.add('revealed');
-          }
-          io.unobserve(el);
-        });
-      }, { threshold: 0.15 });
-
-      if (mark) io.observe(mark);
-      textEls.forEach(function(el) { io.observe(el); });
-      document.querySelectorAll('.reveal-el').forEach(function(el) { io.observe(el); });
-    })();
-  </script>
-
-  <!-- SECURITY: version pinning + crossorigin. TODO: aggiungere attributo `integrity` con hash SHA-384 calcolato sui file pinned (vedi SECURITY-REPORT.md LOW-001). -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script>
-    (function() {
-      var container = document.querySelector('.s01-shader');
-      if (!container || typeof THREE === 'undefined') return;
-
-      var W = container.offsetWidth;
-      var H = container.offsetHeight;
-
-      var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setPixelRatio(0.75);
-      renderer.setSize(W, H);
-      renderer.setClearColor(0x000000, 0);
-      container.appendChild(renderer.domElement);
-
-      var scene  = new THREE.Scene();
-      var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
-      var uniforms = {
-        iTime:       { value: 0.0 },
-        iResolution: { value: new THREE.Vector2(W, H) }
-      };
-
-      var material = new THREE.ShaderMaterial({
-        uniforms: uniforms,
-        vertexShader: 'void main() { gl_Position = vec4(position, 1.0); }',
-        fragmentShader: [
-          'uniform float iTime;',
-          'uniform vec2 iResolution;',
-          '#define NUM_OCTAVES 3',
-
-          'float rand(vec2 n) {',
-          '  return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);',
-          '}',
-
-          'float noise(vec2 p) {',
-          '  vec2 ip = floor(p);',
-          '  vec2 u = fract(p);',
-          '  u = u*u*(3.0-2.0*u);',
-          '  float res = mix(',
-          '    mix(rand(ip), rand(ip + vec2(1.0, 0.0)), u.x),',
-          '    mix(rand(ip + vec2(0.0, 1.0)), rand(ip + vec2(1.0, 1.0)), u.x), u.y);',
-          '  return res * res;',
-          '}',
-
-          'float fbm(vec2 x) {',
-          '  float v = 0.0;',
-          '  float a = 0.3;',
-          '  vec2 shift = vec2(100.0);',
-          '  mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));',
-          '  for (int i = 0; i < NUM_OCTAVES; ++i) {',
-          '    v += a * noise(x);',
-          '    x = rot * x * 2.0 + shift;',
-          '    a *= 0.4;',
-          '  }',
-          '  return v;',
-          '}',
-
-          'void main() {',
-          '  vec2 shake = vec2(sin(iTime * 1.2) * 0.005, cos(iTime * 2.1) * 0.005);',
-          '  vec2 p = ((gl_FragCoord.xy + shake * iResolution.xy) - iResolution.xy * 0.5) / iResolution.y * mat2(6.0, -4.0, 4.0, 6.0);',
-          '  vec2 v;',
-          '  vec4 o = vec4(0.0);',
-          '  float f = 2.0 + fbm(p + vec2(iTime * 5.0, 0.0)) * 0.5;',
-          '  for (float i = 0.0; i < 18.0; i++) {',
-          '    v = p + cos(i * i + (iTime + p.x * 0.08) * 0.025 + i * vec2(13.0, 11.0)) * 3.5 + vec2(sin(iTime * 3.0 + i) * 0.003, cos(iTime * 3.5 - i) * 0.003);',
-          '    float tailNoise = fbm(v + vec2(iTime * 0.5, i)) * 0.3 * (1.0 - (i / 18.0));',
-          '    vec4 auroraColors = vec4(1.0, 1.0, 1.0, 1.0);',
-          '    vec4 currentContribution = auroraColors * exp(sin(i * i + iTime * 0.8)) / length(max(v, vec2(v.x * f * 0.015, v.y * 1.5)));',
-          '    float thinnessFactor = smoothstep(0.0, 1.0, i / 18.0) * 0.6;',
-          '    o += currentContribution * (1.0 + tailNoise * 0.8) * thinnessFactor;',
-          '  }',
-          '  o = tanh(pow(o / 100.0, vec4(1.6)));',
-          '  vec4 stars = o * 1.5;',
-          '  float lum = min(length(stars.rgb) * 1.5, 1.0);',
-          '  vec3 bg = vec3(0.043, 0.043, 0.043);',
-          '  gl_FragColor = vec4(mix(bg, stars.rgb, lum), 1.0);',
-          '}'
-        ].join('\n')
-      });
-
-      var mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
-      scene.add(mesh);
-
-      window.addEventListener('resize', function() {
-        W = container.offsetWidth;
-        H = container.offsetHeight;
-        renderer.setSize(W, H);
-        uniforms.iResolution.value.set(W, H);
-      });
-
-      var active = true;
-      if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function(entries) {
-          active = entries[0].isIntersecting;
-          renderer.domElement.style.visibility = active ? 'visible' : 'hidden';
-        }, { threshold: 0.05 }).observe(container);
-      }
-
-      (function animate() {
-        requestAnimationFrame(animate);
-        if (!active) return;
-        uniforms.iTime.value += 0.016;
-        renderer.render(scene, camera);
-      })();
-    })();
-  </script>
-
-  <!-- Analitiche navigazione anonime (tempo per pagina). Nessun PII. -->
-  <script src="assets/js/track.js" defer></script>
+        if (this.fitHeader) this.fitHeader();
+      },
+      scrimRef: el => { this.scrimEl = el; },
+      reviewsTitleRef: el => { this.reviewsTitleEl = el; if (this.fitHeader) this.fitHeader(); },
+      puntaRef: el => { this.puntaEl = el; if (this.fitHeader) this.fitHeader(); },
+      bookPanelRef: el => { this.bookPanelEl = el; if (this.fitHeader) this.fitHeader(); },
+      bookBtnsRef: el => { this.bookBtnsEl = el; if (this.fitHeader) this.fitHeader(); },
+      necklace2Ref: el => { this.necklace2El = el; if (this.fitHeader) this.fitHeader(); },
+      cap1Ref: el => { this.cap1El = el; if (this.fitHeader) this.fitHeader(); },
+      openNav: () => this.setNav(true),
+      closeNav: () => this.setNav(false),
+      itBtn: el => { this.itEl = el; },
+      enBtn: el => { this.enEl = el; },
+      setIt: () => this.setState({ lang: 'it' }),
+      setEn: () => this.setState({ lang: 'en' })
+    };
+  }
+}
+</script>
 </body>
 </html>

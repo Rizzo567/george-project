@@ -1,1419 +1,564 @@
 <!DOCTYPE html>
-<html lang="it">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Prenota il tuo appuntamento da Mister Barber — Via Torino 38, Pavia.">
-
-  <!-- Security headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-
-  <title>PRENOTA — MISTER BARBER</title>
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="assets/img/mister-barber-logo.png">
-  <link rel="apple-touch-icon" href="assets/img/mister-barber-logo.png">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <!-- SECURITY: pinning a versione esatta + crossorigin per SRI/error reporting -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="assets/js/config.js"></script>
-  <!-- Analitiche navigazione anonime (tempo pagina + time-to-book). Nessun PII. -->
-  <script src="assets/js/track.js"></script>
-
-  <style>
-    /* ─── PRENOTA PAGE ─── */
-    .prenota-page { background: var(--asphalt); min-height: 100vh; }
-
-    /* ─── HERO ─── */
-    .prenota-hero {
-      padding: calc(var(--nav-height) + 80px) var(--page-margin) 64px;
-      position: relative;
-      overflow: hidden;
-    }
-    .prenota-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(circle at 80% 20%, rgba(232,90,31,0.08), transparent 50%),
-        radial-gradient(circle at 10% 80%, rgba(232,90,31,0.05), transparent 40%);
-      pointer-events: none;
-    }
-    .prenota-hero__title {
-      font-family: var(--font-display);
-      font-size: clamp(96px, 18vw, 280px);
-      line-height: 0.82;
-      letter-spacing: -0.01em;
-      text-transform: uppercase;
-      position: relative;
-      z-index: 2;
-      margin-bottom: 32px;
-    }
-    .prenota-hero__title .word-solid { display: block; color: var(--canvas); }
-    .prenota-hero__title .word-outline {
-      display: block;
-      color: transparent;
-      -webkit-text-stroke: 2px var(--canvas);
-    }
-    .prenota-hero__sub {
-      font-family: var(--font-body);
-      font-size: var(--body-l);
-      color: var(--canvas-soft);
-      letter-spacing: 0.04em;
-      position: relative;
-      z-index: 2;
-    }
-
-    /* ─── SECTION ─── */
-    .prenota-section {
-      padding: 0 var(--page-margin) 80px;
-      overflow: hidden;
-    }
-    .prenota-section-label {
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: var(--eyebrow);
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--silver);
-      margin-bottom: 32px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(229,225,216,0.1);
-    }
-
-    /* ─── BOOKING STEPS ─── */
-    .book-step { }
-    .book-step--hidden { display: none !important; }
-
-    /* ─── BACK BUTTON ─── */
-    .step-back {
-      background: none;
-      border: none;
-      color: var(--silver);
-      font-family: var(--font-body);
-      font-size: var(--body-s);
-      letter-spacing: 0.12em;
-      cursor: pointer;
-      padding: 0;
-      margin-bottom: 28px;
-      text-transform: uppercase;
-      transition: color 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .step-back:hover { color: var(--canvas); }
-
-    /* ─── BARBER CARDS ─── */
-    .barber-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .barber-card {
-      background: #111;
-      border: 2px solid rgba(229,225,216,0.08);
-      border-radius: 20px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      padding: 0 0 28px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-      transition: border-color 0.2s, background 0.2s;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    .barber-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at 50% 0%, rgba(232,90,31,0.07) 0%, transparent 65%);
-      opacity: 0;
-      transition: opacity 0.25s;
-      border-radius: 20px;
-    }
-    .barber-card:hover { border-color: rgba(232,90,31,0.5); }
-    .barber-card:hover::before { opacity: 1; }
-    .barber-card__img-wrap {
-      width: 100%;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      height: 280px;
-      overflow: hidden;
-    }
-    .barber-card__img-wrap img {
-      height: 100%;
-      width: auto;
-      object-fit: contain;
-      object-position: bottom center;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
-    }
-    /* Placeholder iniziale quando manca la foto del barbiere */
-    .barber-card__img-wrap--ph { align-items: center; }
-    .barber-card__img-wrap--ph::after {
-      content: attr(data-ph);
-      font-family: var(--font-display);
-      font-size: clamp(90px, 14vw, 160px);
-      color: rgba(232,90,31,0.85);
-      line-height: 1;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
-    }
-    .selected-pill__avatar--ph {
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(232,90,31,0.18);
-    }
-    .selected-pill__avatar--ph::after {
-      content: attr(data-ph);
-      font-family: var(--font-display);
-      color: var(--accent, #E85A1F);
-      font-size: 60%;
-    }
-    .barber-card__info { text-align: center; margin-top: 16px; }
-    .barber-card__name {
-      font-family: var(--font-display);
-      font-size: clamp(36px, 4vw, 56px);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--canvas);
-      line-height: 1;
-    }
-    .barber-card__sub {
-      font-family: var(--font-body);
-      font-size: var(--body-s);
-      color: var(--silver);
-      letter-spacing: 0.06em;
-      margin-top: 6px;
-    }
-
-    /* ─── ANIMATIONS ─── */
-    @keyframes fly-left {
-      0%   { transform: translateX(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateX(-140vw) rotate(-10deg); opacity: 0; }
-    }
-    @keyframes fly-right {
-      0%   { transform: translateX(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateX(140vw) rotate(10deg); opacity: 0; }
-    }
-    @keyframes pop-in {
-      0%   { transform: scale(0.72); opacity: 0; }
-      65%  { transform: scale(1.04); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    @keyframes slide-up {
-      0%   { transform: translateY(44px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
-    }
-    @keyframes fade-in {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    .card-exit-left  { animation: fly-left  0.52s cubic-bezier(0.4,0,1,1) forwards; }
-    .card-exit-right { animation: fly-right 0.52s cubic-bezier(0.4,0,1,1) forwards; }
-    .anim-pop   { animation: pop-in   0.48s cubic-bezier(0.34,1.56,0.64,1) forwards; }
-    .anim-slide { animation: slide-up 0.42s ease forwards; }
-    .anim-fade  { animation: fade-in  0.35s ease forwards; }
-
-    /* ─── BARBER PILL ─── */
-    .selected-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: #161210;
-      border: 1px solid var(--ember);
-      padding: 8px 18px 8px 8px;
-      margin-bottom: 24px;
-    }
-    .selected-pill__avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 1px solid rgba(232,90,31,0.4);
-      flex-shrink: 0;
-    }
-    .selected-pill__avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: top;
-    }
-    .selected-pill__name {
-      font-family: var(--font-display);
-      font-size: 18px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--canvas);
-    }
-
-    /* ─── CALENDAR ─── */
-    .cal-wrap {
-      background: #111;
-      border: 1px solid rgba(229,225,216,0.08);
-      padding: 28px;
-      max-width: 440px;
-    }
-    .cal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .cal-title {
-      font-family: var(--font-display);
-      font-size: 22px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--canvas);
-    }
-    .cal-nav {
-      background: none;
-      border: 1px solid rgba(229,225,216,0.15);
-      color: var(--canvas);
-      font-size: 20px;
-      width: 36px;
-      height: 36px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: border-color 0.2s, background 0.2s;
-      line-height: 1;
-    }
-    .cal-nav:hover {
-      border-color: var(--ember);
-      background: rgba(232,90,31,0.08);
-    }
-    .cal-weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      margin-bottom: 8px;
-    }
-    .cal-weekdays span {
-      font-family: var(--font-body);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--silver);
-      text-align: center;
-      padding: 4px 0;
-    }
-    .cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
-    .cal-day {
-      aspect-ratio: 1;
-      background: none;
-      border: 1px solid transparent;
-      color: var(--canvas);
-      font-family: var(--font-body);
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
-      position: relative;
-    }
-    .cal-day:hover:not(:disabled):not(.cal-day--selected) {
-      border-color: rgba(232,90,31,0.4);
-      background: rgba(232,90,31,0.06);
-    }
-    .cal-day--other {
-      color: rgba(229,225,216,0.18);
-      pointer-events: none;
-    }
-    .cal-day--today::after {
-      content: '';
-      position: absolute;
-      bottom: 4px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--ember);
-    }
-    .cal-day--selected {
-      background: var(--ember) !important;
-      border-color: var(--ember) !important;
-      color: var(--asphalt) !important;
-      font-weight: 700;
-    }
-    .cal-day:disabled {
-      color: rgba(229,225,216,0.14);
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-
-    /* ─── SLOTS ─── */
-    .slots-section {
-      margin-top: 24px;
-      max-width: 440px;
-    }
-    .slot-hint {
-      font-family: var(--font-body);
-      font-size: var(--body-s);
-      color: var(--silver);
-      letter-spacing: 0.04em;
-      margin-bottom: 12px;
-    }
-    .slot-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-    }
-    .slot-btn {
-      background: #111;
-      border: 1px solid rgba(229,225,216,0.15);
-      color: var(--canvas);
-      font-family: var(--font-body);
-      font-size: var(--body-s);
-      letter-spacing: 0.04em;
-      padding: 12px 6px;
-      cursor: pointer;
-      text-align: center;
-      transition: border-color 0.2s, background 0.2s, color 0.2s;
-    }
-    .slot-btn:hover:not(:disabled) { border-color: rgba(232,90,31,0.5); }
-    .slot-btn.is-selected {
-      background: var(--ember);
-      border-color: var(--ember);
-      color: var(--asphalt);
-      font-weight: 600;
-    }
-    .slot-btn:disabled { opacity: 0.2; cursor: not-allowed; }
-
-    /* ─── BOOKING RECAP ─── */
-    .booking-recap {
-      background: #161210;
-      border: 1px solid rgba(232,90,31,0.25);
-      padding: 16px 22px;
-      margin-bottom: 36px;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-    .recap-item {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .recap-label {
-      font-family: var(--font-body);
-      font-size: 10px;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--silver);
-    }
-    .recap-value {
-      font-family: var(--font-display);
-      font-size: 20px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--canvas);
-    }
-    .recap-sep {
-      width: 1px;
-      height: 32px;
-      background: rgba(229,225,216,0.1);
-    }
-
-    /* ─── FORM ─── */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .form-field--full { grid-column: 1 / -1; }
-    .form-label {
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: var(--eyebrow);
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--silver);
-    }
-    .form-input,
-    .form-textarea {
-      background: #111;
-      border: 1px solid rgba(229,225,216,0.15);
-      color: var(--canvas);
-      font-family: var(--font-body);
-      font-size: var(--body);
-      padding: 14px 18px;
-      outline: none;
-      width: 100%;
-      border-radius: 0;
-      transition: border-color 0.2s, background 0.2s;
-      line-height: 1.5;
-    }
-    .form-input::placeholder,
-    .form-textarea::placeholder { color: rgba(229,225,216,0.22); }
-    .form-input:focus,
-    .form-textarea:focus { border-color: var(--ember); background: #1f1a18; }
-    .form-textarea { resize: vertical; min-height: 110px; }
-
-    /* ─── IMAGE UPLOAD ─── */
-    .upload-area {
-      border: 1.5px dashed rgba(229,225,216,0.18);
-      padding: 32px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      position: relative;
-    }
-    .upload-area:hover {
-      border-color: var(--ember);
-      background: rgba(232,90,31,0.04);
-    }
-    .upload-area input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-    }
-    .upload-icon {
-      font-size: 26px;
-      color: var(--silver);
-      margin-bottom: 10px;
-    }
-    .upload-text {
-      font-family: var(--font-body);
-      font-size: var(--body-s);
-      color: var(--silver);
-      letter-spacing: 0.04em;
-      line-height: 1.6;
-    }
-    .upload-text strong { color: var(--ember); }
-    .upload-preview {
-      display: none;
-      margin: 14px auto 0;
-      max-width: 120px;
-      max-height: 120px;
-      object-fit: cover;
-      border: 1px solid rgba(232,90,31,0.4);
-    }
-
-    /* ─── SUBMIT ─── */
-    .prenota-submit-wrap { margin-top: 40px; }
-    .btn-submit {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--ember);
-      color: var(--asphalt);
-      border: none;
-      padding: 20px 48px;
-      font-family: var(--font-display);
-      font-size: 24px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      cursor: pointer;
-      min-width: 340px;
-      transition: background 0.3s;
-      overflow: hidden;
-    }
-    .btn-submit:hover:not(:disabled) { background: #ff7a3c; }
-    .btn-submit:disabled { cursor: not-allowed; }
-
-    .btn-text { transition: opacity 0.2s; }
-    .btn-spinner,
-    .btn-success-icon {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .btn-submit.is-loading .btn-text     { opacity: 0; }
-    .btn-submit.is-loading .btn-spinner  { opacity: 1; }
-
-    .btn-submit.is-success { background: #27ae60; }
-    .btn-submit.is-success .btn-spinner      { opacity: 0; }
-    .btn-submit.is-success .btn-success-icon { opacity: 1; }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner-svg { animation: spin 0.8s linear infinite; }
-
-    .check-circle-path {
-      fill: none; stroke: white; stroke-width: 3;
-      stroke-linecap: round;
-      stroke-dasharray: 138; stroke-dashoffset: 138;
-    }
-    .check-mark-path {
-      fill: none; stroke: white; stroke-width: 3;
-      stroke-linecap: round; stroke-linejoin: round;
-      stroke-dasharray: 50; stroke-dashoffset: 50;
-    }
-    .is-success .check-circle-path {
-      animation: draw-stroke 0.4s ease forwards;
-    }
-    .is-success .check-mark-path {
-      animation: draw-stroke 0.3s ease 0.38s forwards;
-    }
-    @keyframes draw-stroke { to { stroke-dashoffset: 0; } }
-
-    /* ─── HERO CHARACTERS ─── */
-    .prenota-hero__chars {
-      position: absolute;
-      right: var(--page-margin);
-      bottom: 0;
-      display: flex;
-      align-items: flex-end;
-      gap: 0;
-      pointer-events: none;
-    }
-    .prenota-char {
-      width: auto;
-      object-fit: contain;
-      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
-    }
-    .prenota-char--berlin {
-      height: 594px;
-      transform: translateX(-200px);
-      transform-origin: bottom center;
-    }
-
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 768px) {
-      .prenota-hero {
-        padding: calc(var(--nav-height) + 48px) 20px 48px;
-      }
-      .prenota-hero__chars { right: 0; bottom: 60px; }
-      .prenota-char--berlin { height: 240px; transform: translateX(0); }
-      .prenota-hero__title .word-outline {
-        -webkit-text-stroke: 1.5px var(--canvas);
-      }
-      .prenota-section { padding: 0 20px 64px; }
-      .barber-cards {
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-      }
-      .barber-card__img-wrap { height: 180px; }
-      .barber-card__name { font-size: 28px; }
-      .cal-wrap { padding: 20px 14px; }
-      .form-grid { grid-template-columns: 1fr; }
-      .form-field--full { grid-column: 1; }
-      .btn-submit { width: 100%; min-width: unset; }
-      .slot-grid { grid-template-columns: repeat(3, 1fr); }
-      .booking-recap { gap: 14px; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>window.__resources={"https://unpkg.com/react@18.3.1/umd/react.production.min.js":"assets/vendor/react.production.min.js","https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js":"assets/vendor/react-dom.production.min.js"};</script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/track.js"></script>
+<script src="./support.js"></script>
 </head>
-<body class="prenota-page">
+<body>
+<x-dc>
+<helmet>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prenota — Mister Barber, Pavia</title>
+  <meta name="description" content="Prenota il tuo taglio da Mister Barber, Via Torino 38 Pavia. Scegli giorno e orario libero con Berlin: conferma in 30 secondi.">
+  <link rel="icon" type="image/png" href="assets/img/logo.png">
+  <link rel="apple-touch-icon" href="assets/img/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { margin: 0; background: #242627; color: #D4D0CA; font-family: 'Barlow', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: #EA6934; text-decoration: none; }
+    a:hover { color: #f4885a; }
+    button { font: inherit; }
+    .mb-strip::-webkit-scrollbar { height: 5px; }
+    .mb-strip::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 99px; }
+    .mb-strip::-webkit-scrollbar-track { background: transparent; }
+    @keyframes mb-rise { from { opacity: 0; transform: translateY(38px) scale(.97); } to { opacity: 1; transform: none; } }
+    @keyframes mb-draw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+    @keyframes mb-ring { 0% { opacity: 0; transform: scale(.6); } 40% { opacity: 1; } 100% { opacity: 0; transform: scale(1.5); } }
+    @keyframes mb-pop { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
+    @keyframes mb-confetti { 0% { opacity: 1; transform: translate3d(0,0,0) rotate(0deg); } 100% { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--rot)); } }
+  </style>
+</helmet>
 
-  <!-- NAVBAR -->
-  <nav class="nav" id="nav">
-    <a href="/" class="nav__logo"><img class="nav__logo-img" src="assets/img/mister-barber-logo.png" alt="">Mister Barber</a>
-    <ul class="nav__links" id="navLinks">
-      <li><a href="/#servizi">Servizi</a></li>
-      <li><a href="/#barbieri">Barbieri</a></li>
-      <li><a href="/#posto">Il Posto</a></li>
-      <li><a href="/#drop">Drop</a></li>
-    </ul>
-    <a href="prenota.html" class="nav__cta" style="border-color: var(--ember); color: var(--ember);">Prenota</a>
-    <button class="nav__hamburger" id="hamburger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
+  <x-import component-from-global-scope="star-field" from="./star-field.js" layer="back" seed="7" density="1.3" spin="0.05" props="assets/img/cap-1.png,assets/img/cap-2.png,assets/img/cap-3.png,assets/img/cap-4.png,assets/img/cap-5.png,assets/img/bracciale-1.png,assets/img/bracciale-2.png" hint-size="100%,100%" style="position:fixed;inset:0;z-index:0;width:100%;height:100%"></x-import>
+  <x-import component-from-global-scope="star-field" from="./star-field.js" layer="front" seed="7" density="1.3" spin="0.05" props="assets/img/cap-1.png,assets/img/cap-2.png,assets/img/cap-3.png,assets/img/cap-4.png,assets/img/cap-5.png,assets/img/bracciale-1.png,assets/img/bracciale-2.png" hint-size="100%,100%" style="position:fixed;inset:0;z-index:90;width:100%;height:100%"></x-import>
 
-  <main>
-
-    <!-- HERO -->
-    <section class="prenota-hero">
-      <h1 class="prenota-hero__title">
-        <span class="word-solid">Pre</span>
-        <span class="word-outline">nota</span>
-      </h1>
-      <p class="prenota-hero__sub">Scegli il tuo barbiere e il tuo orario</p>
-      <div class="prenota-hero__chars" aria-hidden="true">
-        <img class="prenota-char prenota-char--berlin" src="assets/img/character/berlin-incazzato.png" alt="">
+  <header style="position:relative;z-index:1;background:transparent">
+    <div style="max-width:1240px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center">
+      <span></span>
+      <a href="index.html" style="justify-self:center" style-hover="color:#D4D0CA">
+        <img src="assets/img/logo.png" alt="Mister Barber" style="display:block;height:clamp(150px,15vw,190px);width:auto;margin:-32px 0 -24px" />
+      </a>
+      <div style="justify-self:end;display:flex;align-items:center;gap:16px">
+        <button onClick="{{ openNav }}" aria-label="Apri il menu" style="display:flex;flex-direction:column;gap:5px;background:transparent;border:0;cursor:pointer;padding:10px">
+          <span style="display:block;width:22px;height:2px;background:#D4D0CA;border-radius:2px"></span>
+          <span style="display:block;width:22px;height:2px;background:#D4D0CA;border-radius:2px"></span>
+          <span style="display:block;width:22px;height:2px;background:#D4D0CA;border-radius:2px"></span>
+        </button>
       </div>
-    </section>
+    </div>
+  </header>
 
-    <!-- BOOKING FLOW -->
-    <section class="prenota-section" id="bookingSection">
+  <div ref="{{ scrimRef }}" onClick="{{ closeNav }}" style="position:fixed;inset:0;z-index:70;background:rgba(11,11,11,.62);opacity:0;pointer-events:none;transition:opacity .34s ease"></div>
+  <aside ref="{{ panelRef }}" style="position:fixed;top:0;right:0;bottom:0;z-index:80;width:min(86vw,350px);background:#1a1c1d;border-left:1px solid rgba(212,208,202,.12);padding:0 26px 34px;display:flex;flex-direction:column;gap:22px;transform:translateX(105%);transition:transform .38s cubic-bezier(.2,.7,.3,1);box-shadow:-24px 0 60px rgba(0,0,0,.5)">
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin:0 -26px;padding:0 24px">
+      <span></span>
+      <img src="assets/img/logo.png" alt="Mister Barber" style="display:block;justify-self:center;height:clamp(150px,15vw,190px);width:auto;margin:-32px 0 -24px" />
+      <button onClick="{{ closeNav }}" aria-label="Chiudi il menu" style="justify-self:end;background:transparent;border:0;cursor:pointer;padding:8px;font-family:system-ui,sans-serif;font-size:26px;line-height:1;color:#D4D0CA">&times;</button>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:16px">
+      <a href="index.html#barbiere" onClick="{{ closeNav }}" data-en="The barber" style="font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:.04em;color:#D4D0CA;padding:6px 0;transition:color .2s ease" style-hover="color:#EA6934">Il barbiere</a>
+      <a href="index.html#servizi" onClick="{{ closeNav }}" data-en="Services" style="font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:.04em;color:#D4D0CA;padding:6px 0;transition:color .2s ease" style-hover="color:#EA6934">Servizi</a>
+      <a href="index.html#video" onClick="{{ closeNav }}" data-en="Videos" style="font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:.04em;color:#D4D0CA;padding:6px 0;transition:color .2s ease" style-hover="color:#EA6934">Video</a>
+      <a href="index.html#recensioni" onClick="{{ closeNav }}" data-en="Reviews" style="font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:.04em;color:#D4D0CA;padding:6px 0;transition:color .2s ease" style-hover="color:#EA6934">Recensioni</a>
+      <a href="index.html#contatti" onClick="{{ closeNav }}" data-en="Contact" style="font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:.04em;color:#D4D0CA;padding:6px 0;transition:color .2s ease" style-hover="color:#EA6934">Contatti</a>
+    </nav>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;border:1px solid rgba(212,208,202,.22);border-radius:99px;overflow:hidden;font-size:11px;font-weight:700;letter-spacing:.12em;align-self:flex-start">
+        <button ref="{{ itBtn }}" onClick="{{ setIt }}" style="border:0;cursor:pointer;padding:8px 14px;background:#EA6934;color:#0B0B0B;font:inherit">IT</button>
+        <button ref="{{ enBtn }}" onClick="{{ setEn }}" style="border:0;cursor:pointer;padding:8px 14px;background:transparent;color:#D4D0CA;font:inherit">EN</button>
+      </div>
+      <a href="prenota.html" onClick="{{ closeNav }}" data-en="Book now" style="background:#EA6934;color:#0B0B0B;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:14px 20px;border-radius:99px;text-align:center" style-hover="color:#0B0B0B">Prenota ora</a>
+    </div>
+  </aside>
 
-      <!-- STEP 1: BARBER -->
-      <div id="stepBarber" class="book-step">
-        <p class="prenota-section-label">Scegli il barbiere</p>
-        <div class="barber-cards" id="barberCards">
+  <section style="position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:clamp(20px,3vw,44px) 24px clamp(64px,9vw,110px)">
 
-          <div class="barber-card" data-barber="berlin" role="button" tabindex="0">
-            <div class="barber-card__img-wrap">
-              <img src="assets/img/character/berlin-canotta-removebg-preview.png" alt="Berlin">
-            </div>
-            <div class="barber-card__info">
-              <p class="barber-card__name">Berlin</p>
-              <p class="barber-card__sub">Il tocco preciso</p>
-            </div>
+    <div style="position:relative;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif">
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,368px),1fr));gap:clamp(16px,2vw,24px);align-items:start;position:{{ pickPosition }};top:0;left:0;right:0;transform:{{ pickTransform }};opacity:{{ pickOpacity }};pointer-events:{{ pickPointer }};transition:transform .62s cubic-bezier(.3,.8,.25,1),opacity .45s ease">
+
+      <div style="border-radius:28px;padding:clamp(20px,2.2vw,26px);background:rgba(255,255,255,.07);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.16);color:#F5F5F7">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:22px;font-weight:600;letter-spacing:-.01em">{{ monthLabel }}</span>
+            <span style="font-size:13px;font-weight:400;color:rgba(245,245,247,.5)">{{ yearLabel }}</span>
           </div>
+          <div style="display:flex;gap:8px">
+            <button onClick="{{ prevMonth }}" aria-label="Mese precedente" style="width:34px;height:34px;border-radius:99px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#F5F5F7;cursor:pointer;font-size:15px;line-height:1;transition:background .2s ease" style-hover="background:rgba(255,255,255,.14)">&#8249;</button>
+            <button onClick="{{ nextMonth }}" aria-label="Mese successivo" style="width:34px;height:34px;border-radius:99px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#F5F5F7;cursor:pointer;font-size:15px;line-height:1;transition:background .2s ease" style-hover="background:rgba(255,255,255,.14)">&#8250;</button>
+          </div>
+        </div>
 
+        <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(5px,1.4vw,8px)">
+            <sc-for list="{{ days }}" as="day" hint-placeholder-count="31">
+              <button onClick="{{ day.pick }}" style="aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;border-radius:clamp(11px,3vw,16px);border:1px solid {{ day.border }};background:{{ day.bg }};cursor:{{ day.cursor }};opacity:{{ day.opacity }};transition:background .2s ease,border-color .2s ease">
+                <span style="font-size:clamp(9px,2.4vw,11px);font-weight:600;letter-spacing:.02em;color:{{ day.sub }}">{{ day.wd }}</span>
+                <span style="font-size:clamp(14px,3.6vw,17px);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:{{ day.fg }}">{{ day.n }}</span>
+                <span style="width:3px;height:3px;border-radius:99px;background:{{ day.dot }}"></span>
+              </button>
+            </sc-for>
         </div>
       </div>
 
-      <!-- STEP 2: CALENDAR -->
-      <div id="stepCalendar" class="book-step book-step--hidden">
-
-        <button class="step-back" id="backToBarber">← Cambia barbiere</button>
-
-        <div id="selectedPill"></div>
-
-        <div class="cal-wrap">
-          <div class="cal-header">
-            <button class="cal-nav" id="calPrev">‹</button>
-            <span class="cal-title" id="calTitle"></span>
-            <button class="cal-nav" id="calNext">›</button>
-          </div>
-          <div class="cal-weekdays">
-            <span>Lu</span><span>Ma</span><span>Me</span><span>Gi</span>
-            <span>Ve</span><span>Sa</span><span>Do</span>
-          </div>
-          <div class="cal-grid" id="calGrid"></div>
+      <div ref="{{ slotsCardRef }}" style="border-radius:28px;padding:clamp(20px,2.2vw,26px);background:rgba(255,255,255,.07);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.16);color:#F5F5F7;display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <span data-en="Available times" style="font-size:12px;font-weight:600;letter-spacing:.02em;color:rgba(245,245,247,.5)">Orari disponibili</span>
+          <span style="font-size:22px;font-weight:600;letter-spacing:-.01em">{{ dateLabel }}</span>
         </div>
 
-        <div class="slots-section" id="slotsSection" style="display:none">
-          <p class="slot-hint" id="slotHint"></p>
-          <div class="slot-grid" id="slotGrid"></div>
+        <div style="display:flex;gap:clamp(14px,2vw,20px);align-items:flex-end;flex-wrap:wrap">
+          <div style="flex:1 1 180px;display:grid;grid-template-columns:repeat(auto-fill,clamp(58px,16vw,78px));justify-content:start;gap:clamp(5px,1.4vw,8px);align-content:start">
+            <sc-for list="{{ slots }}" as="slot" hint-placeholder-count="12">
+              <button onClick="{{ slot.pick }}" style="padding:clamp(8px,2.4vw,11px) 2px;border-radius:clamp(10px,3vw,14px);border:1px solid {{ slot.border }};background:{{ slot.bg }};color:{{ slot.fg }};font-size:clamp(13px,3.4vw,15px);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;cursor:{{ slot.cursor }};opacity:{{ slot.opacity }};transition:background .2s ease,border-color .2s ease">{{ slot.label }}</button>
+            </sc-for>
+            <sc-if value="{{ showSlotsNote }}" hint-placeholder-val="{{ false }}">
+              <span style="grid-column:1/-1;font-size:13px;line-height:1.5;color:rgba(245,245,247,.62)">{{ slotsNote }}</span>
+            </sc-if>
+          </div>
+          <img src="assets/img/berlin-punta.png" alt="Berlin" style="flex:0 0 auto;width:clamp(72px,13vw,158px);height:auto;filter:drop-shadow(0 18px 26px rgba(0,0,0,.5))" />
         </div>
 
+        <div style="height:1px;background:rgba(255,255,255,.12)"></div>
+
+        <span style="font-size:13px;line-height:1.5;color:rgba(245,245,247,.62)">{{ summary }}</span>
       </div>
+    </div>
 
-      <!-- STEP 3: FORM -->
-      <div id="stepForm" class="book-step book-step--hidden">
+    <sc-if value="{{ showConfirm }}" hint-placeholder-val="{{ false }}">
+      <div style="border-radius:28px;padding:clamp(22px,2.4vw,30px);background:rgba(255,255,255,.07);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.16);color:#F5F5F7;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:clamp(16px,2.4vw,30px);animation:mb-rise .55s cubic-bezier(.2,.8,.25,1) both" ref="{{ confirmCardRef }}">
+        <div style="flex:1 1 290px;display:flex;flex-direction:column;gap:18px;min-width:0">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span data-en="Confirm" style="font-size:12px;font-weight:600;letter-spacing:.02em;color:rgba(245,245,247,.5)">Conferma</span>
+            <span data-en="Send this booking?" style="font-size:clamp(22px,2.6vw,30px);font-weight:600;letter-spacing:-.02em;line-height:1.15">Confermi di voler inviare la prenotazione?</span>
+          </div>
 
-        <button class="step-back" id="backToCalendar">← Cambia data / orario</button>
-
-        <div class="booking-recap" id="bookingRecap"></div>
-
-        <form id="prenotaForm" novalidate>
-          <input type="hidden" id="h-barber">
-          <input type="hidden" id="h-date">
-          <input type="hidden" id="h-time">
-
-          <div class="form-grid">
-
-            <div class="form-field">
-              <label class="form-label" for="nome">Nome</label>
-              <input class="form-input" type="text" id="nome" name="nome"
-                placeholder="Il tuo nome" autocomplete="given-name" required>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:10px">
+            <div style="border-radius:16px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:3px">
+              <span data-en="Date" style="font-size:11px;font-weight:600;color:rgba(245,245,247,.45)">Data</span>
+              <span style="font-size:15px;font-weight:600;letter-spacing:-.01em">{{ dateLabel }}</span>
             </div>
-
-            <div class="form-field">
-              <label class="form-label" for="telefono">Telefono</label>
-              <input class="form-input" type="tel" id="telefono" name="telefono"
-                placeholder="+39 000 000 0000" autocomplete="tel" required>
+            <div style="border-radius:16px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:3px">
+              <span data-en="Time" style="font-size:11px;font-weight:600;color:rgba(245,245,247,.45)">Orario</span>
+              <span style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em">{{ slotLabel }}</span>
             </div>
-
-            <div class="form-field form-field--full">
-              <label class="form-label" for="email">Email</label>
-              <input class="form-input" type="email" id="email" name="email"
-                placeholder="la@tua.email" autocomplete="email" required>
+            <div style="border-radius:16px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:3px">
+              <span data-en="Service" style="font-size:11px;font-weight:600;color:rgba(245,245,247,.45)">Servizio</span>
+              <span style="font-size:15px;font-weight:600;letter-spacing:-.01em">{{ serviceLabel }}</span>
             </div>
+            <div style="border-radius:16px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:3px">
+              <span data-en="Where" style="font-size:11px;font-weight:600;color:rgba(245,245,247,.45)">Dove</span>
+              <span style="font-size:15px;font-weight:600;letter-spacing:-.01em">Via Torino 38, Pavia</span>
+            </div>
+          </div>
 
-            <div class="form-field form-field--full">
-              <label class="form-label" for="servizio">Servizio</label>
-              <select class="form-input" id="servizio" name="servizio" required style="cursor:pointer;appearance:none;-webkit-appearance:none;">
-                <option value="" disabled selected>Scegli il servizio</option>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px">
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span data-en="Name" style="font-size:11px;font-weight:600;color:rgba(245,245,247,.45)">Nome</span>
+              <input ref="{{ nomeRef }}" type="text" name="nome" autocomplete="name" maxlength="100" placeholder="Mario Rossi" style="width:100%;border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#F5F5F7;font:inherit;font-size:15px;outline:none;transition:border-color .2s ease" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span data-en="Phone" style="font-size:11px;font-weight:600;color:rgba(245,245,247,.45)">Telefono</span>
+              <input ref="{{ telRef }}" type="tel" name="telefono" autocomplete="tel" inputmode="tel" maxlength="32" placeholder="+39 333 1234567" style="width:100%;border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#F5F5F7;font:inherit;font-size:15px;outline:none;transition:border-color .2s ease" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span data-en="Email (optional)" style="font-size:11px;font-weight:600;color:rgba(245,245,247,.45)">Email (facoltativa)</span>
+              <input ref="{{ emailRef }}" type="email" name="email" autocomplete="email" maxlength="120" placeholder="mario@email.it" style="width:100%;border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#F5F5F7;font:inherit;font-size:15px;outline:none;transition:border-color .2s ease" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span data-en="Service" style="font-size:11px;font-weight:600;color:rgba(245,245,247,.45)">Servizio</span>
+              <select ref="{{ servRef }}" name="servizio" onChange="{{ onService }}" style="width:100%;border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#F5F5F7;font:inherit;font-size:15px;outline:none;transition:border-color .2s ease">
                 <option value="Cut">Cut</option>
                 <option value="Fade">Fade</option>
                 <option value="Beard">Beard</option>
                 <option value="Razor">Razor</option>
                 <option value="Full">Full</option>
               </select>
-            </div>
-
-            <div class="form-field form-field--full">
-              <label class="form-label" for="note-taglio">
-                Dettagli taglio
-                <span style="color:var(--silver);font-size:9px;letter-spacing:0.15em;text-transform:none;font-weight:400;">(opzionale)</span>
-              </label>
-              <textarea class="form-textarea" id="note-taglio" name="note"
-                placeholder="Descrivi il taglio che vuoi, lunghezza, stile, fade…"></textarea>
-            </div>
-
-            <div class="form-field form-field--full">
-              <label class="form-label">
-                Immagine di riferimento
-                <span style="color:var(--silver);font-size:9px;letter-spacing:0.15em;text-transform:none;font-weight:400;">(opzionale)</span>
-              </label>
-              <div class="upload-area" id="uploadArea">
-                <input type="file" id="imgRef" name="imgRef" accept="image/*">
-                <div class="upload-icon">↑</div>
-                <p class="upload-text">
-                  <strong>Clicca per caricare</strong> o trascina qui<br>
-                  <span style="font-size:11px;opacity:0.6;">JPG, PNG, WEBP — max 5MB</span>
-                </p>
-                <img class="upload-preview" id="uploadPreview" alt="">
-              </div>
-            </div>
-
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1">
+              <span data-en="Notes (optional)" style="font-size:11px;font-weight:600;color:rgba(245,245,247,.45)">Note (facoltative)</span>
+              <input ref="{{ noteRef }}" type="text" name="note" maxlength="500" placeholder="" style="width:100%;border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#F5F5F7;font:inherit;font-size:15px;outline:none;transition:border-color .2s ease" />
+            </label>
           </div>
+          <sc-if value="{{ showError }}" hint-placeholder-val="{{ false }}">
+            <span role="alert" style="font-size:13px;line-height:1.5;color:#ffb199;background:rgba(234,105,52,.14);border:1px solid rgba(234,105,52,.4);border-radius:12px;padding:10px 12px">{{ formError }}</span>
+          </sc-if>
 
-          <div class="prenota-submit-wrap">
-            <button class="btn-submit" type="submit" id="submitBtn">
-              <span class="btn-text">Conferma prenotazione</span>
-
-              <span class="btn-spinner">
-                <svg class="spinner-svg" width="34" height="34" viewBox="0 0 34 34" fill="none">
-                  <circle cx="17" cy="17" r="14" stroke="rgba(0,0,0,0.25)" stroke-width="3"/>
-                  <path d="M17 3 A14 14 0 0 1 31 17" stroke="rgba(0,0,0,0.7)" stroke-width="3" stroke-linecap="round"/>
-                </svg>
-              </span>
-
-              <span class="btn-success-icon">
-                <svg width="42" height="42" viewBox="0 0 50 50">
-                  <circle class="check-circle-path" cx="25" cy="25" r="22"/>
-                  <polyline class="check-mark-path" points="14,25 22,33 36,17"/>
-                </svg>
-              </span>
-            </button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center">
+            <button onClick="{{ confirm }}" style="border:0;border-radius:99px;padding:14px 26px;background:#EA6934;color:#0B0B0B;font-size:14px;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease" style-hover="transform:translateY(-2px);box-shadow:0 12px 26px rgba(234,105,52,.4)">{{ confirmLabel }}</button>
+            <button onClick="{{ back }}" data-en="Change" style="border:1px solid rgba(255,255,255,.18);border-radius:99px;padding:14px 22px;background:transparent;color:#F5F5F7;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s ease" style-hover="background:rgba(255,255,255,.09)">Modifica</button>
           </div>
-
-        </form>
-      </div>
-
-    </section>
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer__logo"><span class="footer__logo-mister">Mister</span><br><span class="footer__logo-barber">Barber</span></div>
-    <div class="footer__grid">
-      <div>
-        <p class="footer__col-label">Dove</p>
-        <p class="footer__col-value">Via Torino 38<br>Pavia</p>
-      </div>
-      <div>
-        <p class="footer__col-label">Orari</p>
-        <p class="footer__col-value">Mar &ndash; Sab<br>09:00 &ndash; 19:00</p>
-      </div>
-      <div>
-        <p class="footer__col-label">Social</p>
-        <div class="footer__social">
-          <a href="#" target="_blank" rel="noopener">Instagram</a>
-          <a href="#" target="_blank" rel="noopener">TikTok</a>
         </div>
+
+        <img src="assets/img/berlin-postazione.png" alt="Berlin" style="flex:0 0 auto;margin:0 auto;width:clamp(190px,22vw,300px);height:auto;filter:drop-shadow(0 22px 30px rgba(0,0,0,.55))" />
       </div>
+    </sc-if>
+
+    <sc-if value="{{ showDone }}" hint-placeholder-val="{{ false }}">
+      <div style="border-radius:28px;padding:clamp(30px,4vw,54px) clamp(22px,2.4vw,30px);background:rgba(255,255,255,.07);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.16);color:#F5F5F7;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;overflow:hidden;position:relative">
+        <div style="position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center">
+          <div style="position:absolute;inset:0;pointer-events:none">
+            <sc-for list="{{ confetti }}" as="piece" hint-placeholder-count="0">
+              <span style="{{ piece.style }}"></span>
+            </sc-for>
+          </div>
+          <span style="position:absolute;inset:6px;border-radius:99px;border:2px solid rgba(234,105,52,.7);animation:mb-ring .9s ease-out .1s both"></span>
+          <svg viewBox="0 0 64 64" style="position:relative;width:96px;height:96px;overflow:visible">
+            <circle cx="32" cy="32" r="27" fill="none" stroke="rgba(245,245,247,.16)" stroke-width="3"></circle>
+            <path d="M18 34 L28 45 L47 20" pathLength="100" fill="none" stroke="#EA6934" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:100;animation:mb-draw .62s cubic-bezier(.6,.1,.3,1) .18s both"></path>
+          </svg>
+        </div>
+        <span data-en="Booking sent" style="font-size:clamp(24px,3vw,34px);font-weight:600;letter-spacing:-.02em;animation:mb-pop .5s ease .5s both">Prenotazione inviata</span>
+        <span style="font-size:15px;line-height:1.55;color:rgba(245,245,247,.62);max-width:44ch;animation:mb-pop .5s ease .62s both">{{ doneLine }}</span>
+      </div>
+    </sc-if>
+
     </div>
-    <div class="footer__bottom">
-      <span>&copy; 2026 Mister Barber</span>
-      <span class="footer-powered">Powered by <span class="aike-word">aike</span><img class="aike-mark" src="assets/img/aike-owl.png" alt="aike"></span>
-    </div>
-  </footer>
+  </section>
 
-  <!-- NAVBAR JS -->
-  <script>
-    var nav = document.getElementById('nav');
-    var hamburger = document.getElementById('hamburger');
-    var navLinks = document.getElementById('navLinks');
-    nav.classList.add('nav--scrolled');
-    window.addEventListener('scroll', function () {
-      nav.classList.toggle('nav--scrolled', window.scrollY > 0);
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+// Prenotazioni — stessa grafica del design, backend vero:
+//   GET  /api/available?barber=berlin&date=YYYY-MM-DD → {slots:[{time,available}], closed?, reason?}
+//   POST /api/book {barber,nome,telefono,email,servizio,data,ora,notes,apptId} → {ok,apptId} | {error}
+//   poi notifica best-effort (Supabase edge fn) → sessionStorage.mbooking → conferma.html
+const MONTHS = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WD = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
+const WD_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const SEL = '#F5F5F7';
+const BARBER = 'berlin';
+const BARBER_NAME = 'Berlin';
+const CLOSED_WEEKDAYS = [0];            // domenica: come il sito precedente; le altre chiusure le dice il server
+const SERVICES = ['Cut', 'Fade', 'Beard', 'Razor', 'Full'];
+const MAX_MONTHS_AHEAD = 12;
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    this.state = {
+      lang: 'it',
+      view: new Date(today.getFullYear(), today.getMonth(), 1),
+      today,
+      selected: null,
+      slot: null,
+      stage: 'pick',
+      confetti: [],
+      avail: null,        // [{time, available}] del giorno scelto
+      availLoading: false,
+      availClosed: false,
+      availReason: '',
+      availError: false,
+      service: SERVICES[0],
+      formError: '',
+      sending: false
+    };
+    this.availCache = {};
+    this.availReq = 0;
+  }
+
+  componentDidMount() { this.paintLang(); }
+  componentDidUpdate() { this.paintLang(); }
+
+  paintLang() {
+    const root = this.rootEl || document;
+    const en = this.state.lang === 'en';
+    root.querySelectorAll('[data-en]').forEach(el => {
+      if (!el.dataset.it) el.dataset.it = el.innerHTML;
+      el.innerHTML = en ? el.dataset.en : el.dataset.it;
     });
-    hamburger.addEventListener('click', function () { nav.classList.toggle('nav--open'); });
-    navLinks.querySelectorAll('a').forEach(function (l) {
-      l.addEventListener('click', function () { nav.classList.remove('nav--open'); });
+    if (this.itEl && this.enEl) {
+      this.itEl.style.background = en ? 'transparent' : '#EA6934';
+      this.itEl.style.color = en ? '#D4D0CA' : '#0B0B0B';
+      this.enEl.style.background = en ? '#EA6934' : 'transparent';
+      this.enEl.style.color = en ? '#0B0B0B' : '#D4D0CA';
+    }
+  }
+
+  setNav(open) {
+    if (this.panelEl) this.panelEl.style.transform = open ? 'translateX(0)' : 'translateX(105%)';
+    if (this.scrimEl) {
+      this.scrimEl.style.opacity = open ? '1' : '0';
+      this.scrimEl.style.pointerEvents = open ? 'auto' : 'none';
+    }
+  }
+
+  makeConfetti() {
+    const cols = ['#EA6934', '#F5F5F7', '#f4a35a', '#D4D0CA', '#ffd9c2'];
+    return Array.from({ length: 46 }, (_, i) => {
+      const a = (i / 46) * Math.PI * 2 + Math.random() * 0.3;
+      const d = 90 + Math.random() * 150;
+      const w = 5 + Math.random() * 6;
+      const h = Math.random() < 0.35 ? w : 3 + Math.random() * 4;
+      const col = cols[i % cols.length];
+      const dur = 0.9 + Math.random() * 0.7;
+      return {
+        style: 'position:absolute;left:50%;top:50%;width:' + w.toFixed(1) + 'px;height:' + h.toFixed(1) +
+          'px;margin:' + (-h / 2).toFixed(1) + 'px 0 0 ' + (-w / 2).toFixed(1) + 'px;background:' + col +
+          ';border-radius:' + (Math.random() < 0.4 ? '99px' : '1px') +
+          ';--dx:' + (Math.cos(a) * d).toFixed(1) + 'px;--dy:' + (Math.sin(a) * d + 40).toFixed(1) +
+          'px;--rot:' + Math.round(180 + Math.random() * 540) + 'deg;animation:mb-confetti ' + dur.toFixed(2) +
+          's cubic-bezier(.2,.7,.3,1) ' + (0.05 + Math.random() * 0.25).toFixed(2) + 's both'
+      };
     });
-  </script>
+  }
 
-  <!-- BOOKING FLOW -->
-  <script>
-    (function () {
+  scrollToConfirm() {
+    const go = () => {
+      const el = this.confirmCardEl || this.slotsCardEl;
+      if (!el) return;
+      const win = el.ownerDocument.defaultView;
+      const top = el.getBoundingClientRect().top + win.scrollY - 84;
+      win.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(go));
+    setTimeout(go, 220);
+  }
 
-      // Supabase client
-      var sb = supabase.createClient(window.MB_CONFIG.SUPABASE_URL, window.MB_CONFIG.SUPABASE_KEY);
+  scrollToSlots() {
+    const el = this.slotsCardEl;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      const doc = el.ownerDocument;
+      const win = doc.defaultView;
+      const top = el.getBoundingClientRect().top + win.scrollY - 16;
+      win.scrollTo({ top, behavior: 'smooth' });
+      el.style.transition = 'box-shadow .5s ease, transform .5s ease';
+      el.style.transform = 'translateY(-4px)';
+      el.style.boxShadow = '0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.16), 0 0 0 1px rgba(234,105,52,.55)';
+      setTimeout(() => {
+        el.style.transform = '';
+        el.style.boxShadow = '0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.16)';
+      }, 700);
+    });
+  }
 
-      var state = { barber: null, date: null, time: null };
+  // ── date ──────────────────────────────────────────────────────────
+  key(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  isOpen(d) { return !CLOSED_WEEKDAYS.includes(d.getDay()); }
 
-      var stepBarber   = document.getElementById('stepBarber');
-      var stepCalendar = document.getElementById('stepCalendar');
-      var stepForm     = document.getElementById('stepForm');
-
-      var MONTHS = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
-                    'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-      var DAYS   = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
-
-      var calView = new Date();
-      calView.setDate(1);
-
-      var today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      function pad(n) { return n < 10 ? '0' + n : '' + n; }
-
-      // ── Helpers ───────────────────────────────────────────
-
-      function showStep(el, animClass) {
-        el.classList.remove('book-step--hidden');
-        void el.offsetWidth; // reflow
-        el.classList.add(animClass);
-        el.addEventListener('animationend', function done() {
-          el.classList.remove(animClass);
-          el.removeEventListener('animationend', done);
-        });
-      }
-
-      function hideStep(el, cb) {
-        el.style.opacity = '0';
-        el.style.transition = 'opacity 0.25s';
-        setTimeout(function () {
-          el.classList.add('book-step--hidden');
-          el.style.opacity = '';
-          el.style.transition = '';
-          if (cb) cb();
-        }, 270);
-      }
-
-      // ── Step 1: Barber selection ──────────────────────────
-
-      document.querySelectorAll('.barber-card').forEach(function (card, idx) {
-        card.addEventListener('click', function () { pickBarber(card, idx); });
-        card.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickBarber(card, idx); }
-        });
+  // ── disponibilità dal server ──────────────────────────────────────
+  loadAvail(d, force) {
+    const iso = this.key(d);
+    const cached = this.availCache[iso];
+    if (cached && !force) {
+      this.setState({ avail: cached.slots, availClosed: cached.closed, availReason: cached.reason, availLoading: false, availError: false });
+      return;
+    }
+    const req = ++this.availReq;
+    this.setState({ avail: null, availLoading: true, availClosed: false, availReason: '', availError: false });
+    fetch('/api/available?barber=' + BARBER + '&date=' + iso)
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then(data => {
+        if (req !== this.availReq) return;
+        const entry = { slots: Array.isArray(data.slots) ? data.slots : [], closed: !!data.closed, reason: data.reason || '' };
+        this.availCache[iso] = entry;
+        this.setState({ avail: entry.slots, availClosed: entry.closed, availReason: entry.reason, availLoading: false, availError: false });
+      })
+      .catch(() => {
+        if (req !== this.availReq) return;
+        this.setState({ avail: [], availLoading: false, availError: true });
       });
+  }
 
-      function pickBarber(card, idx) {
-        state.barber = card.dataset.barber;
-        var cards = document.querySelectorAll('.barber-card');
-        if (cards[0]) cards[0].classList.add('card-exit-left');
-        if (cards[1]) cards[1].classList.add('card-exit-right');
-
-        setTimeout(function () {
-          stepBarber.classList.add('book-step--hidden');
-          cards.forEach(function (c) {
-            c.classList.remove('card-exit-left', 'card-exit-right');
-          });
-
-          buildPill();
-          state.date = null;
-          state.time = null;
-          calView = new Date();
-          calView.setDate(1);
-          renderCalendar();
-          document.getElementById('slotsSection').style.display = 'none';
-          document.getElementById('slotGrid').innerHTML = '';
-
-          showStep(stepCalendar, 'anim-pop');
-        }, 500);
-      }
-
-      function buildPill() {
-        var name = state.barber.charAt(0).toUpperCase() + state.barber.slice(1);
-        var img  = 'assets/img/' + state.barber + '-face.png';
-        var onerr = "this.onerror=null;var a=this.parentNode;a.classList.add('selected-pill__avatar--ph');a.setAttribute('data-ph','" + name.charAt(0) + "');this.style.display='none';";
-        document.getElementById('selectedPill').innerHTML =
-          '<div class="selected-pill">' +
-          '<div class="selected-pill__avatar"><img src="' + img + '" alt="' + name + '" onerror="' + onerr + '"></div>' +
-          '<span class="selected-pill__name">' + name + '</span>' +
-          '</div>';
-      }
-
-      document.getElementById('backToBarber').addEventListener('click', function () {
-        hideStep(stepCalendar, function () {
-          showStep(stepBarber, 'anim-fade');
-        });
+  buildDays(en) {
+    const { view, today, selected } = this.state;
+    const total = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+    const out = [];
+    for (let i = 1; i <= total; i++) {
+      const d = new Date(view.getFullYear(), view.getMonth(), i);
+      const off = d < today || !this.isOpen(d);
+      const isSel = selected && this.key(selected) === this.key(d);
+      const isToday = this.key(today) === this.key(d);
+      out.push({
+        n: i,
+        wd: (en ? WD_EN : WD)[d.getDay()],
+        pick: off ? () => {} : () => {
+          this.setState({ selected: d, slot: null, formError: '' });
+          this.loadAvail(d);
+          this.scrollToSlots();
+        },
+        bg: isSel ? SEL : 'rgba(255,255,255,.06)',
+        border: isSel ? SEL : 'rgba(255,255,255,.12)',
+        fg: isSel ? '#0B0B0B' : '#F5F5F7',
+        sub: isSel ? 'rgba(11,11,11,.55)' : 'rgba(245,245,247,.45)',
+        dot: isSel ? 'rgba(11,11,11,.45)' : (isToday ? '#EA6934' : 'transparent'),
+        cursor: off ? 'not-allowed' : 'pointer',
+        opacity: off ? '.3' : '1'
       });
+    }
+    return out;
+  }
 
-      // ── Calendar ──────────────────────────────────────────
+  buildSlots() {
+    const { selected, slot, avail } = this.state;
+    if (!selected || !avail) return [];
+    return avail.map(s => {
+      const off = !s.available;
+      const isSel = slot === s.time;
+      return {
+        label: s.time,
+        pick: off ? () => {} : () => {
+          this.setState({ slot: s.time, formError: '' });
+          clearTimeout(this.stageT);
+          this.stageT = setTimeout(() => { this.setState({ stage: 'confirm' }); this.scrollToConfirm(); }, 320);
+        },
+        bg: isSel ? SEL : 'rgba(255,255,255,.06)',
+        border: isSel ? SEL : 'rgba(255,255,255,.12)',
+        fg: isSel ? '#0B0B0B' : '#F5F5F7',
+        cursor: off ? 'not-allowed' : 'pointer',
+        opacity: off ? '.26' : '1'
+      };
+    });
+  }
 
-      document.getElementById('calPrev').addEventListener('click', function () {
-        calView.setMonth(calView.getMonth() - 1);
-        renderCalendar();
-      });
-      document.getElementById('calNext').addEventListener('click', function () {
-        calView.setMonth(calView.getMonth() + 1);
-        renderCalendar();
-      });
+  // ── invio ─────────────────────────────────────────────────────────
+  readForm() {
+    const v = el => (el && typeof el.value === 'string') ? el.value.trim() : '';
+    return { nome: v(this.nomeEl), telefono: v(this.telEl), email: v(this.emailEl),
+             servizio: v(this.servEl) || this.state.service, note: v(this.noteEl) };
+  }
 
-      function renderCalendar() {
-        var y = calView.getFullYear();
-        var m = calView.getMonth();
-        document.getElementById('calTitle').textContent = MONTHS[m] + ' ' + y;
+  validate(f, en) {
+    if (f.nome.length < 1) return en ? 'Enter your name.' : 'Nome non valido.';
+    if (!/^[\d\s+\-()]{5,32}$/.test(f.telefono)) return en ? 'Enter a valid phone number.' : 'Telefono non valido.';
+    if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) return en ? 'Enter a valid email.' : 'Email non valida.';
+    if (!SERVICES.includes(f.servizio)) return en ? 'Pick a service.' : 'Scegli un servizio.';
+    return '';
+  }
 
-        var firstDay    = new Date(y, m, 1).getDay();
-        var startOffset = (firstDay + 6) % 7; // Mon = 0
-        var daysInMonth = new Date(y, m + 1, 0).getDate();
-        var prevDays    = new Date(y, m, 0).getDate();
+  uuid() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+  }
 
-        var grid = document.getElementById('calGrid');
-        grid.innerHTML = '';
-
-        // Prev month filler
-        for (var i = startOffset - 1; i >= 0; i--) {
-          var ph = document.createElement('button');
-          ph.type = 'button';
-          ph.className = 'cal-day cal-day--other';
-          ph.textContent = prevDays - i;
-          ph.disabled = true;
-          grid.appendChild(ph);
-        }
-
-        // Current month
-        for (var d = 1; d <= daysInMonth; d++) {
-          var dayDate = new Date(y, m, d);
-          dayDate.setHours(0, 0, 0, 0);
-          var btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'cal-day';
-          btn.textContent = d;
-          var iso = y + '-' + pad(m + 1) + '-' + pad(d);
-          btn.dataset.date = iso;
-
-          if (dayDate < today || dayDate.getDay() === 0) {
-            btn.disabled = true;
+  submit() {
+    const { selected, slot, sending, lang } = this.state;
+    if (!selected || !slot || sending) return;
+    const en = lang === 'en';
+    const f = this.readForm();
+    const err = this.validate(f, en);
+    if (err) { this.setState({ formError: err }); return; }
+    const date = this.key(selected);
+    const apptId = this.uuid();   // chiave di idempotenza: un retry non crea doppioni
+    this.setState({ sending: true, formError: '' });
+    const body = { barber: BARBER, nome: f.nome, telefono: f.telefono, email: f.email || null,
+                   servizio: f.servizio, data: date, ora: slot, notes: f.note || null, apptId };
+    fetch('/api/book', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(r => r.text().then(txt => { let data = {}; try { data = txt ? JSON.parse(txt) : {}; } catch (e) {} return { ok: r.ok, status: r.status, data }; }))
+      .then(res => {
+        if (!res.ok) {
+          const msg = res.data && res.data.error ? res.data.error
+            : (en ? 'Something went wrong. Please try again in a few minutes.' : 'Errore durante la prenotazione. Riprova tra qualche minuto.');
+          if (res.status === 409) {
+            // Slot preso nel frattempo: si torna alla scelta con gli orari aggiornati.
+            this.setState({ sending: false, stage: 'pick', slot: null, formError: '' });
+            this.loadAvail(selected, true);
+            this.scrollToSlots();
+            this.setState({ availReason: msg });
           } else {
-            if (dayDate.getTime() === today.getTime()) btn.classList.add('cal-day--today');
-            if (state.date === iso) btn.classList.add('cal-day--selected');
-            btn.addEventListener('click', (function (b) {
-              return function () { pickDay(b); };
-            })(btn));
+            this.setState({ sending: false, formError: msg });
           }
-          grid.appendChild(btn);
-        }
-
-        // Next month filler
-        var total   = startOffset + daysInMonth;
-        var fill    = (7 - (total % 7)) % 7;
-        for (var n = 1; n <= fill; n++) {
-          var ph2 = document.createElement('button');
-          ph2.type = 'button';
-          ph2.className = 'cal-day cal-day--other';
-          ph2.textContent = n;
-          ph2.disabled = true;
-          grid.appendChild(ph2);
-        }
-      }
-
-      function pickDay(btn) {
-        document.querySelectorAll('.cal-day--selected').forEach(function (d) {
-          d.classList.remove('cal-day--selected');
-        });
-        btn.classList.add('cal-day--selected');
-        state.date = btn.dataset.date;
-        state.time = null;
-        loadSlots(state.barber, state.date);
-      }
-
-      // ── Slots ─────────────────────────────────────────────
-
-      function loadSlots(barber, date) {
-        var sec  = document.getElementById('slotsSection');
-        var hint = document.getElementById('slotHint');
-        var grid = document.getElementById('slotGrid');
-        sec.style.display = 'block';
-        hint.textContent  = 'Caricamento orari…';
-        grid.innerHTML    = '';
-
-        var calendarPromise = fetch('/api/available?barber=' + barber + '&date=' + date)
-          .then(function (r) { return r.json(); })
-          .catch(function () { return { slots: null }; });
-
-        // SECURITY: legge dalla VIEW appointment_slots (no PII) invece che dalla tabella
-        var supabasePromise = sb.from('appointment_slots')
-          .select('time')
-          .eq('barber', barber)
-          .eq('date', date)
-          .then(function (res) { return (res.data || []).map(function (r) { return r.time.slice(0, 5); }); })
-          .catch(function () { return []; });
-
-        Promise.all([calendarPromise, supabasePromise]).then(function (results) {
-          var calData    = results[0] || {};
-          var dbBooked   = results[1];
-
-          // Giorno chiuso (festività / domenica / mezza giornata senza slot residui)
-          if (calData.closed) {
-            renderClosed(calData.reason);
-            return;
-          }
-
-          var slots;
-          if (calData.slots && calData.slots.length) {
-            slots = calData.slots.map(function (s) {
-              // Google Calendar è autoritativo: lo slot è libero solo se il calendario
-              // del barbiere è libero (s.available) E non c'è prenotazione attiva in DB.
-              // Così i blocchi creati a mano dai barbieri su Calendar bloccano i clienti.
-              return { time: s.time, available: s.available && dbBooked.indexOf(s.time) === -1 };
-            });
-          } else if (calData.slots) {
-            // available ha risposto con lista vuota ma senza flag closed → nessuno slot
-            renderClosed(calData.reason);
-            return;
-          } else {
-            // available non raggiungibile → fallback locale (solo Supabase come guardia)
-            slots = fallbackSlots(barber).map(function (s) {
-              return { time: s.time, available: dbBooked.indexOf(s.time) === -1 };
-            });
-          }
-          renderSlots(slots);
-        });
-      }
-
-      // Causa a monte dell'incidente 30/07/2026: la griglia slot si carica una
-      // volta sola. Il cliente aveva la pagina aperta da prima che le 13:30
-      // venissero occupate (74 secondi di scarto fra le due prenotazioni) e
-      // vedeva ancora l'orario libero. Al ritorno sulla scheda ricarichiamo la
-      // disponibilità — ma solo se sta ancora scegliendo l'orario, per non
-      // resettare chi è già dentro al form.
-      document.addEventListener('visibilitychange', function () {
-        if (document.hidden) return;
-        if (!state.barber || !state.date) return;
-        if (!stepForm.classList.contains('book-step--hidden')) return;
-        state.time = null; // la selezione precedente potrebbe non essere più libera
-        loadSlots(state.barber, state.date);
-      });
-
-      function fallbackSlots(barber) {
-        // Berlin: appuntamento 30min senza pausa = slot ogni 30min.
-        // Pausa pranzo 12:00-13:00: mattina si ferma, pomeriggio riparte da 13:00.
-        var step     = 30;
-        var breakStart = 12 * 60; // 12:00
-        var breakEnd   = 13 * 60; // 13:00
-        var endMin     = 18 * 60 + 30; // ultimo slot 18:30 (finisce alle 19:00)
-        var slots = [];
-
-        // Mattina: da 09:00 fino a prima della pausa
-        for (var m = 9 * 60; m < breakStart; m += step) {
-          var h = Math.floor(m / 60);
-          var mm = m % 60;
-          slots.push((h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm);
-        }
-
-        // Pomeriggio: riparte da 13:00
-        for (var p = breakEnd; p <= endMin; p += step) {
-          var ph = Math.floor(p / 60);
-          var pm = p % 60;
-          slots.push((ph < 10 ? '0' : '') + ph + ':' + (pm < 10 ? '0' : '') + pm);
-        }
-
-        return slots.map(function (t) { return { time: t, available: true }; });
-      }
-
-      function renderClosed(reason) {
-        var hint = document.getElementById('slotHint');
-        var grid = document.getElementById('slotGrid');
-        grid.innerHTML = '';
-        hint.textContent = reason
-          ? 'Chiuso in questa data (' + reason + '). Scegli un altro giorno.'
-          : 'Chiuso in questa data. Scegli un altro giorno.';
-      }
-
-      function renderSlots(slots) {
-        var hint = document.getElementById('slotHint');
-        var grid = document.getElementById('slotGrid');
-        grid.innerHTML = '';
-        var avail = slots.filter(function (s) { return s.available; });
-        if (!avail.length) {
-          hint.textContent = 'Nessun orario disponibile per questa data.';
           return;
         }
-        hint.textContent = 'Seleziona un orario:';
-        slots.forEach(function (slot) {
-          var btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'slot-btn';
-          btn.textContent = slot.time;
-          btn.disabled = !slot.available;
-          btn.addEventListener('click', function () {
-            grid.querySelectorAll('.slot-btn').forEach(function (b) { b.classList.remove('is-selected'); });
-            btn.classList.add('is-selected');
-            state.time = slot.time;
-            setTimeout(goToForm, 380);
-          });
-          grid.appendChild(btn);
-        });
-      }
-
-      // ── Step 2 → 3 ────────────────────────────────────────
-
-      function goToForm() {
-        hideStep(stepCalendar, function () {
-          buildRecap();
-          document.getElementById('h-barber').value = state.barber;
-          document.getElementById('h-date').value   = state.date;
-          document.getElementById('h-time').value   = state.time;
-          showStep(stepForm, 'anim-slide');
-        });
-      }
-
-      document.getElementById('backToCalendar').addEventListener('click', function () {
-        hideStep(stepForm, function () {
-          showStep(stepCalendar, 'anim-pop');
-        });
+        // Prenotazione a DB + Calendar. La notifica ai barbieri è best-effort.
+        const cfg = window.MB_CONFIG || {};
+        const notify = cfg.EDGE_FN_URL
+          ? fetch(cfg.EDGE_FN_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ barber: BARBER, name: f.nome, phone: f.telefono, service: f.servizio, date, time: slot, notes: f.note || null }) })
+              .catch(() => {})
+          : Promise.resolve();
+        notify.then(() => this.done(date, slot));
+      })
+      .catch(() => {
+        // Rete caduta: NON mostrare successo.
+        this.setState({ sending: false, formError: en ? 'Network error. Please try again.' : 'Errore di rete. Riprova.' });
       });
+  }
 
-      function buildRecap() {
-        var name    = 'Berlin';
-        var dateObj = new Date(state.date + 'T12:00:00');
-        var dateStr = DAYS[dateObj.getDay()] + ' ' +
-                      dateObj.getDate() + ' ' + MONTHS[dateObj.getMonth()];
-        document.getElementById('bookingRecap').innerHTML =
-          '<div class="recap-item">' +
-            '<span class="recap-label">Barbiere</span>' +
-            '<span class="recap-value">' + name + '</span>' +
-          '</div>' +
-          '<div class="recap-sep"></div>' +
-          '<div class="recap-item">' +
-            '<span class="recap-label">Data</span>' +
-            '<span class="recap-value" style="font-size:15px;text-transform:none;">' + dateStr + '</span>' +
-          '</div>' +
-          '<div class="recap-sep"></div>' +
-          '<div class="recap-item">' +
-            '<span class="recap-label">Orario</span>' +
-            '<span class="recap-value">' + state.time + '</span>' +
-          '</div>';
-      }
+  done(date, time) {
+    if (window.MBTrack && typeof window.MBTrack.markBooked === 'function') { try { window.MBTrack.markBooked(); } catch (e) {} }
+    try { sessionStorage.setItem('mbooking', JSON.stringify({ barber: BARBER, date, time })); } catch (e) {}
+    this.setState({ sending: false, stage: 'done', confetti: this.makeConfetti() });
+    setTimeout(() => { window.location.href = 'conferma.html'; }, 2200);
+  }
 
-      // ── Image upload preview ───────────────────────────────
-
-      document.getElementById('imgRef').addEventListener('change', function (e) {
-        var file = e.target.files[0];
-        if (!file) return;
-        // SECURITY: validazione client-side dimensione (server applica 5MB hard limit)
-        var MAX_BYTES = 5 * 1024 * 1024;
-        if (file.size > MAX_BYTES) {
-          alert('Immagine troppo grande (max 5MB).');
-          e.target.value = '';
-          return;
-        }
-        // SECURITY: whitelist MIME type
-        var ALLOWED = ['image/jpeg','image/jpg','image/png','image/webp','image/heic'];
-        if (file.type && ALLOWED.indexOf(file.type) === -1) {
-          alert('Formato immagine non supportato. Usa JPG, PNG o WEBP.');
-          e.target.value = '';
-          return;
-        }
-        var preview = document.getElementById('uploadPreview');
-        var reader  = new FileReader();
-        reader.onload = function (ev) {
-          preview.src = ev.target.result;
-          preview.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-      });
-
-      // ── Submit + Apple Pay animation ───────────────────────
-
-      document.getElementById('prenotaForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        var nome     = document.getElementById('nome').value.trim().slice(0, 100);
-        var telefono = document.getElementById('telefono').value.trim().slice(0, 32);
-        var email    = document.getElementById('email').value.trim().slice(0, 254);
-        var note     = document.getElementById('note-taglio').value.trim().slice(0, 500);
-        var servizio = document.getElementById('servizio').value;
-        // SECURITY: validazione client (server applica controlli definitivi)
-        var ALLOWED_SVC = ['Cut','Fade','Beard','Razor','Full'];
-        var PHONE_RE = /^[\d\s+\-()]{5,32}$/;
-        var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!nome || nome.length < 1)            { document.getElementById('nome').focus(); alert('Nome non valido.'); return; }
-        if (!PHONE_RE.test(telefono))            { document.getElementById('telefono').focus(); alert('Telefono non valido.'); return; }
-        if (!email || !EMAIL_RE.test(email))     { document.getElementById('email').focus(); alert('Email non valida.'); return; }
-        if (ALLOWED_SVC.indexOf(servizio) < 0)   { document.getElementById('servizio').focus(); alert('Seleziona un servizio valido.'); return; }
-        if (!state.barber || !state.date || !state.time) { alert('Sessione scaduta. Riprova la prenotazione.'); return; }
-
-        // Salvo su state per renderli accessibili a doSuccess() (scope IIFE)
-        state.nome     = nome;
-        state.email    = email;
-        state.servizio = servizio;
-
-        var btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.classList.add('is-loading');
-
-        var fileInput = document.getElementById('imgRef');
-        var file      = fileInput.files[0];
-
-        function sendBooking(imgBase64, imgMime, imgName) {
-
-          // ── Prenotazione: UNA sola chiamata, /api/book ──────────────────
-          // Il client NON inserisce più la riga appointments. Prima lo faceva
-          // PRIMA della validazione server: quando /api/book rispondeva 409
-          // (slot già preso) la riga restava a DB come "confirmed" — anon non ha
-          // DELETE sotto RLS, quindi nessun rollback era possibile — e il
-          // gestionale mostrava due clienti sullo stesso orario (incidente
-          // 30/07/2026, berlin 13:30). Ora la riga la crea /api/book con la
-          // service_role DOPO dedup + chiusure + freeBusy: se il server dice no,
-          // a DB non resta nulla.
-          function doBook(imgUrl) {
-            // apptId generato qui = chiave di idempotenza: se la rete va in
-            // timeout e la richiesta viene ritentata, il server riconosce lo
-            // stesso id e non crea un doppione.
-            var aptId = (typeof crypto !== 'undefined' && crypto.randomUUID)
-              ? crypto.randomUUID()
-              : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
-                  return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
-                });
-
-            var calBody = {
-              barber:   state.barber,
-              nome:     nome,
-              email:    email || null,
-              telefono: telefono,
-              servizio: servizio,
-              data:     state.date,
-              ora:      state.time,
-              notes:    note || null,
-              apptId:   aptId
-            };
-            if (imgUrl) { calBody.imgUrl = imgUrl; }
-
-            fetch('/api/book', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(calBody)
-            })
-            .then(function (r) {
-              // Leggi SEMPRE la risposta: il 409 non è più silenziato.
-              return r.text().then(function (txt) {
-                var data = {};
-                try { data = txt ? JSON.parse(txt) : {}; } catch (e) { data = {}; }
-                return { ok: r.ok, status: r.status, data: data };
-              });
-            })
-            .then(function (res) {
-              if (!res.ok) {
-                if (res.status === 409) { doSlotTaken(res.data.error); }
-                else                    { doBookingError(res.data.error); }
-                return null;
-              }
-              // Prenotazione confermata a DB (+ Google Calendar). La notifica ai
-              // barbieri è best-effort: se fallisce, la prenotazione resta valida.
-              return fetch(window.MB_CONFIG.EDGE_FN_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  barber:  state.barber,
-                  name:    nome,
-                  phone:   telefono,
-                  service: servizio,
-                  date:    state.date,
-                  time:    state.time,
-                  notes:   note || null
-                })
-              })
-              .catch(function () { /* notifica non critica */ })
-              .then(function () { doSuccess(); });
-            })
-            .catch(function () {
-              // Rete caduta o server irraggiungibile: NON mostrare successo.
-              doBookingError();
-            });
-          }
-
-          if (imgBase64 && imgMime && imgName) {
-            // SECURITY: nome file safe + uuid per evitare collisioni/upsert overwrite
-            var rawExt = (imgName.split('.').pop() || '').toLowerCase();
-            var safeExt = /^[a-z0-9]{1,5}$/.test(rawExt) ? rawExt : 'jpg';
-            var uuid = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
-              return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
-            });
-            var path = state.barber + '/' + state.date + '_' + state.time.replace(':', '') + '_' + uuid + '.' + safeExt;
-            var blob = base64ToBlob(imgBase64, imgMime);
-            sb.storage.from('bookings').upload(path, blob, { contentType: imgMime, upsert: false })
-              .then(function (res) {
-                if (res.error) { doBook(null); return; }
-                var urlData = sb.storage.from('bookings').getPublicUrl(path);
-                doBook(urlData.data ? urlData.data.publicUrl : null);
-              })
-              .catch(function () { doBook(null); });
-          } else {
-            doBook(null);
-          }
-        }
-
-        function base64ToBlob(b64, mime) {
-          var bytes = atob(b64);
-          var arr   = new Uint8Array(bytes.length);
-          for (var i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-          return new Blob([arr], { type: mime });
-        }
-
-        function doBookingError(msg) {
-          var btn = document.getElementById('submitBtn');
-          btn.disabled = false;
-          btn.classList.remove('is-loading');
-          alert(msg || 'Errore durante la prenotazione. Riprova tra qualche minuto.');
-        }
-
-        // Slot occupato mentre il cliente compilava il form (griglia stantìa o
-        // corsa con un altro cliente): niente successo finto — si torna al
-        // calendario con la disponibilità ricaricata da zero.
-        function doSlotTaken(msg) {
-          var btn = document.getElementById('submitBtn');
-          btn.disabled = false;
-          btn.classList.remove('is-loading');
-          btn.classList.remove('is-success');
-          state.time = null;
-          alert(msg || 'Questo orario è stato appena prenotato da un altro cliente. Scegli un altro orario.');
-          if (state.barber && state.date) { loadSlots(state.barber, state.date); }
-          if (!stepForm.classList.contains('book-step--hidden')) {
-            hideStep(stepForm, function () { showStep(stepCalendar, 'anim-pop'); });
-          }
-        }
-
-        if (file) {
-          var reader = new FileReader();
-          reader.onload = function (ev) {
-            var b64 = ev.target.result.split(',')[1];
-            sendBooking(b64, file.type, file.name);
-          };
-          reader.readAsDataURL(file);
-        } else {
-          sendBooking(null, null, null);
-        }
-      });
-
-      function doSuccess() {
-        var btn = document.getElementById('submitBtn');
-        btn.classList.remove('is-loading');
-        btn.classList.add('is-success');
-
-        // Email di conferma inviata server-side da /api/book (nessuna chiave esposta al client)
-
-        // Analitiche anonime: registra il tempo impiegato per completare la prenotazione
-        if (window.MBTrack && typeof window.MBTrack.markBooked === 'function') {
-          window.MBTrack.markBooked();
-        }
-
-        sessionStorage.setItem('mbooking', JSON.stringify({
-          barber: state.barber,
-          date:   state.date,
-          time:   state.time
-        }));
-
-        setTimeout(function () {
-          window.location.href = 'conferma.html';
-        }, 2200);
-      }
-
-    })();
-  </script>
-
+  renderVals() {
+    const { view, selected, slot, lang, stage, avail, availLoading, availClosed, availReason, availError, service, formError, sending } = this.state;
+    const en = lang === 'en';
+    const away = stage !== 'pick';
+    const dateLabel = selected
+      ? (en ? WD_EN : WD)[selected.getDay()] + ' ' + selected.getDate() + ' ' + (en ? MONTHS_EN : MONTHS)[selected.getMonth()].toLowerCase()
+      : (en ? 'No date selected' : 'Nessuna data scelta');
+    let summary = en ? 'Pick a date from the calendar.' : 'Scegli una data dal calendario.';
+    if (selected && !slot) summary = en ? 'Pick a free time.' : 'Scegli un orario libero.';
+    if (selected && slot) summary = dateLabel + (en ? ' at ' : ' alle ') + slot + (en ? ' — with ' : ' — con ') + BARBER_NAME + '.';
+    let slotsNote = '';
+    if (selected && availLoading) slotsNote = en ? 'Loading times…' : 'Carico gli orari…';
+    else if (selected && availError) slotsNote = en ? 'Could not load times. Try again.' : 'Impossibile caricare gli orari. Riprova.';
+    else if (selected && availClosed) slotsNote = availReason || (en ? 'Closed on this day.' : 'Chiuso in questo giorno.');
+    else if (selected && avail && avail.length === 0) slotsNote = en ? 'No times available on this day.' : 'Nessun orario disponibile in questo giorno.';
+    else if (selected && avail && !avail.some(x => x.available)) slotsNote = en ? 'All times are taken on this day.' : 'Tutti gli orari sono occupati in questo giorno.';
+    else if (selected && availReason) slotsNote = availReason;
+    const minView = new Date(this.state.today.getFullYear(), this.state.today.getMonth(), 1);
+    const maxView = new Date(minView.getFullYear(), minView.getMonth() + MAX_MONTHS_AHEAD, 1);
+    return {
+      days: this.buildDays(en),
+      slots: this.buildSlots(),
+      monthLabel: (en ? MONTHS_EN : MONTHS)[view.getMonth()],
+      yearLabel: String(view.getFullYear()),
+      dateLabel,
+      summary,
+      slotLabel: slot || '—',
+      serviceLabel: service + (en ? ' with ' : ' con ') + BARBER_NAME,
+      showSlotsNote: !!slotsNote,
+      slotsNote,
+      showConfirm: stage === 'confirm',
+      showDone: stage === 'done',
+      showError: !!formError,
+      formError,
+      confirmLabel: sending ? (en ? 'Sending…' : 'Invio…') : (en ? 'Confirm booking' : 'Conferma prenotazione'),
+      confetti: this.state.confetti,
+      pickTransform: away ? 'translateY(-46px) scale(.96)' : 'none',
+      pickOpacity: away ? '0' : '1',
+      pickPointer: away ? 'none' : 'auto',
+      pickPosition: away ? 'absolute' : 'static',
+      doneLine: en
+        ? 'We saved ' + dateLabel + ' at ' + (slot || '') + ' with ' + BARBER_NAME + '. Taking you to the confirmation…'
+        : 'Abbiamo segnato ' + dateLabel + ' alle ' + (slot || '') + ' con ' + BARBER_NAME + '. Ti portiamo alla conferma…',
+      back: () => { if (!sending) this.setState({ stage: 'pick', slot: null, formError: '' }); },
+      rootRef: el => { this.rootEl = el; },
+      panelRef: el => { this.panelEl = el; },
+      slotsCardRef: el => { this.slotsCardEl = el; },
+      confirmCardRef: el => { this.confirmCardEl = el; },
+      scrimRef: el => { this.scrimEl = el; },
+      itBtn: el => { this.itEl = el; },
+      enBtn: el => { this.enEl = el; },
+      nomeRef: el => { this.nomeEl = el; },
+      telRef: el => { this.telEl = el; },
+      emailRef: el => { this.emailEl = el; },
+      servRef: el => { this.servEl = el; if (el && el.value !== service) el.value = service; },
+      noteRef: el => { this.noteEl = el; },
+      onService: e => { const v = e && e.target ? e.target.value : ''; if (SERVICES.includes(v)) this.setState({ service: v }); },
+      openNav: () => this.setNav(true),
+      closeNav: () => this.setNav(false),
+      setIt: () => this.setState({ lang: 'it' }),
+      setEn: () => this.setState({ lang: 'en' }),
+      prevMonth: () => { const nv = new Date(view.getFullYear(), view.getMonth() - 1, 1); if (nv >= minView) this.setState({ view: nv }); },
+      nextMonth: () => { const nv = new Date(view.getFullYear(), view.getMonth() + 1, 1); if (nv <= maxView) this.setState({ view: nv }); },
+      confirm: () => this.submit()
+    };
+  }
+}
+</script>
 </body>
 </html>
