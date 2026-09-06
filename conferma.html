@@ -289,7 +289,10 @@
       } else {
         document.getElementById('confName').textContent  = 'Grazie';
         document.getElementById('confDetail').textContent = 'Ti contatteremo presto.';
-        document.getElementById('confThumb').style.display = 'none';
+        // Un solo barbiere: Berlin si vede anche senza dati di prenotazione
+        // (pagina aperta direttamente o ricaricata).
+        document.getElementById('confThumb').src = 'assets/img/berlin-thumb.png';
+        document.getElementById('confThumb').alt = 'Berlin';
       }
 
       // Navbar
