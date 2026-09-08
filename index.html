@@ -753,16 +753,38 @@ class Component extends DCLogic {
   kickVideos() {
     const root = this.rootEl;
     if (!root) return;
-    root.querySelectorAll('video').forEach(v => {
+    // Su iPhone l'autoplay parte solo se `muted` e `playsinline` sono ATTRIBUTI
+    // veri nel DOM: React li mette come proprietà e Safari non li vede (08/09/2026,
+    // i video restavano neri sul telefono). Qui si rimettono a mano.
+    const vids = [...root.querySelectorAll('video')];
+    vids.forEach(v => {
       v.muted = true;
       v.defaultMuted = true;
       v.volume = 0;
+      v.setAttribute('muted', '');
+      v.setAttribute('playsinline', '');
+      v.setAttribute('webkit-playsinline', '');
+      v.setAttribute('preload', 'metadata');
       v.removeAttribute('controls');
-      const go = () => v.play().catch(() => {});
+      const go = () => { if (v.dataset.inView !== '0') v.play().catch(() => {}); };
+      v.playSafe = go;
       if (v.dataset.playlist) { this.chainVideo(v); } else { v.loop = true; }
       go();
       v.addEventListener('canplay', go, { once: true });
     });
+
+    // Un decoder video per volta è già tanto per un telefono: sei clip in
+    // riproduzione insieme fanno inchiodare (o annerire) tutto. Suona solo
+    // quello che si vede; gli altri stanno in pausa.
+    if (typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        const v = e.target;
+        if (e.isIntersecting) { v.dataset.inView = '1'; v.play().catch(() => {}); }
+        else { v.dataset.inView = '0'; v.pause(); }
+      });
+    }, { threshold: 0.15 });
+    vids.forEach(v => io.observe(v));
   }
 
   // «Dalla sedia, in diretta»: solo i tagli di Berlin (data-playlist); se una
@@ -787,7 +809,7 @@ class Component extends DCLogic {
         const show = () => { v.style.opacity = '1'; };
         v.addEventListener('playing', show, { once: true });
         setTimeout(show, 1500);   // se «playing» non arriva, non restare al buio
-        v.play().catch(() => {});
+        if (v.dataset.inView !== '0') v.play().catch(() => {});
       }, 700);
     };
     v.addEventListener('ended', () => { if (!v.loop) next(); });
