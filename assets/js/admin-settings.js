@@ -40,7 +40,7 @@
     afternoon_only: 'Aperti solo pomeriggio',
     custom:         'Orario personalizzato'
   };
-  var SCOPE_LABELS = { both: 'Entrambi', george: 'George', berlin: 'Berlin' };
+  var SCOPE_LABELS = { both: 'Tutti', george: 'George', berlin: 'Berlin', reggie: 'Reggie' };
 
   // Widget della dashboard riordinabili. id = chiave persistita; sel = elemento reale.
   var WIDGET_DEFS = [
@@ -455,7 +455,7 @@
         '<form class="st-cl-form is-hidden" id="closuresForm">' +
           '<div class="st-grid2">' +
             '<label class="st-field"><span class="st-label">Per chi</span>' +
-              '<select id="clScope" class="st-input"><option value="both">Entrambi</option><option value="berlin">Solo Berlin</option></select></label>' +
+              '<select id="clScope" class="st-input"><option value="both">Tutti</option><option value="berlin">Solo Berlin</option><option value="reggie">Solo Reggie</option></select></label>' +
             '<label class="st-field"><span class="st-label">Modalità</span>' +
               '<select id="clMode" class="st-input">' +
                 '<option value="full">Chiuso tutto il giorno</option>' +

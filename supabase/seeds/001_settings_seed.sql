@@ -44,7 +44,8 @@ on conflict (name) do nothing;
 -- George disattivato.
 insert into public.staff (slug, display_name, calendar_id, event_duration_min, slot_pitch_min, active, sort_order) values
   ('george', 'George', null, 40, 45, false, 2),
-  ('berlin', 'Berlin', null, 30, 30, true, 1)
+  ('berlin', 'Berlin', null, 30, 30, true, 1),
+  ('reggie', 'Reggie', null, 30, 30, true, 2)   -- migration 010: calendar-less
 on conflict (slug) do nothing;
 
 -- ----------------------------------------------------------------------------
@@ -71,6 +72,13 @@ on conflict (staff_slug, weekday) do nothing;
 
 insert into public.business_hours (staff_slug, weekday, ranges)
 select 'berlin', wd,
+       '[{"start":"09:00","end":"12:00"},{"start":"13:00","end":"19:00"}]'::jsonb
+from generate_series(1, 6) as wd
+on conflict (staff_slug, weekday) do nothing;
+
+-- REGGIE (migration 010): stessi orari di Berlin.
+insert into public.business_hours (staff_slug, weekday, ranges)
+select 'reggie', wd,
        '[{"start":"09:00","end":"12:00"},{"start":"13:00","end":"19:00"}]'::jsonb
 from generate_series(1, 6) as wd
 on conflict (staff_slug, weekday) do nothing;

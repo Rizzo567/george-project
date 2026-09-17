@@ -109,9 +109,12 @@ export async function getAllowedServices(env) {
 }
 
 // Lista barbieri ammessi (book.js / available.js): staff.slug where active.
-// Fallback: ['berlin'] (unico barbiere attivo).
+// Fallback (DB non raggiungibile): ['berlin', 'reggie'] — i barbieri attivi.
+// Reggie è calendar-less: col fallback la sua disponibilità viene comunque
+// dalle prenotazioni Supabase e il CHECK appointments_barber_check (migr. 010)
+// resta l'ultima parola sull'insert.
 export async function getAllowedBarbers(env) {
-  const fallback = ['berlin'];
+  const fallback = ['berlin', 'reggie'];
   const config = await loadShopConfig(env);
   if (config && Array.isArray(config.staff)) {
     const slugs = config.staff
@@ -226,7 +229,7 @@ function hhmmToMin(t) {
 // giorno feriale). Usati quando il DB non è disponibile o non ha una riga
 // business_hours per (barbiere, giorno).
 function _fallbackWorkRanges(barber) {
-  // Unico barbiere: Berlin. Con pitch 30 la griglia copre i range esatti
+  // Berlin e Reggie hanno gli stessi orari. Con pitch 30 la griglia copre i range esatti
   // (ultimo slot pomeridiano 18:30–19:00): nessuno slot extra necessario.
   return [
     { start: 9 * 60,   end: 12 * 60 }, // mattina 09:00–12:00
@@ -288,7 +291,8 @@ export function getCalendarId(barber, env, config) {
       return s.calendar_id.trim();
     }
   }
-  // Env fallback SOLO per Berlin (unico barbiere, con calendario Google).
+  // Env fallback SOLO per Berlin (unico barbiere con calendario Google).
+  // Reggie e altri slug: null → path Supabase-only (niente freeBusy/eventi).
   if (barber === 'berlin') return env.BERLIN_CALENDAR_ID || null;
   return null;
 }

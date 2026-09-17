@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, loadShopConfig, getAllowedBarbers } from './_google.js';
 
 const ALLOWED_ORIGINS = [
   'https://misterbarber.it',
@@ -34,17 +34,26 @@ export async function onRequestPost({ request, env }) {
 
   const { barber, eventId } = body;
 
-  if (!['berlin'].includes(barber)) {
+  // Barbieri ammessi DB-driven (staff active, fallback berlin+reggie).
+  // 'berlin' resta sempre accettato: ha il calendario Google.
+  const allowedBarbers = await getAllowedBarbers(env);
+  if (typeof barber !== 'string' || !(barber === 'berlin' || allowedBarbers.includes(barber))) {
     return json({ error: 'Barbiere non valido' }, 400, corsHeaders);
   }
   if (!eventId || typeof eventId !== 'string' || eventId.length > 1024) {
     return json({ error: 'eventId non valido' }, 400, corsHeaders);
   }
 
-  const calendarId     = getCalendarId(barber, env);
+  const shopConfig     = await loadShopConfig(env);
+  const calendarId     = getCalendarId(barber, env, shopConfig);
   const serviceAccount = getServiceAccount(barber, env);
 
   if (!calendarId || !serviceAccount.email) {
+    // Barbiere calendar-less (es. Reggie): nessun evento Google da cancellare.
+    // La cancellazione vive solo su Supabase → no-op riuscito.
+    if (barber !== 'berlin') {
+      return json({ ok: true, skipped: 'no_calendar' }, 200, corsHeaders);
+    }
     return json({ error: 'Barbiere non configurato' }, 400, corsHeaders);
   }
 

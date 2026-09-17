@@ -507,7 +507,7 @@
   }
 
   // Etichetta barbiere generica (slug → Capitalizzato). Copre qualsiasi slug
-  // (oggi solo berlin) senza dover toccare ogni punto di rendering.
+  // (oggi berlin e reggie) senza dover toccare ogni punto di rendering.
   function brbLabel(slug) {
     return slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : '—';
   }
@@ -649,7 +649,7 @@
   }
 
   // ── Auto-complete appuntamenti scaduti ─────────────────────
-  // Berlin = appuntamento da 30 min.
+  // Berlin e Reggie = appuntamento da 30 min.
   // Completa automaticamente 1 min dopo la fine dell'appuntamento.
   function slotDurationMin(barber) {
     return 30;
@@ -854,7 +854,7 @@
       });
     }
 
-    // ── Line chart: andamento prenotazioni Berlin ───────────
+    // ── Line chart: andamento prenotazioni per barbiere ─────
     var ctxBrb = document.getElementById('chartBarbers');
     if (ctxBrb) {
       chartBarbers = new Chart(ctxBrb.getContext('2d'), {
@@ -871,6 +871,18 @@
               tension: 0.35,
               pointRadius: 3,
               pointBackgroundColor: '#E85A1F',
+              pointBorderColor: '#1A1A1A',
+              pointBorderWidth: 1.5
+            },
+            {
+              label: 'Reggie',
+              data: [],
+              borderColor: '#6FA8DC',
+              backgroundColor: 'rgba(111,168,220,0.07)',
+              fill: true,
+              tension: 0.35,
+              pointRadius: 3,
+              pointBackgroundColor: '#6FA8DC',
               pointBorderColor: '#1A1A1A',
               pointBorderWidth: 1.5
             }
@@ -952,10 +964,12 @@
     var total       = rows.length;
     var todayCount  = rows.filter(function(r) { return r.date === todayStr; }).length;
     var berlinCount   = rows.filter(function(r) { return r.barber === 'berlin'; }).length;
+    var reggieCount   = rows.filter(function(r) { return r.barber === 'reggie'; }).length;
 
     animateCount(document.getElementById('kpiTotal'),    total);
     animateCount(document.getElementById('kpiToday'),    todayCount);
     animateCount(document.getElementById('kpiBerlin'),   berlinCount);
+    animateCount(document.getElementById('kpiReggie'),   reggieCount);
 
     // "Giornata libera" empty state
     var todaySub = document.getElementById('kpiTodaySub');
@@ -998,6 +1012,9 @@
     var bCurr = rows.filter(function(r) { return r.barber==='berlin' && inRange(r.date, w0, now); }).length;
     var bPrev = rows.filter(function(r) { return r.barber==='berlin' && inRange(r.date, w1, wEnd); }).length;
     renderTrend('trendBerlin', bCurr, bPrev);
+    var rCurr = rows.filter(function(r) { return r.barber==='reggie' && inRange(r.date, w0, now); }).length;
+    var rPrev = rows.filter(function(r) { return r.barber==='reggie' && inRange(r.date, w1, wEnd); }).length;
+    renderTrend('trendReggie', rCurr, rPrev);
 
     // Prossimo appuntamento
     var upcoming = rows.filter(function(r) {
@@ -1071,11 +1088,14 @@
       chartServizi.update();
     }
 
-    // Andamento prenotazioni Berlin
+    // Andamento prenotazioni per barbiere (dataset 0 = Berlin, 1 = Reggie)
     if (chartBarbers) {
       chartBarbers.data.labels = labels14;
-      chartBarbers.data.datasets[0].data = dates14.map(function(ds) {
-        return rows.filter(function(r) { return r.date===ds && r.barber==='berlin'; }).length;
+      ['berlin', 'reggie'].forEach(function(slug, i) {
+        if (!chartBarbers.data.datasets[i]) return;
+        chartBarbers.data.datasets[i].data = dates14.map(function(ds) {
+          return rows.filter(function(r) { return r.date===ds && r.barber===slug; }).length;
+        });
       });
       chartBarbers.update();
     }

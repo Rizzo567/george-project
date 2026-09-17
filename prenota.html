@@ -13,7 +13,7 @@
 <helmet>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Prenota — Mister Barber, Pavia</title>
-  <meta name="description" content="Prenota il tuo taglio da Mister Barber, Via Torino 38 Pavia. Scegli giorno e orario libero con Berlin: conferma in 30 secondi.">
+  <meta name="description" content="Prenota il tuo taglio da Mister Barber, Via Torino 38 Pavia. Scegli il barbiere (Berlin o Reggie), giorno e orario libero: conferma in 30 secondi.">
   <link rel="icon" type="image/png" href="assets/img/logo.png">
   <link rel="apple-touch-icon" href="assets/img/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -84,6 +84,21 @@
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,368px),1fr));gap:clamp(16px,2vw,24px);align-items:start;position:{{ pickPosition }};top:0;left:0;right:0;transform:{{ pickTransform }};opacity:{{ pickOpacity }};pointer-events:{{ pickPointer }};transition:transform .62s cubic-bezier(.3,.8,.25,1),opacity .45s ease">
 
+      <div style="grid-column:1/-1;border-radius:28px;padding:clamp(16px,2vw,22px) clamp(20px,2.2vw,26px);background:rgba(255,255,255,.07);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.16);color:#F5F5F7;display:flex;align-items:center;justify-content:space-between;gap:14px 20px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <span data-en="Barber" style="font-size:12px;font-weight:600;letter-spacing:.02em;color:rgba(245,245,247,.5)">Barbiere</span>
+          <span data-en="Who cuts your hair?" style="font-size:22px;font-weight:600;letter-spacing:-.01em">Con chi ti tagli?</span>
+        </div>
+        <div role="radiogroup" aria-label="Barbiere" style="display:flex;gap:clamp(8px,1.4vw,12px);flex-wrap:wrap">
+          <sc-for list="{{ barbers }}" as="b" hint-placeholder-count="2">
+            <button onClick="{{ b.pick }}" role="radio" aria-checked="{{ b.checked }}" style="display:flex;align-items:center;gap:10px;padding:6px 18px 6px 6px;border-radius:99px;border:1px solid {{ b.border }};background:{{ b.bg }};color:{{ b.fg }};cursor:pointer;font-size:15px;font-weight:600;letter-spacing:-.01em;transition:background .2s ease,border-color .2s ease,color .2s ease">
+              <img src="{{ b.thumb }}" alt="" style="width:40px;height:40px;border-radius:99px;object-fit:cover;background:{{ b.thumbBg }};flex:0 0 auto" />
+              <span>{{ b.name }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
       <div style="border-radius:28px;padding:clamp(20px,2.2vw,26px);background:rgba(255,255,255,.07);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.16);color:#F5F5F7">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px">
           <div style="display:flex;flex-direction:column;gap:2px">
@@ -122,7 +137,7 @@
               <span style="grid-column:1/-1;font-size:13px;line-height:1.5;color:rgba(245,245,247,.62)">{{ slotsNote }}</span>
             </sc-if>
           </div>
-          <img src="assets/img/berlin-punta.png" alt="Berlin" style="flex:0 0 auto;width:clamp(72px,13vw,158px);height:auto;filter:drop-shadow(0 18px 26px rgba(0,0,0,.5))" />
+          <img src="{{ barberSlotsImg }}" alt="{{ barberName }}" style="flex:0 0 auto;width:{{ barberSlotsImgW }};height:auto;filter:drop-shadow(0 18px 26px rgba(0,0,0,.5))" />
         </div>
 
         <div style="height:1px;background:rgba(255,255,255,.12)"></div>
@@ -196,7 +211,7 @@
           </div>
         </div>
 
-        <img src="assets/img/berlin-postazione.png" alt="Berlin" style="flex:0 0 auto;margin:0 auto;width:clamp(190px,22vw,300px);height:auto;filter:drop-shadow(0 22px 30px rgba(0,0,0,.55))" />
+        <img src="{{ barberConfirmImg }}" alt="{{ barberName }}" style="flex:0 0 auto;margin:0 auto;width:{{ barberConfirmImgW }};height:auto;filter:drop-shadow(0 22px 30px rgba(0,0,0,.55))" />
       </div>
     </sc-if>
 
@@ -225,7 +240,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 // Prenotazioni — stessa grafica del design, backend vero:
-//   GET  /api/available?barber=berlin&date=YYYY-MM-DD → {slots:[{time,available}], closed?, reason?}
+//   GET  /api/available?barber=berlin|reggie&date=YYYY-MM-DD (barbiere scelto dall'utente) → {slots:[{time,available}], closed?, reason?}
 //   POST /api/book {barber,nome,telefono,email,servizio,data,ora,notes,apptId} → {ok,apptId} | {error}
 //   poi notifica best-effort (Supabase edge fn) → sessionStorage.mbooking → conferma.html
 const MONTHS = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
@@ -233,8 +248,25 @@ const MONTHS_EN = ['January','February','March','April','May','June','July','Aug
 const WD = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
 const WD_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const SEL = '#F5F5F7';
-const BARBER = 'berlin';
-const BARBER_NAME = 'Berlin';
+// Barbieri prenotabili. Lo slug deve esistere (active) in `staff` su Supabase:
+// /api/available e /api/book lo validano server-side (getAllowedBarbers).
+const BARBERS = [
+  { slug: 'berlin', name: 'Berlin', thumb: 'assets/img/berlin-face.png',
+    slotsImg: 'assets/img/berlin-punta.png', slotsW: 'clamp(72px,13vw,158px)',
+    confirmImg: 'assets/img/berlin-postazione.png', confirmW: 'clamp(190px,22vw,300px)' },
+  { slug: 'reggie', name: 'Reggie', thumb: 'assets/img/reggie-face.png',
+    slotsImg: 'assets/img/reggie.png', slotsW: 'clamp(52px,9vw,110px)',
+    confirmImg: 'assets/img/reggie.png', confirmW: 'clamp(120px,14vw,190px)' }
+];
+const DEFAULT_BARBER = 'berlin';
+function barberBySlug(slug) { return BARBERS.find(b => b.slug === slug) || BARBERS[0]; }
+function initialBarber() {
+  try {
+    const q = new URLSearchParams(window.location.search).get('barber');
+    if (q && BARBERS.some(b => b.slug === q)) return q;
+  } catch (e) {}
+  return DEFAULT_BARBER;
+}
 const CLOSED_WEEKDAYS = [0];            // domenica: come il sito precedente; le altre chiusure le dice il server
 const SERVICES = ['Cut', 'Fade', 'Beard', 'Razor', 'Full'];
 const MAX_MONTHS_AHEAD = 12;
@@ -246,6 +278,7 @@ class Component extends DCLogic {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     this.state = {
       lang: 'it',
+      barber: initialBarber(),
       view: new Date(today.getFullYear(), today.getMonth(), 1),
       today,
       selected: null,
@@ -346,21 +379,23 @@ class Component extends DCLogic {
   isOpen(d) { return !CLOSED_WEEKDAYS.includes(d.getDay()); }
 
   // ── disponibilità dal server ──────────────────────────────────────
-  loadAvail(d, force) {
+  loadAvail(d, force, barberSlug) {
     const iso = this.key(d);
-    const cached = this.availCache[iso];
+    const barber = barberSlug || this.state.barber;
+    const ck = barber + '|' + iso;
+    const cached = this.availCache[ck];
     if (cached && !force) {
       this.setState({ avail: cached.slots, availClosed: cached.closed, availReason: cached.reason, availLoading: false, availError: false });
       return;
     }
     const req = ++this.availReq;
     this.setState({ avail: null, availLoading: true, availClosed: false, availReason: '', availError: false });
-    fetch('/api/available?barber=' + BARBER + '&date=' + iso)
+    fetch('/api/available?barber=' + encodeURIComponent(barber) + '&date=' + iso)
       .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
       .then(data => {
         if (req !== this.availReq) return;
         const entry = { slots: Array.isArray(data.slots) ? data.slots : [], closed: !!data.closed, reason: data.reason || '' };
-        this.availCache[iso] = entry;
+        this.availCache[ck] = entry;
         this.setState({ avail: entry.slots, availClosed: entry.closed, availReason: entry.reason, availLoading: false, availError: false });
       })
       .catch(() => {
@@ -441,8 +476,17 @@ class Component extends DCLogic {
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
   }
 
+  pickBarber(slug) {
+    const { barber, selected, sending, stage } = this.state;
+    if (sending || stage !== 'pick' || slug === barber || !BARBERS.some(b => b.slug === slug)) return;
+    this.setState({ barber: slug, slot: null, formError: '' });
+    // Griglia orari ricaricata per il nuovo barbiere (ogni barbiere ha i suoi slot).
+    if (selected) this.loadAvail(selected, false, slug);
+  }
+
   submit() {
-    const { selected, slot, sending, lang } = this.state;
+    const { selected, slot, sending, lang, barber } = this.state;
+    const BARBER = barberBySlug(barber).slug;
     if (!selected || !slot || sending) return;
     const en = lang === 'en';
     const f = this.readForm();
@@ -487,14 +531,16 @@ class Component extends DCLogic {
 
   done(date, time) {
     if (window.MBTrack && typeof window.MBTrack.markBooked === 'function') { try { window.MBTrack.markBooked(); } catch (e) {} }
-    try { sessionStorage.setItem('mbooking', JSON.stringify({ barber: BARBER, date, time })); } catch (e) {}
+    try { sessionStorage.setItem('mbooking', JSON.stringify({ barber: this.state.barber, date, time })); } catch (e) {}
     this.setState({ sending: false, stage: 'done', confetti: this.makeConfetti() });
     setTimeout(() => { window.location.href = 'conferma.html'; }, 2200);
   }
 
   renderVals() {
-    const { view, selected, slot, lang, stage, avail, availLoading, availClosed, availReason, availError, service, formError, sending } = this.state;
+    const { view, selected, slot, lang, stage, avail, availLoading, availClosed, availReason, availError, service, formError, sending, barber } = this.state;
     const en = lang === 'en';
+    const cur = barberBySlug(barber);
+    const BARBER_NAME = cur.name;
     const away = stage !== 'pick';
     const dateLabel = selected
       ? (en ? WD_EN : WD)[selected.getDay()] + ' ' + selected.getDate() + ' ' + (en ? MONTHS_EN : MONTHS)[selected.getMonth()].toLowerCase()
@@ -512,6 +558,22 @@ class Component extends DCLogic {
     const minView = new Date(this.state.today.getFullYear(), this.state.today.getMonth(), 1);
     const maxView = new Date(minView.getFullYear(), minView.getMonth() + MAX_MONTHS_AHEAD, 1);
     return {
+      barbers: BARBERS.map(b => {
+        const on = b.slug === cur.slug;
+        return {
+          name: b.name, thumb: b.thumb, checked: on ? 'true' : 'false',
+          pick: () => this.pickBarber(b.slug),
+          bg: on ? SEL : 'rgba(255,255,255,.06)',
+          border: on ? SEL : 'rgba(255,255,255,.14)',
+          fg: on ? '#0B0B0B' : '#F5F5F7',
+          thumbBg: on ? 'rgba(11,11,11,.12)' : 'rgba(255,255,255,.1)'
+        };
+      }),
+      barberName: BARBER_NAME,
+      barberSlotsImg: cur.slotsImg,
+      barberSlotsImgW: cur.slotsW,
+      barberConfirmImg: cur.confirmImg,
+      barberConfirmImgW: cur.confirmW,
       days: this.buildDays(en),
       slots: this.buildSlots(),
       monthLabel: (en ? MONTHS_EN : MONTHS)[view.getMonth()],

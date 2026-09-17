@@ -15,6 +15,9 @@ const BOOKING_SHARED_SECRET = Deno.env.get('BOOKING_SHARED_SECRET') ?? '';
 
 const BARBER_EMAILS: Record<string, string> = {
   berlin: 'superberlin0204@gmail.com',
+  // Reggie non ha ancora un indirizzo suo: le notifiche vanno alla mail del
+  // negozio (quella di Berlin). Sostituire quando Reggie avrà la sua email.
+  reggie: 'superberlin0204@gmail.com',
 };
 
 // Barbieri validi ma SENZA email configurata: la notifica email viene saltata

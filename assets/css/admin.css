@@ -511,6 +511,8 @@ body {
   margin-right: 4px;
 }
 .bl-dot--berlin { background: #E85A1F; }
+.bl-dot--reggie { background: #6FA8DC; }
+.kpi-card--reggie .kpi-value { color: #6FA8DC; }
 .bl-name {
   font-size: 10px;
   letter-spacing: 0.14em;

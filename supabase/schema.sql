@@ -16,7 +16,7 @@ create table if not exists public.appointments (
   id          uuid        default gen_random_uuid() primary key,
   name        text        not null check (char_length(name) between 1 and 100),
   phone       text        not null check (char_length(phone) between 5 and 32),
-  barber      text        not null check (barber in ('george', 'berlin', 'gabriele')),
+  barber      text        not null check (barber in ('george', 'berlin', 'gabriele', 'reggie')),
   service     text        not null check (service in ('Cut','Fade','Beard','Razor','Full')),
   date        date        not null,
   time        time        not null,
@@ -53,7 +53,7 @@ create policy "anon_insert_only"
     -- difensiva: vincoli replicati anche in policy
     char_length(name)  between 1 and 100
     and char_length(phone) between 5 and 32
-    and barber in ('george','berlin','gabriele')
+    and barber in ('george','berlin','gabriele','reggie')
     and service in ('Cut','Fade','Beard','Razor','Full')
     and (notes is null or char_length(notes) <= 500)
     and status in ('pending','confirmed')  -- anon non può creare prenotazioni già completed/cancelled
@@ -177,7 +177,7 @@ revoke all on function public.gdpr_delete_by_phone(text) from public, anon, auth
 -- Lette server-side da /api/available e /api/book (CF Functions, anon key)
 -- e scritte dal gestionale (authenticated).
 --
--- scope:  'both' | 'george' | 'berlin'  → a quale barbiere si applica
+-- scope:  'both' | 'george' | 'berlin' | 'gabriele' | 'reggie'  → a quale barbiere si applica
 -- mode:   'full'          → chiuso tutto il giorno
 --         'morning_only'  → aperti solo mattina (09:00–12:00)
 --         'afternoon_only'→ aperti solo pomeriggio (13:00–chiusura)
@@ -187,7 +187,7 @@ revoke all on function public.gdpr_delete_by_phone(text) from public, anon, auth
 -- ============================================================================
 create table if not exists public.closures (
   id           uuid        default gen_random_uuid() primary key,
-  scope        text        not null check (scope in ('both','george','berlin','gabriele')),
+  scope        text        not null check (scope in ('both','george','berlin','gabriele','reggie')),
   start_date   date        not null,
   end_date     date        not null check (end_date >= start_date),
   mode         text        not null check (mode in ('full','morning_only','afternoon_only','custom')),
@@ -222,7 +222,7 @@ create policy "closures_auth_all"
   on public.closures for all
   to authenticated
   using (true)
-  with check (scope in ('both','george','berlin','gabriele'));
+  with check (scope in ('both','george','berlin','gabriele','reggie'));
 
 grant select on public.closures to anon;
 grant select, insert, update, delete on public.closures to authenticated;

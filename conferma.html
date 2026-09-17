@@ -270,20 +270,24 @@
                     'luglio','agosto','settembre','ottobre','novembre','dicembre'];
       var DAYS   = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
 
+      var BARBERS = {
+        berlin: { name: 'Berlin', thumb: 'assets/img/berlin-thumb.png' },
+        reggie: { name: 'Reggie', thumb: 'assets/img/reggie-thumb.png' }
+      };
       var raw = sessionStorage.getItem('mbooking');
       var validBarber = false, validDate = false, validTime = false;
       var b = null;
       try {
         b = raw ? JSON.parse(raw) : null;
         if (b && typeof b === 'object') {
-          validBarber = b.barber === 'berlin';
+          validBarber = Object.prototype.hasOwnProperty.call(BARBERS, b.barber);
           validDate   = typeof b.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(b.date);
           validTime   = typeof b.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(b.time);
         }
       } catch (e) { b = null; }
 
       if (b && validBarber && validDate && validTime) {
-        var name = 'Berlin';
+        var name = BARBERS[b.barber].name;
         var d    = new Date(b.date + 'T12:00:00');
         var dateStr = DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
 
@@ -300,18 +304,15 @@
         strong2.textContent = b.time;
         detail.appendChild(strong2);
 
-        var thumbMap = {
-          berlin: 'assets/img/berlin-thumb.png'
-        };
-        document.getElementById('confThumb').src = thumbMap[b.barber];
+        document.getElementById('confThumb').src = BARBERS[b.barber].thumb;
         document.getElementById('confThumb').alt = name;
 
         sessionStorage.removeItem('mbooking');
       } else {
         document.getElementById('confName').textContent  = 'Grazie';
         document.getElementById('confDetail').textContent = 'Ti contatteremo presto.';
-        // Un solo barbiere: Berlin si vede anche senza dati di prenotazione
-        // (pagina aperta direttamente o ricaricata).
+        // Senza dati di prenotazione (pagina aperta direttamente o ricaricata)
+        // si mostra Berlin come immagine di default del negozio.
         document.getElementById('confThumb').src = 'assets/img/berlin-thumb.png';
         document.getElementById('confThumb').alt = 'Berlin';
       }
