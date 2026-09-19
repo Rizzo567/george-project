@@ -254,7 +254,12 @@ const BARBERS = [
   { slug: 'berlin', name: 'Berlin', thumb: 'assets/img/berlin-face.png',
     slotsImg: 'assets/img/berlin-punta.png', slotsW: 'clamp(72px,13vw,158px)',
     confirmImg: 'assets/img/berlin-postazione.png', confirmW: 'clamp(190px,22vw,300px)' },
-  { slug: 'reggie', name: 'Reggie', thumb: 'assets/img/reggie-face.png',
+  // startDate = primo giorno prenotabile (YYYY-MM-DD): i giorni precedenti
+  // restano spenti nel calendario. Copia di BARBER_START_DATE in
+  // functions/api/_google.js, che è la sorgente di verità: il server rifiuta
+  // comunque /api/available e /api/book prima di quella data. Se cambia là,
+  // cambiarla anche qui.
+  { slug: 'reggie', name: 'Reggie', thumb: 'assets/img/reggie-face.png', startDate: '2026-09-22',
     slotsImg: 'assets/img/reggie.png', slotsW: 'clamp(52px,9vw,110px)',
     confirmImg: 'assets/img/reggie.png', confirmW: 'clamp(120px,14vw,190px)' }
 ];
@@ -377,6 +382,11 @@ class Component extends DCLogic {
   // ── date ──────────────────────────────────────────────────────────
   key(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   isOpen(d) { return !CLOSED_WEEKDAYS.includes(d.getDay()); }
+  // Il barbiere scelto non ha ancora iniziato in questa data?
+  beforeStart(d) {
+    const start = barberBySlug(this.state.barber).startDate;
+    return !!start && this.key(d) < start;
+  }
 
   // ── disponibilità dal server ──────────────────────────────────────
   loadAvail(d, force, barberSlug) {
@@ -410,7 +420,7 @@ class Component extends DCLogic {
     const out = [];
     for (let i = 1; i <= total; i++) {
       const d = new Date(view.getFullYear(), view.getMonth(), i);
-      const off = d < today || !this.isOpen(d);
+      const off = d < today || !this.isOpen(d) || this.beforeStart(d);
       const isSel = selected && this.key(selected) === this.key(d);
       const isToday = this.key(today) === this.key(d);
       out.push({

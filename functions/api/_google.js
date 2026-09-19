@@ -125,6 +125,53 @@ export async function getAllowedBarbers(env) {
   return fallback;
 }
 
+// ────────────────────────────────────────────────────────────────────
+// DATA DI INIZIO PER BARBIERE
+//
+// ⬇️ UNICO POSTO DA MODIFICARE ⬇️
+// Slug del barbiere → primo giorno in cui è prenotabile (YYYY-MM-DD, ora di Roma).
+// Prima di quella data non esiste disponibilità: /api/available non restituisce
+// slot e /api/book rifiuta con 409 (il blocco è server-side, non solo nell'UI).
+// Un barbiere assente da questa mappa è prenotabile da sempre — è il caso normale.
+//
+// Quando il barbiere ha iniziato da un pezzo la riga si può togliere: senza riga
+// il comportamento è identico a non avere mai avuto un limite.
+// Per assenze singole (ferie, un giorno di chiusura) NON si usa questa mappa: si
+// usa la tabella `closures` dal gestionale (vedi getClosure più sotto).
+//
+// Nota: prenota.html duplica questa data nell'array BARBERS (campo startDate) per
+// spegnere i giorni nel calendario. Quella è solo cosmetica: la parola definitiva
+// è qui. Cambiando la data, aggiornare anche là.
+// ────────────────────────────────────────────────────────────────────
+export const BARBER_START_DATE = {
+  reggie: '2026-09-22', // Reggie inizia martedì 22/09/2026
+};
+
+// Data di inizio di un barbiere, o null se non ne ha una.
+export function getBarberStartDate(barber) {
+  const d = BARBER_START_DATE[barber];
+  return typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null;
+}
+
+// true se `date` (YYYY-MM-DD) cade prima dell'inizio del barbiere.
+// Confronto fra stringhe ISO: lessicografico = cronologico, nessun fuso di mezzo.
+export function isBeforeBarberStart(barber, date) {
+  const start = getBarberStartDate(barber);
+  if (!start) return false;
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  return date < start;
+}
+
+// Messaggio in italiano da mostrare al cliente (available.reason / book.error).
+// Stringa vuota se il barbiere non ha una data di inizio.
+export function barberStartMessage(barber) {
+  const start = getBarberStartDate(barber);
+  if (!start) return '';
+  const [y, m, d] = start.split('-');
+  const nome = barber.charAt(0).toUpperCase() + barber.slice(1);
+  return `${nome} non è ancora disponibile: inizia il ${d}/${m}/${y}.`;
+}
+
 // Giorni di chiusura settimanale (available.js): shop_settings.weekly_closed_days.
 // Fallback: [0] (domenica). Ritorna sempre un array di interi 0..6.
 export async function getWeeklyClosedDays(env) {

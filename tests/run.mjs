@@ -2,6 +2,7 @@
 import './book.test.mjs';
 import './available.test.mjs';
 import './reggie.test.mjs';
+import './barber-start.test.mjs';
 import { run } from './_harness.mjs';
 
 console.log('\n── /api/book + /api/available ──');

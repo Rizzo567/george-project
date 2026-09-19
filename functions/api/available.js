@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getWorkRanges, getSlotMinutes, getEventDuration, getBookedBusy, getClosure, closureWindow, pad, loadShopConfig, getAllowedBarbers, getWeeklyClosedDays } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getWorkRanges, getSlotMinutes, getEventDuration, getBookedBusy, getClosure, closureWindow, pad, loadShopConfig, getAllowedBarbers, getWeeklyClosedDays, isBeforeBarberStart, barberStartMessage } from './_google.js';
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: CORS lockdown (vedi book.js per dettagli)
@@ -60,6 +60,14 @@ export async function onRequestGet({ request, env }) {
   if (closedDays.includes(dayOfWeek)) {
     const reason = dayOfWeek === 0 ? 'Domenica' : 'Chiuso';
     return json({ slots: [], closed: true, reason }, 200, corsHeaders);
+  }
+
+  // ── Il barbiere ha già iniziato a lavorare? ────────────────
+  // Data di inizio per barbiere (BARBER_START_DATE in _google.js): prima di quel
+  // giorno non c'è nessuna disponibilità. Stesso esito di un giorno chiuso, così
+  // il client mostra il motivo con la nota che già usa per le chiusure.
+  if (isBeforeBarberStart(barber, date)) {
+    return json({ slots: [], closed: true, reason: barberStartMessage(barber) }, 200, corsHeaders);
   }
 
   // ── Chiusure / festività ───────────────────────────────────

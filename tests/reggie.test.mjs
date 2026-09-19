@@ -8,6 +8,7 @@
 import { onRequestPost as book } from '../functions/api/book.js';
 import { onRequestGet as available } from '../functions/api/available.js';
 import { onRequestPost as cancelCalendar } from '../functions/api/cancel-calendar.js';
+import { getBarberStartDate } from '../functions/api/_google.js';
 import { test, assert, assertEq, makeEnv, installFetchMock, bookRequest, validPayload } from './_harness.mjs';
 
 const STAFF_BOTH = [
@@ -18,12 +19,24 @@ const STAFF_BERLIN_ONLY = [STAFF_BOTH[0]];
 
 const googleCalls = mock => mock.calls.filter(c => /googleapis\.com/.test(c.url));
 
+// Prima data utile per Reggie: non domenica e non prima della sua data di inizio
+// (BARBER_START_DATE in _google.js), altrimenti scatterebbe quel blocco invece
+// del comportamento calendar-less che questi test verificano.
 function nextOpenDate() {
-  for (let i = 1; i <= 8; i++) {
+  const start = getBarberStartDate('reggie');
+  for (let i = 1; i <= 21; i++) {
     const d = new Date(Date.now() + i * 24 * 60 * 60 * 1000);
-    if (d.getUTCDay() !== 0) return d.toISOString().slice(0, 10);
+    const iso = d.toISOString().slice(0, 10);
+    if (d.getUTCDay() === 0) continue;
+    if (start && iso < start) continue;
+    return iso;
   }
   throw new Error('nessuna data utile');
+}
+
+// validPayload usa domani: per Reggie serve una data dal suo inizio in poi.
+function reggiePayload(extra = {}) {
+  return validPayload({ barber: 'reggie', data: nextOpenDate(), ...extra });
 }
 
 async function avail(barber, mockOpts = {}) {
@@ -71,7 +84,7 @@ test('berlin available invariato con reggie attivo (usa ancora Calendar)', async
 
 // ── book ────────────────────────────────────────────────────────────
 test('reggie book: 200, riga barber=reggie, nessun evento Calendar', async () => {
-  const { res, body, mock } = await doBook(validPayload({ barber: 'reggie' }), { staff: STAFF_BOTH });
+  const { res, body, mock } = await doBook(reggiePayload(), { staff: STAFF_BOTH });
   assertEq(res.status, 200, 'status');
   assertEq(body.ok, true, 'ok');
   const ins = mock.inserts();
@@ -83,25 +96,25 @@ test('reggie book: 200, riga barber=reggie, nessun evento Calendar', async () =>
 });
 
 test('reggie book: slot già preso → 409 senza INSERT (dedup)', async () => {
-  const { res, mock } = await doBook(validPayload({ barber: 'reggie' }), { staff: STAFF_BOTH, slotRows: [{ id: 'x' }] });
+  const { res, mock } = await doBook(reggiePayload(), { staff: STAFF_BOTH, slotRows: [{ id: 'x' }] });
   assertEq(res.status, 409, 'status');
   assertEq(mock.inserts().length, 0, 'nessuna INSERT');
 });
 
 test('reggie book: indice unique scatta → 409', async () => {
-  const { res } = await doBook(validPayload({ barber: 'reggie' }), { staff: STAFF_BOTH, insert: 'slot_conflict' });
+  const { res } = await doBook(reggiePayload(), { staff: STAFF_BOTH, insert: 'slot_conflict' });
   assertEq(res.status, 409, 'status');
 });
 
 test('reggie book: chiusura scope reggie → 409 senza INSERT', async () => {
-  const p = validPayload({ barber: 'reggie' });
+  const p = reggiePayload();
   const { res, mock } = await doBook(p, { staff: STAFF_BOTH, closures: [{ scope: 'reggie', mode: 'full' }] });
   assertEq(res.status, 409, 'status');
   assertEq(mock.inserts().length, 0, 'nessuna INSERT');
 });
 
 test('reggie book: staff senza reggie → 400 senza INSERT', async () => {
-  const { res, mock } = await doBook(validPayload({ barber: 'reggie' }), { staff: STAFF_BERLIN_ONLY });
+  const { res, mock } = await doBook(reggiePayload(), { staff: STAFF_BERLIN_ONLY });
   assertEq(res.status, 400, 'status');
   assertEq(mock.inserts().length, 0, 'nessuna INSERT');
 });

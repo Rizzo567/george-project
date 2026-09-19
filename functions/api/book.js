@@ -1,4 +1,4 @@
-import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getEventDuration, getClosure, closureWindow, pad, SUPABASE_URL_PUBLIC, loadShopConfig, getAllowedServices, getAllowedBarbers } from './_google.js';
+import { getAccessToken, getCalendarId, getServiceAccount, romeOffset, getEventDuration, getClosure, closureWindow, pad, SUPABASE_URL_PUBLIC, loadShopConfig, getAllowedServices, getAllowedBarbers, isBeforeBarberStart, barberStartMessage } from './_google.js';
 
 // ────────────────────────────────────────────────────────────────────
 // SECURITY: CORS lockdown
@@ -305,6 +305,15 @@ export async function onRequestPost({ request, env }) {
     if (trimmedUrl.startsWith('https://') && trimmedUrl.length <= 2048) {
       safeImgUrl = trimmedUrl;
     }
+  }
+
+  // ── Il barbiere ha già iniziato a lavorare? ────────────────────
+  // Data di inizio per barbiere (BARBER_START_DATE in _google.js). Sta QUI, prima
+  // di qualunque scrittura: il blocco vale anche per una POST diretta a /api/book
+  // che salta l'interfaccia. Il calendario di prenota.html spegne gli stessi
+  // giorni, ma è cosmetica — la parola definitiva è questa.
+  if (isBeforeBarberStart(barber, data)) {
+    return json({ error: barberStartMessage(barber) }, 409, corsHeaders);
   }
 
   // ── Dedup: stesso slot già prenotato? ──────────────────────────
